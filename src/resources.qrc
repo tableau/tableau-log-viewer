@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="sqlsyntax.css">../resources/sqlsyntax.css</file>
+        <file alias="branch-closed.png">../resources/images/branch-closed.png</file>
+        <file alias="branch-end.png">../resources/images/branch-end.png</file>
+        <file alias="branch-more.png">../resources/images/branch-more.png</file>
+        <file alias="branch-open.png">../resources/images/branch-open.png</file>
+        <file alias="branch-vline.png">../resources/images/branch-vline.png</file>
+        <file alias="tab-close-red.png">../resources/images/tab-close-red.png</file>
+        <file alias="tab-close.png">../resources/images/tab-close.png</file>
+        <file alias="tab-sync.png">../resources/images/tab-sync.png</file>
+        <file alias="tab-sync-thin.png">../resources/images/tab-sync-thin.png</file>
+        <file alias="ctx-down.png">../resources/images/ctx-down.png</file>
+        <file alias="ctx-highlight.png">../resources/images/ctx-highlight.png</file>
+        <file alias="ctx-newtab.png">../resources/images/ctx-newtab.png</file>
+        <file alias="ctx-timedelta.png">../resources/images/ctx-timedelta.png</file>
+        <file alias="ctx-timestamp.png">../resources/images/ctx-timestamp.png</file>
+        <file alias="ctx-up.png">../resources/images/ctx-up.png</file>
+        <file alias="ctx-hide.png">../resources/images/ctx-hide.png</file>
+        <file alias="ctx-diff.png">../resources/images/ctx-diff.png</file>
+        <file alias="ctx-book.png">../resources/images/ctx-book.png</file>
+        <file alias="ctx-copy.png">../resources/images/ctx-copy.png</file>
+        <file alias="query-graphs/query-graphs.tlv.html">../resources/query-graphs/query-graphs.tlv.html</file>
+        <file alias="query-graphs/query-graphs.css">../resources/query-graphs/query-graphs.css</file>
+        <file alias="query-graphs/query-graphs.min.js">../resources/query-graphs/query-graphs.min.js</file>
+    </qresource>
+</RCC>

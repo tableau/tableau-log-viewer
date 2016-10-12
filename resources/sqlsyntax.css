@@ -1,0 +1,65 @@
+/* Whole document settings */
+body{
+    font-family: Monaco, Consolas, Monospace, Courier;
+}
+
+/* Keyword */
+.k{
+    color: rgb(148,41,41);
+    font-weight: bold;
+}
+
+/* String */
+.s{
+    color: rgb(20,20,232);
+}
+
+/* Tag */
+.t{
+    color: rgb(231,98,225);
+}
+
+/* Whitespace */
+.w{
+    color: black;
+}
+
+/* Identifier */
+.i{
+    color: black;
+}
+
+/* Symbol */
+.sy{
+    color: black;
+}
+
+/* Open Parenthesis */
+.op{
+    color: rgb(57,166,57);
+}
+
+/* Close Parenthesis */
+.cp{
+    color: rgb(57,166,57);
+}
+
+/* Operator */
+.o{
+    color: black;
+}
+
+/* No Match */
+.n{
+    color: black;
+}
+
+/* Integer */
+.in{
+    color: black;
+}
+
+/* Float */
+.f{
+    color: black;
+}

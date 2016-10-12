@@ -1,0 +1,204 @@
+html, body {
+  margin: 0 auto;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+#tree-container {
+  padding: 0px;
+  padding-top: 53px;
+  width: 100%;
+  background: #fff;
+  margin: 0 auto;
+}
+
+#tree-label {
+  margin: 0 auto;
+  position: fixed;
+  top: 3px;
+  right: 3px;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Monaco, Consolas, monospace;
+  background-color: #fff;
+  padding: 12px;
+  border: thin solid #eee;
+  border-radius: 5px;
+  box-shadow: 2px 2px 2px #888;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.overlay{
+  background-color: #fff;
+}
+
+/*
+  Using a 2 color palette technique. When styling symbols use
+  "fill: inherit" to use the 1st set of colors
+  "fill: currentColor" to use the 2nd set of colors
+  More info on techniques: http://tympanus.net/codrops/2015/07/16/styling-svg-use-content-css/
+*/
+
+/*
+ .expanded luminosity increased by (100 - collapsed luminosity) / 1.5
+*/
+
+.expanded {
+  stroke: hsl(0, 0%, 40%);
+  stroke-width: 0.8;
+  color: hsl(0, 0%, 84%);
+}
+
+.collapsed {
+  stroke: hsl(0, 0%, 40%);
+  stroke-width: 0.8;
+  color: hsl(0, 0%, 50%);
+}
+
+/*
+ federated connection coloring
+
+ db2
+ excel-direct
+ fedeval_dataengine_connection
+ mysql
+ oracle
+ postgres
+ sqlserver
+ textscan
+*/
+
+.db2 .expanded {
+  color: hsl(211, 36%, 83%)
+}
+
+.db2 .collapsed {
+  color: hsl(211, 36%, 48%)
+}
+
+.excel-direct .expanded {
+  color: hsl(30, 88%, 86%)
+}
+
+.excel-direct .collapsed {
+  color: hsl(30, 88%, 56%)
+}
+
+.fedeval_dataengine_connection .expanded {
+  color: hsl(113, 34%, 83%)
+}
+
+.fedeval_dataengine_connection .collapsed {
+  color: hsl(113, 34%, 47%)
+}
+
+.mysql .expanded {
+  color: hsl(47, 82%, 87%)
+}
+
+.mysql .collapsed {
+  color: hsl(47, 82%, 61%)
+}
+
+.oracle .expanded {
+  color: hsl(173, 30%, 88%)
+}
+
+.oracle .collapsed {
+  color: hsl(173, 30%, 64%)
+}
+
+.postgres .expanded {
+  color: hsl(359, 70%, 87%)
+}
+
+.postgres .collapsed {
+  color: hsl(359, 70%, 61%)
+}
+
+.sqlserver .expanded {
+  color: hsl(354, 100%, 94%)
+}
+
+.sqlserver .collapsed {
+  color: hsl(354, 100%, 81%)
+}
+
+.textscan .expanded {
+  color: hsl(317, 25%, 86%)
+}
+
+.textscan .collapsed {
+  color: hsl(317, 25%, 58%)
+}
+
+.nodeCircle {
+  fill: currentColor;
+}
+
+.node text {
+  font-size: 9px;
+  font-weight: bold;
+  font-family: Monaco, Consolas, monospace;
+  fill: #2b2a2a;
+}
+
+.d3-tip {
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Monaco, Consolas, monospace;
+  background-color: #fff;
+  padding: 12px;
+  border: thin solid #eee;
+  border-radius: 5px;
+  box-shadow: 2px 2px 2px #888;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1;
+}
+
+.link-and-arrow {
+  marker-start: url(#arrow);
+  stroke-dasharray: 5 3;
+}
+
+marker#arrow {
+  fill: #ccc;
+}
+
+/* Joins */
+circle.fill-join {
+  fill: currentColor;
+}
+
+circle.fill-join.no-stroke {
+  stroke: none;
+}
+
+circle.empty-join {
+  stroke: none;
+  fill: #fff;
+}
+
+circle.only-stroke-join {
+  fill: none;
+}
+
+/* Table */
+rect.table-background {
+  fill: #fff;
+}
+
+rect.table-header {
+  fill: currentColor;
+}
+
+rect.table-border {
+  fill: none;
+}
