@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>Tableau Log Viewer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTabBar::close-button {
+    image: url(:/tab-close.png);
+    subcontrol-position: right;
+    margin-bottom: -2px;
+}
+QTabBar::close-button:hover {
+    image: url(:/tab-close-red.png);
+}
+QTabWidget::tab-bar {
+    left: 0px;
+}
+</string>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="elideMode">
+       <enum>Qt::ElideRight</enum>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>true</bool>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <property name="movable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>900</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionOpen_in_new_tab"/>
+    <addaction name="actionMerge_into_tab"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_all_events"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionShow_summary"/>
+    <addaction name="actionOpen_timeline"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_tab"/>
+    <addaction name="actionClose_all_tabs"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuRecent_files">
+    <property name="title">
+     <string>&amp;Recent files</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHighlight">
+    <property name="title">
+     <string>&amp;Highlight</string>
+    </property>
+    <widget class="QMenu" name="menuLoad_filters">
+     <property name="title">
+      <string>Load &amp;filters</string>
+     </property>
+     <addaction name="actionPlaceholder"/>
+    </widget>
+    <addaction name="actionHighlight"/>
+    <addaction name="actionFind_next_highlighted"/>
+    <addaction name="actionFind_previous_highlighted"/>
+    <addaction name="actionHighlight_only_mode"/>
+    <addaction name="separator"/>
+    <addaction name="menuLoad_filters"/>
+    <addaction name="actionSave_filters"/>
+   </widget>
+   <widget class="QMenu" name="menuFind">
+    <property name="title">
+     <string>Fin&amp;d</string>
+    </property>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_next"/>
+    <addaction name="actionFind_previous"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Hel&amp;p</string>
+    </property>
+    <addaction name="actionOptions"/>
+   </widget>
+   <widget class="QMenu" name="menuTail_file">
+    <property name="title">
+     <string>&amp;Live capture</string>
+    </property>
+    <addaction name="actionTail_current_tab"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_log_txt"/>
+    <addaction name="actionOpen_beta_log_txt"/>
+    <addaction name="separator"/>
+    <addaction name="actionLog_directory"/>
+    <addaction name="actionBeta_log_directory"/>
+    <addaction name="actionChoose_directory"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuRecent_files"/>
+   <addaction name="menuTail_file"/>
+   <addaction name="menuHighlight"/>
+   <addaction name="menuFind"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionOpen_in_new_tab">
+   <property name="text">
+    <string>&amp;Open in new tab...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionMerge_into_tab">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Merge into tab...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionSave_filters">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Save filters...</string>
+   </property>
+  </action>
+  <action name="actionClose_tab">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Close tab</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F4</string>
+   </property>
+  </action>
+  <action name="actionClose_all_tabs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close &amp;all tabs</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F4</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionHighlight">
+   <property name="text">
+    <string>&amp;Highlight...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionFind_next_highlighted">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Find &amp;next highlighted</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionFind_previous_highlighted">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Find &amp;previous highlighted</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F4</string>
+   </property>
+  </action>
+  <action name="actionHighlight_only_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Highlight &amp;only mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>&amp;Find...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionFind_next">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Find &amp;next</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionFind_previous">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Find &amp;previous</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F3</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>&amp;Options...</string>
+   </property>
+  </action>
+  <action name="actionOpen_timeline">
+   <property name="text">
+    <string>Open &amp;timeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionClear_Recent_Files">
+   <property name="text">
+    <string>Clear recent files</string>
+   </property>
+  </action>
+  <action name="actionPlaceholder">
+   <property name="text">
+    <string>placeholder</string>
+   </property>
+  </action>
+  <action name="actionTail_current_tab">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/tab-sync-thin.png</normaloff>:/tab-sync-thin.png</iconset>
+   </property>
+   <property name="text">
+    <string>Live &amp;mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
+   </property>
+  </action>
+  <action name="actionClear_all_events">
+   <property name="text">
+    <string>Clear all &amp;events</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
+   </property>
+  </action>
+  <action name="actionOpen_log_txt">
+   <property name="text">
+    <string>&amp;Open log.txt</string>
+   </property>
+  </action>
+  <action name="actionOpen_beta_log_txt">
+   <property name="text">
+    <string>Open (beta) log.&amp;txt</string>
+   </property>
+  </action>
+  <action name="actionShow_summary">
+   <property name="text">
+    <string>Show &amp;summary</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionLog_directory">
+   <property name="text">
+    <string>&amp;Log directory</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionBeta_log_directory">
+   <property name="text">
+    <string>&amp;Beta log directory</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionChoose_directory">
+   <property name="text">
+    <string>Choose &amp;directory...</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
