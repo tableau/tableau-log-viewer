@@ -15,7 +15,7 @@ Overview
 ### How do I get started with Tableau Log Viewer?
 Simply launch the application and drag'n'drop Tableau's log file. Both Tableau Desktop and [most] Tableau Server log files are supported. More detailed information can be found on [wiki](https://github.com/tableau/tableau-log-viewer/wiki)
 
-### Where does Tableau saves the logs?
+### Where does Tableau save the logs?
 Tableau Desktop stores the logs in the "Logs" subfolder under "My Tableau Repository". Examples:
 - On Windows: C:\Users\<user>\Documents\My Tableau Repository\Logs\
 - On Mac: Example: ~/Documents/My Tableau Repository/Logs
@@ -25,7 +25,7 @@ Features
 ### Cross platform
 Tableau Log Viewer is build using Qt. The application works on both Windows and Mac OS X.
 
-![Cross platform](resources/wiki/win_and_mac.png "TLV running on Windows and Mac")
+![Cross platform](resources/wiki/mac_and_win.png "TLV running on Mac OS X and Windows 7")
 
 ### Live Capture
 Monitor the events happening in Tableau as they happen. There are different options to start a live capture:
