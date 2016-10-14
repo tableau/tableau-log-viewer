@@ -2,7 +2,9 @@
 
 Tableau Log Viewer is cross-platform tool with a simple interface that has a single purpose of making it easy to quickly glance over Tableau log files.
 
-Features
+![TLV Screenshot](https://cloud.githubusercontent.com/assets/1087437/19377630/b1ca0d56-919c-11e6-9c01-200697c37194.png "TLV running on Windows 10")
+
+Overview
 ---------------
 * Tableau log file representation in easy to read columnar format
 * Advanced event search and highlighting
@@ -10,8 +12,14 @@ Features
 * Live capture: events appear as they happen
 * Supported on Windows and Mac (and can be built on Linux)
 
-How do I get started with Tableau Log Viewer?
-Simply launch the application and drag'n'drop Tableau's log file. Both Tableau Desktop and [most] Tableau Server log files are supported. More detailed information can be found on [wiki](https://github.com/tableau/tableau-log-viewer/wiki)
+How do I use Tableau Log Viewer?
+---------------
+Simply launch the application and drag'n'drop Tableau's log file. Both Tableau Desktop and [most] Tableau Server log files are supported.
+Take a look at our [wiki](https://github.com/tableau/tableau-log-viewer/wiki) to get more details on the features and usage of TLV.
+
+How do I build Tableau Log Viewer?
+---------------
+See [INSTALL.md](INSTALL.md)
 
 Is Tableau Log Viewer supported?
 ---------------
