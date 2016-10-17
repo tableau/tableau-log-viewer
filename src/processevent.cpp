@@ -18,7 +18,8 @@ namespace ProcessEvent
         QJsonDocument jsonDoc;
         if (!message.startsWith("{"))
         {
-            auto str = QString("{\"idx\": %1, \"k\": \"\", \"v\": \"%2\"}").arg(QString::number(index), message);
+            auto str = QString("{\"idx\": %1, \"k\": \"\", \"v\": \"%2\"}")
+                    .arg(QString::number(index), message.replace("\\", "\\\\"));
             jsonDoc = QJsonDocument::fromJson(str.toUtf8());
         }
         else
