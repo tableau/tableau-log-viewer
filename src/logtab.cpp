@@ -39,12 +39,12 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     m_bar->ShowMessage(QString("%1 events loaded").arg(QString::number(m_treeModel->rowCount())), 3000);
 
-    bool isPlainText = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
+    bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
 
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
-    SetColumn(COL::Time, 190, isPlainText);
-    SetColumn(COL::Elapsed, 50, isPlainText);
+    SetColumn(COL::Time, 190, hasNoKey);
+    SetColumn(COL::Elapsed, 50, hasNoKey);
     SetColumn(COL::PID, 30, true);
     SetColumn(COL::TID, 50, true);
     SetColumn(COL::Severity, 50, true);
@@ -52,7 +52,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::Session, 30, true);
     SetColumn(COL::Site, 180, true);
     SetColumn(COL::User, 30, true);
-    SetColumn(COL::Key, 120, isPlainText);
+    SetColumn(COL::Key, 120, hasNoKey);
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
