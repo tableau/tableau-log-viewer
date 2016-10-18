@@ -63,12 +63,14 @@ public:
     QJsonObject GetEvent(QModelIndex idx) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);
+    void UpdateHighlights(HighlightOptions opts);
+
 
     bool m_highlightOnlyMode;
     bool m_liveMode;
     HighlightOptions m_highlightOpts;
-    SearchOpt m_findOpts;
     ColorLibrary * m_colorLibrary;
+    SearchOpt m_findOpts;
     QList<QString> m_paths;
 
 private:

@@ -29,3 +29,11 @@ void HighlightOptions::FromJson(const QJsonArray& json)
         this->append(highlightFilter);
     }
 }
+
+QVector<QColor> HighlightOptions::GetColors()
+{
+    QVector<QColor> result;
+    for (auto searchOpt : *this)
+        result.push_back(searchOpt.m_backgroundColor);
+    return result;
+}
