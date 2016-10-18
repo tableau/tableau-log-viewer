@@ -39,10 +39,12 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     m_bar->ShowMessage(QString("%1 events loaded").arg(QString::number(m_treeModel->rowCount())), 3000);
 
+    bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
+
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
-    SetColumn(COL::Time, 190, false);
-    SetColumn(COL::Elapsed, 50, false);
+    SetColumn(COL::Time, 190, hasNoKey);
+    SetColumn(COL::Elapsed, 50, hasNoKey);
     SetColumn(COL::PID, 30, true);
     SetColumn(COL::TID, 50, true);
     SetColumn(COL::Severity, 50, true);
@@ -50,7 +52,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::Session, 30, true);
     SetColumn(COL::Site, 180, true);
     SetColumn(COL::User, 30, true);
-    SetColumn(COL::Key, 120, false);
+    SetColumn(COL::Key, 120, hasNoKey);
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -491,7 +493,7 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
     valueDlg.m_key = idx_key.data().toString();
 
     valueDlg.setWindowTitle(QString("ID: %1 - Key: %2").arg(valueDlg.m_id, valueDlg.m_key));
-    bool syntaxHighlight = (valueDlg.m_key != "msg");
+    bool syntaxHighlight = (!valueDlg.m_key.isEmpty() && valueDlg.m_key != "msg");
     valueDlg.SetText(value, syntaxHighlight);
     valueDlg.SetQuery(QString(""));
 
@@ -836,7 +838,7 @@ void LogTab::InitHeaderMenu()
         QAction *action = new QAction(hdata.toString(), m_headerMenu);
         action->setCheckable(true);
         // Make some columns 'unhidable'
-        if (i == COL::ID || i == COL::Key || i == COL::Value)
+        if (i == COL::ID || i == COL::Value)
         {
             action->setEnabled(false);
         }

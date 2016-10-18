@@ -792,6 +792,20 @@ void MainWindow::on_actionOptions_triggered()
     optionsDlg.exec();
 }
 
+QString msecsToString(qint64 mseconds)
+{
+    const qint64 msPerDay = 24 * 60 * 60 * 1000;
+    qint64 days = mseconds / msPerDay;
+    QTime t = QTime(0, 0).addMSecs(mseconds % msPerDay);
+    QString str = (days > 0) ? QString("%1 day(s), ").arg(days) : "";
+    str += QString("%1:%2:%3.%4 h:m:s")
+            .arg(t.hour(), 2, 10, QChar('0'))
+            .arg(t.minute(), 2, 10, QChar('0'))
+            .arg(t.second(), 2, 10, QChar('0'))
+            .arg(t.msec(), 2, 10, QChar('0'));
+    return str;
+}
+
 void ShowSummary(TreeModel* model, QWidget* parent)
 {
     typedef std::map<QString, int> CounterMap;
@@ -848,7 +862,21 @@ void ShowSummary(TreeModel* model, QWidget* parent)
         }
     }
 
-    QString summaryText = "Number of";
+    QString summaryText;
+    if (rowCount > 0)
+    {
+        auto firstIdx = model->index(0, COL::Time);
+        auto lastIdx = model->index(model->rowCount() - 1, COL::Time);
+        QString firstTimestamp = model->data(firstIdx, Qt::DisplayRole).toString();
+        QString lastTimestamp = model->data(lastIdx, Qt::DisplayRole).toString();
+        auto firstDT = model->data(firstIdx, Qt::UserRole).toLongLong();
+        auto lastDT = model->data(lastIdx, Qt::UserRole).toLongLong();
+        auto diff = (lastDT - firstDT);
+        summaryText += QString("Begin: %1\nEnd: %2\nSpan: %3\n\n")
+                .arg(firstTimestamp).arg(lastTimestamp).arg(msecsToString(diff));
+    }
+
+    summaryText += "Number of";
     summaryText += QString("\n    Event: %L1").arg(rowCount);
     for (const SummaryCounter& counter : counters)
     {
@@ -857,7 +885,9 @@ void ShowSummary(TreeModel* model, QWidget* parent)
         {
             for (const auto& sc : *counter.SubCounters)
             {
-                summaryText += QString("\n    - %1: %L2").arg(sc.first).arg(sc.second);
+                int subCount = sc.second;
+                float subCountPercent = subCount * 100.0 / counter.Count;
+                summaryText += QString("\n    - %1: %L2 (%3%)").arg(sc.first).arg(subCount, 3).arg(subCountPercent, 0, 'f', 1);
             }
         }
     }
