@@ -8,7 +8,6 @@
 
 void Options::ReadSettings()
 {
-    QSysInfo systemInfo;
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
     settings.beginGroup("Options");
@@ -18,7 +17,7 @@ void Options::ReadSettings()
     m_skippedState = settings.value("skippedState", QBitArray(m_skippedText.length(), true)).toBitArray();
     m_visualizationServiceEnable = settings.value("visualizationServiceEnable", false).toBool();
     m_visualizationServiceURL = settings.value("visualizationServiceURL", QString("")).toString();
-    auto defaultDiffToolPath = systemInfo.productType() == "windows" ? QString("C:/Program Files (x86)/Beyond Compare 4/BCompare.exe") : QString("/usr/local/bin/bcomp");
+    auto defaultDiffToolPath = QSysInfo::productType() == "windows" ? QString("C:/Program Files (x86)/Beyond Compare 4/BCompare.exe") : QString("/usr/local/bin/bcomp");
     m_diffToolPath = settings.value("diffToolPath", defaultDiffToolPath).toString();
     m_futureTabsUnderLive = settings.value("enableLiveCapture").toBool();
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
