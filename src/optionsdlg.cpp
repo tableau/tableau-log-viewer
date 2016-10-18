@@ -38,6 +38,7 @@ void OptionsDlg::WriteSettings()
     auto serviceURL = ui->serviceURLEdit->text();
     auto diffToolPath = ui->diffToolPath->text();
     auto liveEnable = ui->startFutureLiveCapture->isChecked();
+    bool captureAllTextFiles = ui->captureAllTextFiles->isChecked();
     auto currFilter = ui->defaultHighlightComboBox->currentText();
 
     QString iniPath = PathHelper::GetConfigIniPath();
@@ -49,6 +50,7 @@ void OptionsDlg::WriteSettings()
     settings.setValue("visualizationServiceURL", serviceURL);
     settings.setValue("diffToolPath", diffToolPath);
     settings.setValue("enableLiveCapture", liveEnable);
+    settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
     settings.setValue("defaultHighlightFilter", currFilter);
     settings.endGroup();
 
@@ -64,6 +66,7 @@ void OptionsDlg::ReadSettings()
     auto serviceURL = options.getVisualizationServiceURL();
     auto diffPath =options.getDiffToolPath();
     auto liveEnable = options.getFutureTabsUnderLive();
+    bool captureAllTextFiles = options.getCaptureAllTextFiles();
     auto defaultHighlightFilter = options.getDefaultFilterName();
 
     for (int i = 0; i < skippedText.length(); i++)
@@ -77,7 +80,8 @@ void OptionsDlg::ReadSettings()
     ui->serviceURLEdit->setText(serviceURL);
     ui->serviceURLEdit->setEnabled(serviceEnable);
     ui->diffToolPath->setText(diffPath);
-    ui->startFutureLiveCapture->setChecked(liveEnable ? true : false);
+    ui->startFutureLiveCapture->setChecked(liveEnable);
+    ui->captureAllTextFiles->setChecked(captureAllTextFiles);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
