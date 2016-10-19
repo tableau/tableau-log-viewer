@@ -125,6 +125,7 @@ void LogTab::InitOneRowMenu()
     actionTimeDeltas->setChecked(false);
     connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
+    QAction *actionOpenFile = new QAction(QIcon(":/ctx-open-file.png"), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);
