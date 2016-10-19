@@ -1,0 +1,28 @@
+[
+    {
+        "backgroundColor": [
+            191,
+            228,
+            243
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "useRegex": false,
+        "value": "web-data-connector"
+    },
+    {
+        "backgroundColor": [
+            242,
+            236,
+            153
+        ],
+        "keys": [
+            "Value"
+        ],
+        "matchCase": false,
+        "useRegex": true,
+        "value": "^(http.*)"
+    }
+]
