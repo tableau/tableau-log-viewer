@@ -73,12 +73,12 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/ctx-up.png</normaloff>:/ctx-up.png</iconset>
+         <normaloff>:/value-previous.png</normaloff>:/value-previous.png</iconset>
        </property>
        <property name="iconSize">
         <size>
-         <width>18</width>
-         <height>18</height>
+         <width>16</width>
+         <height>16</height>
         </size>
        </property>
       </widget>
@@ -93,12 +93,12 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/ctx-down.png</normaloff>:/ctx-down.png</iconset>
+         <normaloff>:/value-next.png</normaloff>:/value-next.png</iconset>
        </property>
        <property name="iconSize">
         <size>
-         <width>18</width>
-         <height>18</height>
+         <width>16</width>
+         <height>16</height>
         </size>
        </property>
       </widget>
