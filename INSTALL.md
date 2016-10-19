@@ -16,7 +16,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 cd tableau-log-viewer
 
 # Find out where the Qt libraries are stored in your disk drive, and add the directory to the PATH
-export PATH=$PATH:"~/Qt/5.7/clang_64/bin"
+export PATH="~/Qt/5.7/clang_64/bin":$PATH
 
 # Create a directory to compile
 mkdir build-release && cd build-release
@@ -75,4 +75,34 @@ cd release
 ```
 
 ## Buiding using Qt Creator
-Instructions coming soon...
+Start by cloning the repository
+```bash
+git clone https://github.com/tableau/tableau-log-viewer.git
+```
+
+1. Launch Qt Creator and open the project file, it should be under *src/tableau-log-viewer.pro*
+2. Configure the new project. The default configuration might be good enough, if you have problems see the section "Fixing configuration"
+3. Click on the Build button (the one with the Hammer)
+4. Click on the Run button
+
+If everything went well, TLV should up and running!
+
+### Fixing configuration
+The project can be configured with different compiler and targets.
+
+To change the configuration:
+
+1. Click on the Projects button (the one with a wrench)
+2. On the "Build & Run" section, click on "Manage kits..."
+
+We have only tried a handful of configurations. Here are some that are known to work (strings as displayed by Qt creator)
+
+#### Windows, Visual Studio 2013 compiler, 64 bit
+* Compiler: Microsoft Visual C++ Compiler 12.0 (amd64)
+* Debugger: CDB 64 bit
+* Qt Version: Qt 5.X.X MSVC2013 64bit
+
+#### Mac OS X, clang compiler, 64 bit
+* Compiler: Clang (x86 64 bit in /usr/bin)
+* Debugger: System LLDB at /usr/bin/lldb
+* Qt Version: Qt 5.X.X clang 64bit
