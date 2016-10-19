@@ -1,8 +1,8 @@
 # Building Tableau Log Viewer
 
-TLV is build using C++ and Qt libraries and can be build in different platforms.
+TLV is built using C++ and Qt libraries and can be build in different platforms.
 
-You can get the Qt libraries from here the [Qt Site](https://www.qt.io/download/). It is fine to use the Open Source version.
+You can get the Qt libraries from the [Qt Site](https://www.qt.io/download/). It is fine to use the Open Source version.
 
 **Note:** When installing Qt make sure you get the following components: `Qt WebView` and `Qt WebEngine`.
 
@@ -57,7 +57,7 @@ mkdir build-release
 cd build-release
 qmake -spec win32-msvc2013 CONFIG+=x86_64 -Wall ../src/tableau-log-viewer.pro
 ```
-To compile, the enviroment has be set up to use the correct tools. The easiest way is to use the Visual Studio prompt.
+To compile, the enviroment has to be set up to use the correct tools. The easiest way is to use the Visual Studio prompt.
 
 **From the Visual Studio command prompt:**
 ```cmd
@@ -85,7 +85,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 3. Click on the Build button (the one with the Hammer)
 4. Click on the Run button
 
-If everything went well, TLV should up and running!
+If everything went well, TLV should be up and running!
 
 ### Fixing configuration
 The project can be configured with different compiler and targets.
@@ -99,8 +99,14 @@ We have only tried a handful of configurations. Here are some that are known to 
 
 #### Windows, Visual Studio 2013 compiler, 64 bit
 * Compiler: Microsoft Visual C++ Compiler 12.0 (amd64)
-* Debugger: CDB 64 bit
 * Qt Version: Qt 5.X.X MSVC2013 64bit
+* [Optional but recommended] Add a 64 bit debugger
+  1. Switch to the "Debuggers" tab.
+  2. Click on the "Add" button
+  3. Give a name you can recognize later like "CDB 64 bit"
+  4. Find the 64 bit binary. It should be under `C:\debuggers\x64\cdb.exe` or similar
+  5. Save the changes clicking the "Apply" button
+  6. Go back to the "Kits" tab and choose the debugger configuration just created
 
 #### Mac OS X, clang compiler, 64 bit
 * Compiler: Clang (x86 64 bit in /usr/bin)
