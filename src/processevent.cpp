@@ -19,6 +19,7 @@ namespace ProcessEvent
         {
             QJsonObject obj;
             obj["idx"] = index;
+            obj["file"] = fileName;
             obj["k"] = "";
             obj["v"] = message;
             return obj;

@@ -125,7 +125,7 @@ void LogTab::InitOneRowMenu()
     actionTimeDeltas->setChecked(false);
     connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
-    QAction *actionOpenFile = new QAction("Open this file", this);
+    QAction *actionOpenFile = new QAction(QIcon(":/ctx-open-file.png"), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);
@@ -196,6 +196,7 @@ void LogTab::SetTabPath(const QString& path)
     if (m_treeModel->TabType() == TABTYPE::Directory)
     {
         m_liveDirectory = std::make_unique<QDir>(path);
+        m_liveDirectory->setNameFilters(QStringList({"*.txt", "*.log"}));
     }
     else if (m_treeModel->TabType() == TABTYPE::SingleFile)
     {
@@ -248,7 +249,9 @@ void LogTab::SetUpFile(std::shared_ptr<QFile> file)
         }
         break;
     }
-    if (line.startsWith("{"))
+
+    bool includeAllTextFiles = Options::GetInstance().getCaptureAllTextFiles();
+    if (includeAllTextFiles || line.startsWith("{"))
     {
         int offset = file->size();
         file->seek(offset);
@@ -308,7 +311,7 @@ void LogTab::ReadDirectoryFiles()
         auto& fileName = filePathList.at(filePathList.length() - 1);
         while (!file->atEnd())
         {
-            auto line = file->readLine();
+            auto line = file->readLine().trimmed();
             if (line.isEmpty())
             {
                 continue;
@@ -397,7 +400,7 @@ void LogTab::ReadFile()
     }
     while (!m_logFile.atEnd())
     {
-        auto line = m_logFile.readLine();
+        auto line = m_logFile.readLine().trimmed();
         if (line.isEmpty())
         {
             continue;

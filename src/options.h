@@ -22,6 +22,7 @@ private:
     QString m_visualizationServiceURL;
     QString m_diffToolPath;
     bool m_futureTabsUnderLive;
+    bool m_captureAllTextFiles;
     QString m_defaultFilterName;
     HighlightOptions m_defaultHighlightOpts;
 
@@ -40,6 +41,7 @@ public:
     QString getVisualizationServiceURL();
     QString getDiffToolPath();
     bool getFutureTabsUnderLive();
+    bool getCaptureAllTextFiles();
     QString getDefaultFilterName();
     HighlightOptions getDefaultHighlightOpts();
     void LoadHighlightFilter(const QString& filterName);

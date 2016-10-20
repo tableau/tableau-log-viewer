@@ -21,6 +21,7 @@ void Options::ReadSettings()
     m_diffToolPath = settings.value("diffToolPath", defaultDiffToolPath).toString();
     m_futureTabsUnderLive = settings.value("enableLiveCapture").toBool();
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
+    m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles").toBool();
 
     settings.endGroup();
 
@@ -62,6 +63,11 @@ QString Options::getDiffToolPath()
 bool Options::getFutureTabsUnderLive()
 {
     return m_futureTabsUnderLive;
+}
+
+bool Options::getCaptureAllTextFiles()
+{
+    return m_captureAllTextFiles;
 }
 
 QString Options::getDefaultFilterName()

@@ -5,7 +5,6 @@
 #include "statusbar.h"
 #include "treemodel.h"
 #include "ui_mainwindow.h"
-#include "valuedlg.h"
 
 #include <memory>
 #include <QBitArray>

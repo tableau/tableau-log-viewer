@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>502</width>
-    <height>482</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -178,11 +178,21 @@
        <property name="title">
         <string>General</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QCheckBox" name="startFutureLiveCapture">
           <property name="text">
            <string>Open log files in live capture mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="captureAllTextFiles">
+          <property name="toolTip">
+           <string>Include non-JSON format text files such as TDE and server logs in directory live capture</string>
+          </property>
+          <property name="text">
+           <string>Include all text files in directory live capture</string>
           </property>
          </widget>
         </item>
