@@ -52,6 +52,7 @@ private:
     void TrimEventCount();
     bool StartFileLiveCapture();
     void StartDirectoryLiveCapture();
+    QString GetDebugInfo() const;
 
     Ui::LogTab *ui;
     StatusBar *m_bar;
@@ -70,7 +71,6 @@ private:
     std::unique_ptr<QDir> m_liveDirectory;
     QHash<QString, std::shared_ptr<QFile>> m_directoryFiles;
     QList<QString> m_excludedFileNames;
-    bool m_firstLiveRead;
     QString m_tabPath;
 
 private slots:

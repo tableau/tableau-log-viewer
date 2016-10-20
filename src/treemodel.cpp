@@ -295,6 +295,12 @@ void TreeModel::SetTabType(TABTYPE type)
 int TreeModel::MergeIntoModelData(const EventList& events)
 {
     int origIter = m_rootItem->ChildCount() - 1;
+    if (events[0]["ts"].toString().isEmpty())
+    {
+        AddToModelData(events);
+        return origIter;
+    }
+
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
         QDateTime mergeTime = QDateTime::fromString(events[mergeIter]["ts"].toString(), "yyyy-MM-ddTHH:mm:ss.zzz");
@@ -325,11 +331,11 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
 void TreeModel::AddToModelData(const EventList& events)
 {
-    foreach(auto event, events)
+    for (const auto& event : events)
     {
         InsertChild(m_rootItem->ChildCount(), event);
-        layoutChanged();
     }
+    layoutChanged();
 }
 
 void TreeModel::InsertChild(int position, const QJsonObject & event)

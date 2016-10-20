@@ -386,11 +386,16 @@ bool MainWindow::LoadLogFile(QString path)
     return true;
 }
 
-void MainWindow::StartDirectoryLiveCapture(QString directoryPath, const QString& label)
+void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
 {
     directoryPath.replace("\\", "/");
     if(!m_allFiles.contains(directoryPath))
     {
+        if (label.isEmpty())
+        {
+            QFileInfo fi(directoryPath);
+            label = QString("Directory: %1").arg(fi.fileName());
+        }
         EventListPtr events = std::make_shared<EventList>();
         SetUpTab(events, true, directoryPath, label);
     }
@@ -466,10 +471,20 @@ void MainWindow::on_actionBeta_log_directory_triggered()
 
 void MainWindow::on_actionChoose_directory_triggered()
 {
-    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor");
-    if (directoryPath.compare("") != 0)
+    // Use file path of the current tab as default directory.
+    // It works with both file and directory paths.
+    QString defaultDir;
+    TreeModel* model = GetCurrentTreeModel();
+    if (model)
     {
-        StartDirectoryLiveCapture(directoryPath, "Directory");
+        LogTab* currentTab = m_logTabs[model];
+        defaultDir = currentTab->GetTabPath();
+    }
+
+    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", defaultDir);
+    if (!directoryPath.isEmpty())
+    {
+        StartDirectoryLiveCapture(directoryPath, "");
     }
 }
 
@@ -481,7 +496,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
         {
             QFileInfo fi(QString(url.toLocalFile()));
             if (fi.suffix().compare("txt", Qt::CaseInsensitive) != 0 &&
-                fi.suffix().compare("log", Qt::CaseInsensitive) != 0)
+                fi.suffix().compare("log", Qt::CaseInsensitive) != 0 &&
+                !fi.isDir())
                 return;
         }
         e->acceptProposedAction();
@@ -494,7 +510,15 @@ void MainWindow::dropEvent(QDropEvent *e)
     foreach (const QUrl &url, e->mimeData()->urls())
     {
         const QString &fileName = url.toLocalFile();
-        LoadLogFile(fileName);
+        QFileInfo fi(fileName);
+        if (fi.isDir())
+        {
+            StartDirectoryLiveCapture(fileName, "");
+        }
+        else
+        {
+            LoadLogFile(fileName);
+        }
     }
 }
 
@@ -905,7 +929,7 @@ void MainWindow::on_actionShow_summary_triggered()
 
 void MainWindow::on_actionOpen_timeline_triggered()
 {
-    QMessageBox timelineMsg;
+    QMessageBox timelineMsg(this);
     timelineMsg.setText("Timeline is currently not implemented for the TLV QT Port.");
     timelineMsg.exec();
 }
