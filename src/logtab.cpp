@@ -196,7 +196,7 @@ void LogTab::SetTabPath(const QString& path)
     if (m_treeModel->TabType() == TABTYPE::Directory)
     {
         m_liveDirectory = std::make_unique<QDir>(path);
-        m_liveDirectory->setNameFilters(QStringList({"*.txt", ".log"}));
+        m_liveDirectory->setNameFilters(QStringList({"*.txt", "*.log"}));
     }
     else if (m_treeModel->TabType() == TABTYPE::SingleFile)
     {
