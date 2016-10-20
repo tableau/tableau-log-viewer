@@ -12,7 +12,7 @@
 #include <QLineEdit>
 #include <QMap>
 
-HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary * colorLibrary) :
+HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary colorLibrary) :
     QDialog(parent),
     ui(new Ui::HighlightDlg)
 {
@@ -74,7 +74,7 @@ void HighlightDlg::AddNewTab()
     auto newFilter = new FilterTab(nullptr, m_filterTabValueLabel);
     ui->tabWidget->addTab(newFilter, "   ");
     ui->tabWidget->setCurrentIndex(ui->tabWidget->indexOf(newFilter));
-    newFilter->SetBackgroundColor(m_colors->GetNextColor());
+    newFilter->SetBackgroundColor(m_colors.GetNextColor());
 
     connect(newFilter, &FilterTab::filterValueChanged, this, &HighlightDlg::TextChanged);
 }

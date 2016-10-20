@@ -18,11 +18,12 @@ class HighlightDlg : public QDialog
     Q_OBJECT
 
 public:
-    HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary * colorLibrary);
+    HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary colorLibrary);
     ~HighlightDlg();
     void keyPressEvent(QKeyEvent * k);
 
     HighlightOptions m_highlightOpts;
+    ColorLibrary m_colors;
 
 private slots:
     void on_tabWidget_tabCloseRequested(int index);
@@ -38,7 +39,6 @@ private:
     void accepted();
 
     Ui::HighlightDlg *ui;
-    ColorLibrary * m_colors;
     const QString m_filterTabValueLabel = "Highlight &log event values that contains substring:";
     const int m_tabLabelSize = 20;
 };

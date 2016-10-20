@@ -718,13 +718,18 @@ void MainWindow::on_actionHighlight_triggered()
         return;
 
     // Construct a highlight dialog with our model's current _HighlightOpts.
-    ColorLibrary * colorLibrary = new ColorLibrary(model->m_highlightOpts.GetColors());
-    HighlightDlg highlightDlg(this, model->m_highlightOpts, colorLibrary);
+    HighlightDlg highlightDlg(this, model->m_highlightOpts, model->m_colorLibrary);
 
     // Open the dialog and see if ok was pressed. If so we want to update our model's _HighlightOpts member.
     if (highlightDlg.exec() == QDialog::Accepted)
     {
-        model->UpdateHighlights(highlightDlg.m_highlightOpts);
+        model->m_highlightOpts = highlightDlg.m_highlightOpts;
+        model->m_colorLibrary = highlightDlg.m_colors;
+
+        if (!model->HasFilters())
+        {
+            model->m_highlightOnlyMode = false;
+        }
 
         RefilterTreeView();
         UpdateMenuAndStatusBar();

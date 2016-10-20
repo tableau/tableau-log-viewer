@@ -21,11 +21,7 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
     if (!defaultHighlightOpts.isEmpty())
     {
         m_highlightOpts = defaultHighlightOpts;
-        m_colorLibrary = new ColorLibrary(m_highlightOpts.GetColors());
-    }
-    else
-    {
-        m_colorLibrary = new ColorLibrary();
+        m_colorLibrary.Exclude(m_highlightOpts.GetColors());
     }
 
     m_highlightOnlyMode = false;
@@ -35,7 +31,6 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
 TreeModel::~TreeModel()
 {
     delete m_rootItem;
-    delete m_colorLibrary;
 }
 
 int TreeModel::columnCount(const QModelIndex & /* parent */) const
@@ -572,19 +567,6 @@ void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector
     else
     {
         stringList.append(KeyValueString(key, value.toString()));
-    }
-}
-
-void TreeModel::UpdateHighlights(HighlightOptions opts)
-{
-    m_highlightOpts = opts;
-
-    delete m_colorLibrary;
-    m_colorLibrary = new ColorLibrary(opts.GetColors());
-
-    if (!HasFilters())
-    {
-        m_highlightOnlyMode = false;
     }
 }
 

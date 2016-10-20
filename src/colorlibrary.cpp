@@ -16,35 +16,44 @@ const static QVector<QColor> DefaultColors =
 
 ColorLibrary::ColorLibrary()
 {
-    m_colorLibrary = new QQueue<QColor>();
     AddColors(DefaultColors);
 }
 
 ColorLibrary::ColorLibrary(QVector<QColor> usedColors)
 {
-    m_colorLibrary = new QQueue<QColor>();
+    Exclude(usedColors);
+}
+
+void ColorLibrary::Exclude(QVector<QColor> usedColors)
+{
+    m_colorLibrary.clear();
+
     QVector<QColor> colorsToAdd;
+    QVector<QColor> colorsToAddToEnd;
     for(const auto& color : DefaultColors)
     {
         if (!usedColors.contains(color))
             colorsToAdd.push_back(color);
+        else
+            colorsToAddToEnd.push_back(color);
     }
     AddColors(colorsToAdd);
+    AddColors(colorsToAddToEnd);
 }
 
 void ColorLibrary::AddColors(QVector<QColor> colors)
 {
     for (const auto& color : colors)
     {
-        m_colorLibrary->enqueue(color);
+        m_colorLibrary.enqueue(color);
     }
 }
 
 QColor ColorLibrary::GetNextColor()
 {
-    QColor result = m_colorLibrary->head();
-    auto color = m_colorLibrary->dequeue();
-    m_colorLibrary->enqueue(color);
+    QColor result = m_colorLibrary.head();
+    auto color = m_colorLibrary.dequeue();
+    m_colorLibrary.enqueue(color);
     return result;
 }
 
