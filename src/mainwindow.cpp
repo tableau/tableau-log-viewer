@@ -394,7 +394,7 @@ void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
         if (label.isEmpty())
         {
             QFileInfo fi(directoryPath);
-            label = QString("Directory: %1").arg(fi.fileName());
+            label = QString("%1 directory").arg(fi.fileName());
         }
         EventListPtr events = std::make_shared<EventList>();
         SetUpTab(events, true, directoryPath, label);
@@ -450,7 +450,7 @@ void MainWindow::CheckFileOpened(QString path)
         QTreeView * view = GetTreeView(i);
         TreeModel * model = GetTreeModel(view);
         LogTab * currentTab = m_logTabs[model];
-        if ((model->TabType() == TABTYPE::Directory || model->TabType() == TABTYPE::SingleFile) && currentTab->GetTabPath().compare(path) == 0)
+        if (currentTab && currentTab->GetTabPath().compare(path) == 0)
         {
             tabWidget->setCurrentIndex(i);
         }
@@ -717,6 +717,8 @@ void MainWindow::on_actionClose_all_tabs_triggered()
         currentTab->EndLiveCapture();
     }
     tabWidget->clear();
+    m_logTabs.clear();
+    m_allFiles.clear();
     UpdateMenuAndStatusBar();
 }
 
