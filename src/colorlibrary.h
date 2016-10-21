@@ -12,13 +12,13 @@ class ColorLibrary
 {
 public:
     ColorLibrary();
-    ColorLibrary(QVector<QColor> usedColors);
+    ColorLibrary(const QVector<QColor>& usedColors);
 
-    void Exclude(QVector<QColor> usedColors);
+    void Exclude(const QVector<QColor>& usedColors);
     QColor GetNextColor();
 
 private:
     QQueue<QColor> m_colorLibrary;
-    void AddColors(QVector<QColor> colors);
+    void AddColors(const QVector<QColor>& colors);
 };
 #endif // COLORLIBRARY_H

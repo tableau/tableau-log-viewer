@@ -19,12 +19,12 @@ ColorLibrary::ColorLibrary()
     AddColors(DefaultColors);
 }
 
-ColorLibrary::ColorLibrary(QVector<QColor> usedColors)
+ColorLibrary::ColorLibrary(const QVector<QColor>& usedColors)
 {
     Exclude(usedColors);
 }
 
-void ColorLibrary::Exclude(QVector<QColor> usedColors)
+void ColorLibrary::Exclude(const QVector<QColor>& usedColors)
 {
     m_colorLibrary.clear();
 
@@ -41,7 +41,7 @@ void ColorLibrary::Exclude(QVector<QColor> usedColors)
     AddColors(colorsToAddToEnd);
 }
 
-void ColorLibrary::AddColors(QVector<QColor> colors)
+void ColorLibrary::AddColors(const QVector<QColor>& colors)
 {
     for (const auto& color : colors)
     {

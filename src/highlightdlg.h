@@ -18,12 +18,12 @@ class HighlightDlg : public QDialog
     Q_OBJECT
 
 public:
-    HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary colorLibrary);
+    HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, const ColorLibrary& colorLibrary);
     ~HighlightDlg();
     void keyPressEvent(QKeyEvent * k);
 
     HighlightOptions m_highlightOpts;
-    ColorLibrary m_colors;
+    ColorLibrary m_colorLibrary;
 
 private slots:
     void on_tabWidget_tabCloseRequested(int index);
