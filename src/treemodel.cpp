@@ -357,7 +357,7 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
     child->SetData(COL::Time, QDateTime::fromString(QString(event["ts"].toString()), "yyyy-MM-ddTHH:mm:ss.zzz"));
-    child->SetData(COL::PID, event["pid"].toString());
+    child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
     child->SetData(COL::Request, event["req"].toString());
