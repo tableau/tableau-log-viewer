@@ -366,8 +366,15 @@ bool LogTab::StartFileLiveCapture()
 {
     QModelIndex idx = m_treeModel->index(m_treeModel->rowCount() - 1, 0);
     auto item_model = idx.model();
-    auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
-    m_eventIndex = idx_info.data().toInt() + 1;
+    if (item_model)
+    {
+        auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
+        m_eventIndex = idx_info.data().toInt() + 1;
+    }
+    else
+    {
+        m_eventIndex = 1;
+    }
 
     // Open file/check file exists and is readable
     if (!m_logFile.exists())
