@@ -104,7 +104,7 @@ private:
     void FindNextH();
     void FindImplH(int offset);
 
-    void StartDirectoryLiveCapture(QString directoryPath, const QString& label);
+    void StartDirectoryLiveCapture(QString directoryPath, QString label);
     void CheckFileOpened(QString path);
     LogTab* SetUpTab(EventListPtr events, bool isDirectory, QString path, QString label);
 

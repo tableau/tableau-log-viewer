@@ -41,6 +41,7 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
 
+    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
     SetColumn(COL::Time, 190, hasNoKey);
@@ -56,7 +57,6 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
 
     // Connect slots
     connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)),
@@ -171,22 +171,34 @@ void LogTab::keyPressEvent(QKeyEvent *event)
         }
         UpdateStatusBar();
         break;
-    case Qt::Key_C:
-        if ((QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+    default:
+        // Check keys with modifiers together and ensure regular key events get propagated.
+        if ((event->key() == Qt::Key_C) &&
+            (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
             (rowCount > 0))
         {
             CopyItemDetails(idxList);
         }
-        break;
-    case Qt::Key_D:
-        if ((QApplication::keyboardModifiers() & Qt::ControlModifier) &&
-            (rowCount == 2))
+        else if ((event->key() == Qt::Key_D) &&
+                 (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+                 (rowCount == 2))
         {
             RowDiffEvents();
         }
-        break;
-    default:
-        QWidget::keyPressEvent(event);
+        else if ((event->key() == Qt::Key_I) &&
+                 (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+                 (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+        {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Debug Info");
+            msgBox.setText(GetDebugInfo());
+            msgBox.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+            msgBox.exec();
+        }
+        else
+        {
+            QWidget::keyPressEvent(event);
+        }
     }
 }
 
@@ -255,14 +267,11 @@ void LogTab::SetUpFile(std::shared_ptr<QFile> file)
     {
         int offset = file->size();
         file->seek(offset);
-        qDebug() << "SetUpFile Add:" << file->fileName();
         m_directoryFiles[file->fileName()] = file;
     }
     else
     {
         file->close();
-        qDebug() << "SetUpFile Exclude:" << file->fileName();
-        qDebug() << "  line:" << line;
         m_excludedFileNames.append(file->fileName());
     }
 }
@@ -272,7 +281,6 @@ void LogTab::StartDirectoryLiveCapture()
     SetColumn(COL::File, 110, false);
     m_eventIndex = 1;
     m_treeModel->m_liveMode = true;
-    m_firstLiveRead = true;
     QStringList files = m_liveDirectory->entryList(QDir::Files);
     for (const QString& fileName : files)
     {
@@ -352,19 +360,21 @@ void LogTab::UpdateModelView()
     {
         ui->treeView->scrollToBottom();
     }
-    if (m_firstLiveRead)
-    {
-        ui->treeView->resizeColumnToContents(COL::Time);
-        m_firstLiveRead = false;
-    }
 }
 
 bool LogTab::StartFileLiveCapture()
 {
     QModelIndex idx = m_treeModel->index(m_treeModel->rowCount() - 1, 0);
     auto item_model = idx.model();
-    auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
-    m_eventIndex = idx_info.data().toInt() + 1;
+    if (item_model)
+    {
+        auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
+        m_eventIndex = idx_info.data().toInt() + 1;
+    }
+    else
+    {
+        m_eventIndex = 1;
+    }
 
     // Open file/check file exists and is readable
     if (!m_logFile.exists())
@@ -907,4 +917,34 @@ void LogTab::UpdateStatusBar()
 
     status += QString("events: %1  ").arg(m_treeModel->rowCount());
     m_bar->SetRightLabelText(status);
+}
+
+QString LogTab::GetDebugInfo() const
+{
+    QString tabType;
+    QString extra;
+    if (m_treeModel->TabType() == TABTYPE::SingleFile)
+    {
+        tabType = "Single File";
+    }
+    else if (m_treeModel->TabType() == TABTYPE::Directory)
+    {
+        tabType = "Directory";
+        extra = "Monitoring files:\n  Include:\n";
+        for (const QString& file : m_directoryFiles.keys())
+        {
+            extra += QString("    %1\n").arg(file);
+        }
+        extra += "  Exclude:\n";
+        for (const auto& file : m_excludedFileNames)
+        {
+            extra += QString("    %1\n").arg(file);
+        }
+    }
+    else if (m_treeModel->TabType() == TABTYPE::ExportedEvents)
+    {
+        tabType = "Exported Events";
+    }
+
+    return QString("Type: %1\nPath: %2\n\n%3").arg(tabType).arg(m_tabPath).arg(extra);
 }

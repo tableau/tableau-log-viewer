@@ -296,6 +296,12 @@ void TreeModel::SetTabType(TABTYPE type)
 int TreeModel::MergeIntoModelData(const EventList& events)
 {
     int origIter = m_rootItem->ChildCount() - 1;
+    if (events[0]["ts"].toString().isEmpty())
+    {
+        AddToModelData(events);
+        return origIter;
+    }
+
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
         QDateTime mergeTime = QDateTime::fromString(events[mergeIter]["ts"].toString(), "yyyy-MM-ddTHH:mm:ss.zzz");
@@ -326,11 +332,11 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
 void TreeModel::AddToModelData(const EventList& events)
 {
-    foreach(auto event, events)
+    for (const auto& event : events)
     {
         InsertChild(m_rootItem->ChildCount(), event);
-        layoutChanged();
     }
+    layoutChanged();
 }
 
 void TreeModel::InsertChild(int position, const QJsonObject & event)
@@ -352,7 +358,7 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
     child->SetData(COL::Time, QDateTime::fromString(QString(event["ts"].toString()), "yyyy-MM-ddTHH:mm:ss.zzz"));
-    child->SetData(COL::PID, event["pid"].toString());
+    child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
     child->SetData(COL::Request, event["req"].toString());
