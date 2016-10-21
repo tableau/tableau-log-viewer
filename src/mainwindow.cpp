@@ -724,10 +724,13 @@ void MainWindow::on_actionHighlight_triggered()
     if (highlightDlg.exec() == QDialog::Accepted)
     {
         model->m_highlightOpts = highlightDlg.m_highlightOpts;
+        model->m_colorLibrary = highlightDlg.m_colorLibrary;
+
         if (!model->HasFilters())
         {
             model->m_highlightOnlyMode = false;
         }
+
         RefilterTreeView();
         UpdateMenuAndStatusBar();
     }

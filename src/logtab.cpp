@@ -815,7 +815,7 @@ void LogTab::RowHighlightSelectedType()
     SearchOpt newOpt;
     newOpt.m_keys.append(COL::Key);
     newOpt.m_value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
-    newOpt.m_backgroundColor = m_treeModel->m_colorLibrary->GetNextColor();
+    newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
     m_treeModel->m_highlightOpts.append(newOpt);
     menuUpdateNeeded();
 }

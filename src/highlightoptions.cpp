@@ -22,10 +22,18 @@ QJsonArray HighlightOptions::ToJson()
 void HighlightOptions::FromJson(const QJsonArray& json)
 {
     clear();
-    for (auto filterJson : json)
+    for (const auto& filterJson : json)
     {
         SearchOpt highlightFilter;
         highlightFilter.FromJson(filterJson.toObject());
         this->append(highlightFilter);
     }
+}
+
+QVector<QColor> HighlightOptions::GetColors()
+{
+    QVector<QColor> result;
+    for (const auto &searchOpt : *this)
+        result.push_back(searchOpt.m_backgroundColor);
+    return result;
 }

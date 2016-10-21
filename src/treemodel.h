@@ -67,8 +67,8 @@ public:
     bool m_highlightOnlyMode;
     bool m_liveMode;
     HighlightOptions m_highlightOpts;
+    ColorLibrary m_colorLibrary;
     SearchOpt m_findOpts;
-    ColorLibrary * m_colorLibrary;
     QList<QString> m_paths;
 
 private:

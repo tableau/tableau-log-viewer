@@ -19,9 +19,11 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
 
     HighlightOptions defaultHighlightOpts = Options::GetInstance().getDefaultHighlightOpts();
     if (!defaultHighlightOpts.isEmpty())
+    {
         m_highlightOpts = defaultHighlightOpts;
+        m_colorLibrary.Exclude(m_highlightOpts.GetColors());
+    }
 
-    m_colorLibrary = new ColorLibrary();
     m_highlightOnlyMode = false;
     m_liveMode = false;
 }
@@ -29,7 +31,6 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
 TreeModel::~TreeModel()
 {
     delete m_rootItem;
-    delete m_colorLibrary;
 }
 
 int TreeModel::columnCount(const QModelIndex & /* parent */) const
