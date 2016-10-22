@@ -55,7 +55,7 @@ bool SaveFilterDialog::SaveFilter(const QString& filename)
         QMessageBox validationWarning(
             QMessageBox::Icon::Warning,
             QStringLiteral("Invalid name"),
-            QStringLiteral("Only alphanumeric characters and underscores are allowed."));
+            QStringLiteral("Only alphanumeric characters, underscores, dashes, periods, and spaces are allowed."));
         validationWarning.exec();
         return false;
     }
