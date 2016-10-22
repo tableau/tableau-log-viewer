@@ -49,7 +49,7 @@ bool SaveFilterDialog::SaveFilter(const QString& filename)
     qDebug() << "attempting to save...";
 
     // Validate filename
-    QRegularExpression regex("^[a-z0-9-_ ]+$", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression regex("^[a-z0-9.\\-_ ]+$", QRegularExpression::CaseInsensitiveOption);
     if (!regex.match(filename).hasMatch())
     {
         QMessageBox validationWarning(
