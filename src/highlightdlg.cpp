@@ -14,7 +14,8 @@
 
 HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, const ColorLibrary& colorLibrary) :
     QDialog(parent),
-    ui(new Ui::HighlightDlg)
+    ui(new Ui::HighlightDlg),
+    m_colorLibrary(colorLibrary)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -22,7 +23,6 @@ HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, cons
     // Remove close button of the Help tab.
     ui->tabWidget->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
 
-    m_colorLibrary = colorLibrary;
     connect(this, &QDialog::accepted, this, &HighlightDlg::accepted);
     BuildTabs(highlightOpts);
 }
