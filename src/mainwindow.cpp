@@ -237,6 +237,7 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
     int idx = tabWidget->addTab(logTab, "exported data");
     tabWidget->setCurrentIndex(idx);
+    logTab->setFocus();
 
     QTreeView * exportedView = GetCurrentTreeView();
     TreeModel * exportedModel = GetCurrentTreeModel();
@@ -433,6 +434,8 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
 
     tabWidget->setTabToolTip(idx, path);
     tabWidget->setCurrentIndex(idx);
+    logTab->setFocus();
+
     bool futureTabsUnderLive = m_options.getFutureTabsUnderLive();
     if (isDirectory || futureTabsUnderLive)
     {
@@ -453,6 +456,7 @@ void MainWindow::CheckFileOpened(QString path)
         if (currentTab && currentTab->GetTabPath().compare(path) == 0)
         {
             tabWidget->setCurrentIndex(i);
+            currentTab->setFocus();
         }
     }
 }

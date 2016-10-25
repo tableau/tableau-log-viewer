@@ -16,6 +16,7 @@ LogTab::LogTab(QWidget *parent, StatusBar *bar, const EventListPtr events) :
     m_bar(bar)
 {
     ui->setupUi(this);
+    setFocusProxy(ui->treeView);
     InitTreeView(events);
     InitMenus();
 }
