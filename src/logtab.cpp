@@ -9,6 +9,7 @@
 
 #include <QFontDatabase>
 #include <QMenu>
+#include <QJsonDocument>
 
 LogTab::LogTab(QWidget *parent, StatusBar *bar, const EventListPtr events) :
     QWidget(parent),
@@ -520,6 +521,14 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
         {
             valueDlg.SetQuery(queryText);
         }
+    }
+    else if (valueDlg.m_key == "query-plan")
+    {
+        auto event = m_treeModel->GetEvent(idx);
+        auto valObject = event["v"].toObject();
+        QJsonDocument doc(valObject);
+        QString jsonString(doc.toJson(QJsonDocument::Compact));
+        valueDlg.SetQuery(jsonString);
     }
 }
 
