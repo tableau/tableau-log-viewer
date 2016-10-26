@@ -28,3 +28,9 @@ Tableau Log Viewer is made available AS-IS with no support. This is intended to 
 How can I contribute to Tableau Log Viewer?
 ---------------
 Code contributions & improvements by the community are welcomed & encouraged! See the [LICENSE](https://github.com/tableau/TableauLogViewer/blob/master/LICENSE) file for current open-source licensing & use information.
+
+A Word About Licenses
+---------------
+Tableau Log Viewer is released under MIT license however it relies on several other components:
+* [Qt](https://www.qt.io/). We are using Qt's components that are licensed under [LGPLv3 license](https://www.qt.io/licensing-comparison/) source code for which is located [here](http://code.qt.io/cgit/qt/qtbase.git/tree/) and instructions for obtaining it are located [here](https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_source_code). We will be keeping these links up to date and making sure they provide clear directions for obtaining Qt's source code.
+* [Query Graphs](https://github.com/tableau/tableau-log-viewer/tree/dev/resources/query-graphs). This is our side project that is used for query tree visualization. It is released under the MIT license and uses the d3js library, released under the BSD license.
