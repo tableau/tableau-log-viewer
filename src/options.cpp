@@ -21,7 +21,7 @@ void Options::ReadSettings()
     m_diffToolPath = settings.value("diffToolPath", defaultDiffToolPath).toString();
     m_futureTabsUnderLive = settings.value("enableLiveCapture").toBool();
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
-    m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles").toBool();
+    m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
 
     settings.endGroup();
 

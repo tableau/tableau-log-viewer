@@ -99,10 +99,9 @@ private:
     void MergeLogFile(QString path);
     void FindPrev();
     void FindNext();
-    void FindImpl(int offset);
     void FindPrevH();
     void FindNextH();
-    void FindImplH(int offset);
+    void FindImpl(int offset, bool findHighlight);
 
     void StartDirectoryLiveCapture(QString directoryPath, QString label);
     void CheckFileOpened(QString path);
