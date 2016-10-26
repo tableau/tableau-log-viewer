@@ -387,8 +387,8 @@ void SetValueDisplayString(TreeItem* child, QString str)
     // Limit string size in the tree view to prevent UI stutters.
     const int MaxDisplayStringSize = 300;
 
-    str.replace("\n", " ");
     str.truncate(MaxDisplayStringSize);
+    str.replace("\n", " ");
     child->SetData(COL::Value, str);
 }
 
