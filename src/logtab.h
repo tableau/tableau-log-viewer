@@ -26,6 +26,7 @@ public:
     void EndLiveCapture();
     QString GetTabPath() const;
     void SetTabPath(const QString& path);
+    void UpdateStatusBar();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;
@@ -42,7 +43,6 @@ private:
     void RowFindPrev();
     void RowFindNext();
     void RowFindImpl(int offset);
-    void UpdateStatusBar();
     void ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg);
     void ReadFile();
     void ReadDirectoryFiles();

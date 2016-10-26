@@ -138,22 +138,11 @@ void MainWindow::UpdateMenuAndStatusBar()
         return;
     }
 
-    QString status = "";
-    if (!model->m_highlightOpts.isEmpty())
+    LogTab* currentTab = m_logTabs[model];
+    if (currentTab)
     {
-        status += model->m_highlightOnlyMode ? "show only highlighted: {" : "highlighted: {";
-        for(int i=0; i<model->m_highlightOpts.count(); i++)
-        {
-            SearchOpt highlightOpt = model->m_highlightOpts[i];
-            if(i!=0)
-                status += ", ";
-            status += highlightOpt.m_value;
-        }
-        status += "}  |  ";
+        currentTab->UpdateStatusBar();
     }
-
-    status += QString("events: %1  ").arg(model->rowCount());
-    m_statusBarLabel->setText(status);
 }
 
 void MainWindow::WriteSettings()

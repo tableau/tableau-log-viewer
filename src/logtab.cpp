@@ -170,7 +170,6 @@ void LogTab::keyPressEvent(QKeyEvent *event)
             auto idx = idxList.at(i-1);
             m_treeModel->removeRow(idx.row(), idx.parent());
         }
-        UpdateStatusBar();
         break;
     default:
         // Check keys with modifiers together and ensure regular key events get propagated.
@@ -708,10 +707,7 @@ void LogTab::RowDiffEvents()
 void LogTab::RowHideSelected()
 {
     QModelIndex index = ui->treeView->selectionModel()->currentIndex();
-    if (m_treeModel->removeRow(index.row(), index.parent()))
-    {
-        UpdateStatusBar();
-    }
+    m_treeModel->removeRow(index.row(), index.parent());
 }
 
 void LogTab::RowHideSelectedType()
@@ -731,7 +727,6 @@ void LogTab::RowHideSelectedType()
     }
     ui->treeView->setUpdatesEnabled(true);
 
-    UpdateStatusBar();
     m_bar->ShowMessage(QString("%1 '%2' event(s) hidden").arg(QString::number(count), key), 3000);
 }
 
@@ -902,10 +897,9 @@ void LogTab::UpdateStatusBar()
             }
             status += highlightOpt.m_value;
         }
-        status += "}  |  ";
+        status += "}";
     }
 
-    status += QString("events: %1  ").arg(m_treeModel->rowCount());
     m_bar->SetRightLabelText(status);
 }
 
