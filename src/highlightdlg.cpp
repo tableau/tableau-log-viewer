@@ -14,8 +14,8 @@
 
 HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, const ColorLibrary& colorLibrary) :
     QDialog(parent),
-    ui(new Ui::HighlightDlg),
-    m_colorLibrary(colorLibrary)
+    m_colorLibrary(colorLibrary),
+    ui(new Ui::HighlightDlg)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
