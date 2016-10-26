@@ -8,7 +8,6 @@
 #include "pathhelper.h"
 #include "processevent.h"
 #include "savefilterdialog.h"
-#include "treeitem.h"
 #include "zoomabletreeview.h"
 
 #include <map>
@@ -863,7 +862,7 @@ void ShowSummary(TreeModel* model, QWidget* parent)
     for (int i = 0; i < rowCount; i++)
     {
         QModelIndex valIndex = model->index(i, COL::Value);
-        QString valString = model->data(valIndex, Qt::DisplayRole).toString();
+        QString valString = model->GetValueFullString(valIndex);
         QJsonObject event = model->GetEvent(valIndex);
         QString keyString = event["k"].toString();
         auto valObj = event["v"];
@@ -945,19 +944,34 @@ void MainWindow::on_actionOpen_timeline_triggered()
 
 void MainWindow::FindPrev()
 {
-    FindImpl(-1);
+    FindImpl(-1, false);
 }
 void MainWindow::FindNext()
 {
-    FindImpl(1);
+    FindImpl(1, false);
 }
-void MainWindow::FindImpl(int offset)
+
+void MainWindow::FindPrevH()
+{
+    FindImpl(-1, true);
+}
+
+void MainWindow::FindNextH()
+{
+    FindImpl(1, true);
+}
+
+void MainWindow::FindImpl(int offset, bool findHighlight)
 {
     QTreeView * tree = GetCurrentTreeView();;
     TreeModel * model = GetTreeModel(tree);
-    QList<int> lstColumns;
-    for(COL col : model->m_findOpts.m_keys)
-        lstColumns << col;
+
+    if (model->rowCount() == 0)
+        return;
+
+    const QVector<SearchOpt>& filters = (findHighlight) ?
+        model->m_highlightOpts :
+        QVector<SearchOpt> {model->m_findOpts};
 
     int start = tree->currentIndex().row();
     // If nothing is selected, the current index is -1. Force to start at 0 to avoid an infinite loop.
@@ -975,72 +989,33 @@ void MainWindow::FindImpl(int offset)
         else if (i < 0)
             i = model->rowCount() - 1;
 
-        if (i == start)
+        for (SearchOpt searchOpt : filters)
         {
-            statusBar()->showMessage(QString("Not found: '%1'").arg(model->m_findOpts.m_value), 3000);
-            return;
-        }
-
-        foreach (int col, lstColumns)
-        {
-            QModelIndex idx = model->index(i, col);
-            auto data = model->data(idx, Qt::DisplayRole).toString();
-            if (model->m_findOpts.HasMatch(data))
-            {
-                tree->setCurrentIndex(idx);
-                statusBar()->showMessage(QString("Found '%1' on line %2").arg(model->m_findOpts.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()), 3000);
-                return;
-            }
-        }
-    }
-}
-
-void MainWindow::FindPrevH()
-{
-    FindImplH(-1);
-}
-
-void MainWindow::FindNextH()
-{
-    FindImplH(1);
-}
-
-
-void MainWindow::FindImplH(int offset)
-{
-    QTreeView * tree = GetCurrentTreeView();;
-    TreeModel * model = GetTreeModel(tree);
-
-    int start = tree->currentIndex().row();
-    int i = start;
-    while (true)
-    {
-        i += offset;
-
-        if (i >= model->rowCount())
-            i = 0;
-        else if (i < 0)
-            i = model->rowCount() - 1;
-
-        if (i == start)
-        {
-            statusBar()->showMessage(QString("Can't find highlighted item"), 3000);
-            return;
-        }
-
-        for(SearchOpt searchOpt : model->m_highlightOpts)
-        {
-            for(COL col : searchOpt.m_keys)
+            for (COL col : searchOpt.m_keys)
             {
                 QModelIndex idx = model->index(i, col);
-                auto data = model->data(idx, Qt::DisplayRole).toString();
+                QString data = (col == COL::Value) ?
+                    model->GetValueFullString(idx, true) :
+                    model->data(idx, Qt::DisplayRole).toString();
                 if (searchOpt.HasMatch(data))
                 {
                     tree->setCurrentIndex(idx);
-                    statusBar()->showMessage(QString("Found highlighted item on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString()), 3000);
+                    QString msg = (filters.size() == 1) ?
+                        QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
+                        QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
+                    statusBar()->showMessage(msg, 3000);
                     return;
                 }
             }
+        }
+
+        if (i == start)
+        {
+            QString msg = (filters.size() == 1) ?
+                QString("Not found: '%1'").arg(filters[0].m_value) :
+                QString("No matching item.");
+            statusBar()->showMessage(msg, 3000);
+            return;
         }
     }
 }

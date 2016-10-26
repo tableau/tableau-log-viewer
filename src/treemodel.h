@@ -52,7 +52,7 @@ public:
     bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-    TreeItem* GetFirstChildWithKey(const QModelIndex &index, QString key) const;
+    QString GetChildValueString(const QModelIndex &index, QString key) const;
     int MergeIntoModelData(const EventList& events);
     void AddToModelData(const EventList& events);
     bool HasFilters();
@@ -61,6 +61,7 @@ public:
     void ShowDeltas(qint64 delta);
     bool IsHighlightedRow(int row) const;
     QJsonObject GetEvent(QModelIndex idx) const;
+    QString GetValueFullString(const QModelIndex& idx, bool singleLineFormat = false) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);
 
@@ -77,12 +78,11 @@ private:
     void AddChildren(QJsonObject &obj, TreeItem *parent);
     void AddChild(const QString& key, const QJsonValue& value, TreeItem* parent);
     void InsertChild(int position, const QJsonObject & event);
-    const QString KeyValueString(const QString& key, const QString& value);
-    const QString JsonToString(const QJsonObject& json);
-    void GetFlatJson(const QJsonObject& json, QVector<QString>& stringList);
-    void GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList);
-    QColor ItemHighlightColor(TreeItem * item) const;
-    bool EventHighlightMatch(const QJsonObject & event, const ColumnKeys & map);
+    const QString KeyValueString(const QString& key, const QString& value) const;
+    QString JsonToString(const QJsonObject& json, const QString& lineBreak = "; ") const;
+    void GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const;
+    void GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const;
+    QColor ItemHighlightColor(const QModelIndex& idx) const;
     QString GetDeltaMSecs(QDateTime dateTime) const;
     TreeItem *GetItem(const QModelIndex &index) const;
 

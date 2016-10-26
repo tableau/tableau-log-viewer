@@ -497,10 +497,7 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
 {
     auto item_model = idx.model();
     auto idx_key = item_model->index(idx.row(), COL::Key, idx.parent());
-    auto idx_val = item_model->index(idx.row(), COL::Value, idx.parent());
-
-    auto value = idx_val.data().toString();
-    value = value.replace("\\n", "\n");
+    QString value = m_treeModel->GetValueFullString(idx);
 
     auto idx_id = item_model->index(idx.row(), COL::ID, idx.parent());
     valueDlg.m_id = idx_id.data().toString();
@@ -517,16 +514,12 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
         valueDlg.m_key == "begin-query" ||
         valueDlg.m_key == "end-query")
     {
-        auto childWithQuery = m_treeModel->GetFirstChildWithKey(idx, QString("query"));
-        if (childWithQuery)
+        // Assume that queries starting with < have query function trees or logical-query.
+        // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
+        auto queryText = m_treeModel->GetChildValueString(idx, QString("query"));
+        if (queryText.startsWith("<"))
         {
-            auto queryText = childWithQuery->Data(COL::Value).toString();
-            // Assume that queries starting with < have query function trees or logical-query.
-            // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
-            if (queryText.startsWith("<"))
-            {
-                valueDlg.SetQuery(queryText);
-            }
+            valueDlg.SetQuery(queryText);
         }
     }
 }
@@ -597,11 +590,10 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
             if (!(ui->treeView->isColumnHidden(i)))
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
-                QString info = idx_info.data().toString();
-                if (i == COL::Value)
-                {
-                    info = info.replace("\\n", "\n");
-                }
+                QString info = (i == COL::Value) ?
+                    m_treeModel->GetValueFullString(idx) :
+                    idx_info.data().toString();
+
                 if (info.length() > 0)
                 {
                     copyText += info + "\t";
@@ -676,11 +668,8 @@ void LogTab::RowDiffEvents()
     QModelIndex firstIdx = idxList[0];
     QModelIndex secondIdx = idxList[1];
 
-    QString firstVal = firstIdx.model()->index(firstIdx.row(), COL::Value, firstIdx.parent()).data().toString();
-    QString secondVal= secondIdx.model()->index(secondIdx.row(), COL::Value, secondIdx.parent()).data().toString();
-
-    firstVal = firstVal.replace("\\n", "\n");
-    secondVal = secondVal.replace("\\n", "\n");
+    QString firstVal = m_treeModel->GetValueFullString(firstIdx);
+    QString secondVal= m_treeModel->GetValueFullString(secondIdx);
 
     // Save the two strings into temp files
     std::unique_ptr<QTemporaryFile> firstFile = std::make_unique<QTemporaryFile>();

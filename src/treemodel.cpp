@@ -41,7 +41,6 @@ int TreeModel::columnCount(const QModelIndex & /* parent */) const
 QVariant TreeModel::data(const QModelIndex &index, int role) const
 {
     int col = index.column();
-    TreeItem *item = GetItem(index);
 
     switch (role)
     {
@@ -53,7 +52,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::BackgroundRole:
         {
-            QColor highlightColor(ItemHighlightColor(item));
+            QColor highlightColor(ItemHighlightColor(index));
             if (highlightColor != Qt::white)
             {
                 return QBrush(highlightColor);
@@ -62,6 +61,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::UserRole:
         {
+            TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
                 QDateTime dateTime = item->Data(col).toDateTime();
@@ -72,6 +72,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::DisplayRole:
         {
+            TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
                 QDateTime dateTime = item->Data(col).toDateTime();
@@ -113,18 +114,22 @@ TreeItem *TreeModel::GetItem(const QModelIndex &index) const
     return m_rootItem;
 }
 
-TreeItem* TreeModel::GetFirstChildWithKey(const QModelIndex &index, QString key) const
+QString TreeModel::GetChildValueString(const QModelIndex &index, QString key) const
 {
-    TreeItem *parent = GetItem(index);
-    for (int i = 0; i < parent->ChildCount(); i++)
-    {
-        auto child = parent->Child(i);
-        if (child->Data(COL::Key) == key)
-        {
-            return child;
-        }
-    }
-    return nullptr;
+    QJsonObject eventObj = GetEvent(index);
+    QJsonValueRef value = eventObj["v"];
+    if (value.isNull() || !value.isObject())
+        return QString();
+
+    QJsonObject valueObj = value.toObject();
+    if (!valueObj.contains(key))
+        return QString();
+
+    QJsonValueRef child = valueObj[key];
+    if (child.isObject())
+        return JsonToString(child.toObject());
+    else
+        return child.toString();
 }
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
@@ -267,13 +272,37 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 
 QJsonObject TreeModel::GetEvent(QModelIndex idx) const
 {
-    if (idx.parent().row() == -1)
+    while (idx.parent().isValid())
     {
-        return m_allEvents->at(idx.row());
+        idx = idx.parent();
+    }
+
+    int row = idx.row();
+    if (row < 0)
+    {
+        return QJsonObject();
     }
     else
     {
-        return m_allEvents->at(idx.parent().row());
+        return m_allEvents->at(idx.row());
+    }
+}
+
+QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFormat) const
+{
+    QJsonObject eventObj = GetEvent(idx);
+    QJsonValueRef valueObj = eventObj["v"];
+    if (valueObj.isObject())
+    {
+        return (singleLineFormat) ?
+            JsonToString(valueObj.toObject(), "; ").replace("\n", " ") :
+            JsonToString(valueObj.toObject(), "\n");
+    }
+    else
+    {
+        return (singleLineFormat) ?
+            valueObj.toString().replace("\n", " ") :
+            valueObj.toString();
     }
 }
 
@@ -353,6 +382,16 @@ void TreeModel::InsertChild(int position, const QJsonObject & event)
     SetupChild(child, event);
 }
 
+void SetValueDisplayString(TreeItem* child, QString str)
+{
+    // Limit string size in the tree view to prevent UI stutters.
+    const int MaxDisplayStringSize = 300;
+
+    str.replace("\n", " ");
+    str.truncate(MaxDisplayStringSize);
+    child->SetData(COL::Value, str);
+}
+
 void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
 {
     child->SetData(COL::ID, event["idx"].toInt());
@@ -370,12 +409,12 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     auto v = event["v"];
     if (!v.isObject())
     {
-        child->SetData(COL::Value, v.toString().replace("\n", "\\n"));
+        SetValueDisplayString(child, v.toString());
     }
     else
     {
         QJsonObject obj = v.toObject();
-        child->SetData(COL::Value, JsonToString(obj));
+        SetValueDisplayString(child, JsonToString(obj));
         AddChildren(obj, child);
     }
 
@@ -439,7 +478,7 @@ void TreeModel::AddChild(const QString& key, const QJsonValue& value, TreeItem* 
     else if (value.isObject())
     {
         QJsonObject childObj = value.toObject();
-        child->SetData(COL::Value, JsonToString(childObj));
+        SetValueDisplayString(child, JsonToString(childObj));
         AddChildren(childObj, child);
     }
     else if (value.isArray())
@@ -455,22 +494,39 @@ void TreeModel::AddChild(const QString& key, const QJsonValue& value, TreeItem* 
     }
     else
     {
-        auto val = value.toVariant().toString().replace("\n", "\\n");
-        child->SetData(COL::Value, val);
+        SetValueDisplayString(child, value.toVariant().toString());
     }
 }
 
-QColor TreeModel::ItemHighlightColor(TreeItem * item) const
+QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
 {
+    TreeItem* item = GetItem(idx);
     if (item != nullptr)
     {
+        QString valueStr;
+
         // iterate in reverse so the rightmost tab that matches gets applied only
-        for(int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
+        for (int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
         {
             auto highlightOpt = m_highlightOpts[revItr];
-            for(auto key : highlightOpt.m_keys)
+            for (auto key : highlightOpt.m_keys)
             {
-                if(highlightOpt.HasMatch(item->Data(key).toString()))
+                QString columnStr;
+                if (key == COL::Value)
+                {
+                    if (valueStr.isNull())
+                    {
+                        // Cache value string so it's not calculated for all filters.
+                        valueStr = GetValueFullString(idx, true);
+                    }
+                    columnStr = valueStr;
+                }
+                else
+                {
+                    columnStr = item->Data(key).toString();
+                }
+
+                if (highlightOpt.HasMatch(columnStr))
                 {
                     return highlightOpt.m_backgroundColor;
                 }
@@ -480,46 +536,12 @@ QColor TreeModel::ItemHighlightColor(TreeItem * item) const
     return Qt::white;
 }
 
-bool TreeModel::EventHighlightMatch(const QJsonObject & event, const ColumnKeys & map)
-{
-    for (int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
-    {
-        auto highlightOpt = m_highlightOpts[revItr];
-        for(auto key : highlightOpt.m_keys)
-        {
-            QString search;
-            if(key == COL::Value)
-            {
-                auto v = event["v"];
-                if (!v.isObject())
-                {
-                    search = v.toString();
-                }
-                else
-                {
-                    QJsonObject obj = v.toObject();
-                    search = JsonToString(obj);
-                }
-            }
-            else
-            {
-                search = event[map[key]].toString();
-            }
-            if(highlightOpt.HasMatch(search))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-const QString TreeModel::KeyValueString(const QString& key, const QString& value)
+const QString TreeModel::KeyValueString(const QString& key, const QString& value) const
 {
     return key % ": " % value;
 }
 
-const QString TreeModel::JsonToString(const QJsonObject& json)
+QString TreeModel::JsonToString(const QJsonObject& json, const QString& lineBreak) const
 {
     QVector<QString> stringList;
     GetFlatJson(json, stringList);
@@ -530,13 +552,12 @@ const QString TreeModel::JsonToString(const QJsonObject& json)
     QString result;
     for (const QString& str : stringList)
     {
-        result = result % "; " % str;
+        result = result % lineBreak % str;
     }
-    result.replace("\n", "\\n");
-    return result.remove(0, 2);
+    return result.remove(0, lineBreak.size());
 }
 
-void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringList)
+void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const
 {
     for (QJsonObject::ConstIterator iter = json.constBegin(); iter != json.constEnd(); ++iter)
     {
@@ -544,7 +565,7 @@ void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringLis
     }
 }
 
-void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList)
+void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const
 {
     if (value.isDouble())
     {
@@ -619,7 +640,6 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
 bool TreeModel::IsHighlightedRow(int row) const
 {
     QModelIndex idx = index(row, 0);
-    TreeItem* item = GetItem(idx);
-    bool highlighted = (ItemHighlightColor(item) != Qt::white);
+    bool highlighted = (ItemHighlightColor(idx) != Qt::white);
     return highlighted;
 }
