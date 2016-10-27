@@ -7,10 +7,10 @@ Tableau Log Viewer is cross-platform tool with a simple interface that has a sin
 Overview
 ---------------
 * Tableau log file representation in easy to read columnar format
-* Advanced event search and highlighting
+* Live capture from Tableau's log files
+* Advanced event search, filtering and highlighting
 * Query syntax highlighting
-* Live capture: events appear as they happen
-* Supported on Windows and Mac (and can be built on Linux)
+* Compatible with Windows, Mac and, most likely, Linux
 
 How do I use Tableau Log Viewer?
 ---------------
