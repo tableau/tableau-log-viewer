@@ -1,9 +1,11 @@
 #include "statusbar.h"
 
-StatusBar::StatusBar(QStatusBar* qbar, QLabel *statusLabel) :
-    m_qbar(qbar),
-    m_statusLabel(statusLabel)
+StatusBar::StatusBar(QMainWindow* parent) :
+    m_qbar(parent->statusBar()),
+    m_statusLabel(new QLabel(parent))
 {
+    m_statusLabel->setContentsMargins(0, 0, 8, 0);
+    m_qbar->addPermanentWidget(m_statusLabel);
 }
 
 void StatusBar::ShowMessage(const QString& message, int timeout)

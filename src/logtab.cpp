@@ -923,7 +923,7 @@ void LogTab::UpdateStatusBar()
                 break;
             }
         }
-        status += "}  ";
+        status += "}";
     }
 
     m_bar->SetRightLabelText(status);
