@@ -27,7 +27,7 @@ Tableau Log Viewer is made available AS-IS with no support. This is intended to 
 
 How can I contribute to Tableau Log Viewer?
 ---------------
-Code contributions & improvements by the community are welcomed & encouraged! See the [LICENSE](LICENSE) file for current open-source licensing and use information.
+Code contributions & improvements by the community are welcomed & encouraged! See the [LICENSE](LICENSE) file for current open-source licensing and use information. Also, if you are new to GitHub - read [this handy guide](https://guides.github.com/activities/contributing-to-open-source/) on how to get started!
 
 A Word About Licenses
 ---------------
