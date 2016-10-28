@@ -98,7 +98,7 @@ void MainWindow::ClearRecentFileMenu()
 void MainWindow::UpdateMenuAndStatusBar()
 {
     TreeModel * model = GetCurrentTreeModel();
-    bool hasFilters = model && model->HasFilters();
+    bool hasFilters = model && model->HasHighlightFilters();
     bool hasFindOpts = model && model->ValidFindOpts();
 
     // Menu items
@@ -639,9 +639,9 @@ void MainWindow::on_actionRefresh_triggered()
 void MainWindow::on_actionSave_filters_triggered()
 {
     TreeModel * model = GetCurrentTreeModel();
-    if (model && !model->m_highlightOpts.isEmpty())
+    if (model && model->HasHighlightFilters())
     {
-        SaveFilterDialog saveFilterDialog(this, model->m_highlightOpts);
+        SaveFilterDialog saveFilterDialog(this, model->GetHighlightFilters());
         saveFilterDialog.exec();
     }
 }
@@ -687,7 +687,7 @@ void MainWindow::on_menuLoad_filters_triggered(QAction * action)
     }
     QByteArray filterData = loadFile.readAll();
     QJsonDocument filtersDoc(QJsonDocument::fromJson(filterData));
-    model->m_highlightOpts.FromJson(filtersDoc.array());
+    model->SetHighlightFilters(HighlightOptions(filtersDoc.array()));
 
     RefilterTreeView();
     UpdateMenuAndStatusBar();
@@ -735,15 +735,15 @@ void MainWindow::on_actionHighlight_triggered()
         return;
 
     // Construct a highlight dialog with our model's current _HighlightOpts.
-    HighlightDlg highlightDlg(this, model->m_highlightOpts, model->m_colorLibrary);
+    HighlightDlg highlightDlg(this, model->GetHighlightFilters(), model->m_colorLibrary);
 
     // Open the dialog and see if ok was pressed. If so we want to update our model's _HighlightOpts member.
     if (highlightDlg.exec() == QDialog::Accepted)
     {
-        model->m_highlightOpts = highlightDlg.m_highlightOpts;
+        model->SetHighlightFilters(highlightDlg.m_highlightOpts);
         model->m_colorLibrary = highlightDlg.m_colorLibrary;
 
-        if (!model->HasFilters())
+        if (!model->HasHighlightFilters())
         {
             model->m_highlightOnlyMode = false;
         }
@@ -769,7 +769,7 @@ void MainWindow::on_actionHighlight_only_mode_triggered()
         return;
 
     //Don't turn highlight only mode on if there are no filters. But DO turn highlight only mode off if there are no filters
-    if (!model->m_highlightOnlyMode && !model->HasFilters())
+    if (!model->m_highlightOnlyMode && !model->HasHighlightFilters())
         return;
     model->m_highlightOnlyMode = !model->m_highlightOnlyMode;
 
@@ -958,7 +958,7 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
         return;
 
     const QVector<SearchOpt>& filters = (findHighlight) ?
-        model->m_highlightOpts :
+        model->GetHighlightFilters() :
         QVector<SearchOpt> {model->m_findOpts};
 
     int start = tree->currentIndex().row();

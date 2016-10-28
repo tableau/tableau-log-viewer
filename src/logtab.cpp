@@ -832,7 +832,7 @@ void LogTab::RowHighlightSelectedType()
     newOpt.m_keys.append(COL::Key);
     newOpt.m_value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
     newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
-    m_treeModel->m_highlightOpts.append(newOpt);
+    m_treeModel->AddHighlightFilter(newOpt);
     menuUpdateNeeded();
 }
 
@@ -906,12 +906,13 @@ void LogTab::HeaderItemSelected(QAction *action)
 void LogTab::UpdateStatusBar()
 {
     QString status = "";
-    if (!m_treeModel->m_highlightOpts.isEmpty())
+    if (m_treeModel->HasHighlightFilters())
     {
         status += m_treeModel->m_highlightOnlyMode ? "show only highlighted: {" : "highlighted: {";
-        for (int i=0; i< m_treeModel->m_highlightOpts.count(); i++)
+        HighlightOptions highlightOpts(m_treeModel->GetHighlightFilters());
+        for (int i=0; i< highlightOpts.count(); i++)
         {
-            SearchOpt highlightOpt = m_treeModel->m_highlightOpts[i];
+            SearchOpt highlightOpt = highlightOpts[i];
             if (i!=0)
             {
                 status += ", ";

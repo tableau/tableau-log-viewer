@@ -55,7 +55,6 @@ public:
     QString GetChildValueString(const QModelIndex &index, QString key) const;
     int MergeIntoModelData(const EventList& events);
     void AddToModelData(const EventList& events);
-    bool HasFilters();
     bool ValidFindOpts();
     void ClearAllEvents();
     void ShowDeltas(qint64 delta);
@@ -64,10 +63,13 @@ public:
     QString GetValueFullString(const QModelIndex& idx, bool singleLineFormat = false) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);
+    HighlightOptions GetHighlightFilters() const;
+    void SetHighlightFilters(const HighlightOptions& highlightOpts);
+    void AddHighlightFilter(const SearchOpt& filter);
+    bool HasHighlightFilters() const;
 
     bool m_highlightOnlyMode;
     bool m_liveMode;
-    HighlightOptions m_highlightOpts;
     ColorLibrary m_colorLibrary;
     SearchOpt m_findOpts;
     QList<QString> m_paths;
@@ -88,10 +90,10 @@ private:
 
     TreeItem * m_rootItem;
     qint64 m_deltaBase = 0;
-
-    // Used by ToggleHighlightOnly, as not all events might be shown.
     EventListPtr m_allEvents;
     TABTYPE m_fileType;
+    HighlightOptions m_highlightOpts;
+    mutable QHash<TreeItem*, QColor> m_highlightColorCache;
 };
 
 #endif // TREEMODEL_H

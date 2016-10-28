@@ -213,6 +213,11 @@ bool TreeModel::removeRows(int position, int count, const QModelIndex &parent)
     int originalCount = rowCount(parent);
     int endPosition = position + count - 1;
 
+    for (int i = position; i <= endPosition; i++)
+    {
+        m_highlightColorCache.remove(parentItem->Child(i));
+    }
+
     beginRemoveRows(parent, position, endPosition);
     success = parentItem->RemoveChildren(position, count);
     endRemoveRows();
@@ -221,7 +226,7 @@ bool TreeModel::removeRows(int position, int count, const QModelIndex &parent)
     {
         if (count == originalCount)
         {
-            m_allEvents->clear();
+            ClearAllEvents();
         }
         else
         {
@@ -501,38 +506,47 @@ void TreeModel::AddChild(const QString& key, const QJsonValue& value, TreeItem* 
 QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
 {
     TreeItem* item = GetItem(idx);
-    if (item != nullptr)
+    if (item == nullptr || item->Parent() != m_rootItem)
+        return Qt::white;
+
+    auto cachedColor = m_highlightColorCache.find(item);
+    if (cachedColor != m_highlightColorCache.end())
+        return cachedColor.value();
+        //return cacheColor->second;
+
+    QString valueStr;
+
+    // iterate in reverse so the rightmost tab that matches gets applied only
+    for (int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
     {
-        QString valueStr;
-
-        // iterate in reverse so the rightmost tab that matches gets applied only
-        for (int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
+        auto highlightOpt = m_highlightOpts[revItr];
+        for (auto key : highlightOpt.m_keys)
         {
-            auto highlightOpt = m_highlightOpts[revItr];
-            for (auto key : highlightOpt.m_keys)
+            QString columnStr;
+            if (key == COL::Value)
             {
-                QString columnStr;
-                if (key == COL::Value)
+                if (valueStr.isNull())
                 {
-                    if (valueStr.isNull())
-                    {
-                        // Cache value string so it's not calculated for all filters.
-                        valueStr = GetValueFullString(idx, true);
-                    }
-                    columnStr = valueStr;
+                    // Cache value string so it's not calculated for all filters.
+                    valueStr = GetValueFullString(idx, true);
                 }
-                else
-                {
-                    columnStr = item->Data(key).toString();
-                }
+                columnStr = valueStr;
+            }
+            else
+            {
+                columnStr = item->Data(key).toString();
+            }
 
-                if (highlightOpt.HasMatch(columnStr))
-                {
-                    return highlightOpt.m_backgroundColor;
-                }
+            if (highlightOpt.HasMatch(columnStr))
+            {
+//                    m_highlightColorCache[static_cast<intptr_t>(item)] = highlightOpt.m_backgroundColor;
+                m_highlightColorCache.insert(item, highlightOpt.m_backgroundColor);
+                return highlightOpt.m_backgroundColor;
             }
         }
     }
+
+    m_highlightColorCache.insert(item, QColor(Qt::white));
     return Qt::white;
 }
 
@@ -597,7 +611,24 @@ void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector
     }
 }
 
-bool TreeModel::HasFilters()
+HighlightOptions TreeModel::GetHighlightFilters() const
+{
+    return m_highlightOpts;
+}
+
+void TreeModel::SetHighlightFilters(const HighlightOptions& highlightOpts)
+{
+    m_highlightOpts = highlightOpts;
+    m_highlightColorCache.clear();
+}
+
+void TreeModel::AddHighlightFilter(const SearchOpt& filter)
+{
+    m_highlightOpts.append(filter);
+    m_highlightColorCache.clear();
+}
+
+bool TreeModel::HasHighlightFilters() const
 {
     return m_highlightOpts.count() > 0;
 }
@@ -610,6 +641,7 @@ bool TreeModel::ValidFindOpts()
 void TreeModel::ClearAllEvents()
 {
     m_allEvents->clear();
+    m_highlightColorCache.clear();
 }
 
 void TreeModel::ShowDeltas(qint64 delta)
