@@ -588,10 +588,22 @@ void LogTab::ChangePrevIndex()
 void LogTab::CopyItemDetails(const QModelIndexList& idxList)
 {
     QString copyText;
+    int columnCount = m_treeModel->columnCount();
+
+    // Header row
+    for (int i = 0; i < columnCount; i++)
+    {
+        if (!(ui->treeView->isColumnHidden(i)))
+        {
+            QString info = m_treeModel->headerData(i, Qt::Horizontal).toString();
+            copyText += info + "\t";
+        }
+    }
+    copyText += "\n";
+
     for (const auto& idx : idxList)
     {
         auto item_model = idx.model();
-        int columnCount = m_treeModel->columnCount();
 
         for (int i = 0; i < columnCount; i++)
         {
@@ -599,7 +611,7 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
                 QString info = (i == COL::Value) ?
-                    m_treeModel->GetValueFullString(idx) :
+                    m_treeModel->GetValueFullString(idx, true).replace("\t", " ") :
                     idx_info.data().toString();
 
                 if (info.length() > 0)
@@ -608,7 +620,7 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
                 }
                 else
                 {
-                    copyText += "N/A\t";
+                    copyText += "-\t";
                 }
             }
         }
@@ -905,6 +917,11 @@ void LogTab::UpdateStatusBar()
                 status += ", ";
             }
             status += highlightOpt.m_value;
+            if (status.size() > 100)
+            {
+                status += "...";
+                break;
+            }
         }
         status += "}";
     }

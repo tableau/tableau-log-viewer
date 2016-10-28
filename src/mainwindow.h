@@ -109,8 +109,6 @@ private:
 
     Options& m_options = Options::GetInstance();
     StatusBar * m_statusBar;
-    QLabel * m_statusBarLabel;
-    QProgressBar * m_statusBarProgressBar;
     QStringList m_recentFiles;
 
     // m_logTabs is used to store all the log tabs that MainWindow has open, by their TreeModels.

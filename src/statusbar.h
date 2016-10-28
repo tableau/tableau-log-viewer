@@ -6,7 +6,7 @@
 class StatusBar
 {
 public:
-    StatusBar(QStatusBar *qbar, QLabel *statusLabel);
+    StatusBar(QMainWindow* parent);
     void ShowMessage(const QString& message, int timeout);
     void SetRightLabelText(const QString& text);
 

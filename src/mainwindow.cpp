@@ -39,9 +39,7 @@ MainWindow::MainWindow()
 {
     setupUi(this);
 
-    m_statusBarLabel = new QLabel("", this);
-    statusBar()->addPermanentWidget(m_statusBarLabel);
-    m_statusBar = new StatusBar(statusBar(), m_statusBarLabel);
+    m_statusBar = new StatusBar(this);
 
     ReadSettings();
     UpdateMenuAndStatusBar();
@@ -134,7 +132,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     // Status bar
     if (model == nullptr)
     {
-        m_statusBarLabel->setText("¯\\_(ツ)_/¯  ");
+        m_statusBar->SetRightLabelText("¯\\_(ツ)_/¯");
         return;
     }
 
@@ -430,6 +428,7 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
         actionTail_current_tab->setChecked(true);
         on_actionTail_current_tab_triggered();
     }
+    UpdateMenuAndStatusBar();
     return logTab;
 }
 
