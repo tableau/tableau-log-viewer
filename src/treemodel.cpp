@@ -512,7 +512,6 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
     auto cachedColor = m_highlightColorCache.find(item);
     if (cachedColor != m_highlightColorCache.end())
         return cachedColor.value();
-        //return cacheColor->second;
 
     QString valueStr;
 
@@ -539,7 +538,6 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
 
             if (highlightOpt.HasMatch(columnStr))
             {
-//                    m_highlightColorCache[static_cast<intptr_t>(item)] = highlightOpt.m_backgroundColor;
                 m_highlightColorCache.insert(item, highlightOpt.m_backgroundColor);
                 return highlightOpt.m_backgroundColor;
             }
