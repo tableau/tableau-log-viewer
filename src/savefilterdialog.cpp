@@ -49,13 +49,13 @@ bool SaveFilterDialog::SaveFilter(const QString& filename)
     qDebug() << "attempting to save...";
 
     // Validate filename
-    QRegularExpression regex("^[a-z0-9_]+$", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression regex("^[a-z0-9.\\-_ ]+$", QRegularExpression::CaseInsensitiveOption);
     if (!regex.match(filename).hasMatch())
     {
         QMessageBox validationWarning(
             QMessageBox::Icon::Warning,
             QStringLiteral("Invalid name"),
-            QStringLiteral("Only alphanumeric characters and underscores are allowed."));
+            QStringLiteral("Only alphanumeric characters, underscores, dashes, periods, and spaces are allowed."));
         validationWarning.exec();
         return false;
     }

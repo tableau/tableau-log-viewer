@@ -252,9 +252,18 @@ void ValueDlg::VisualizeQuery()
     m_view->setAttribute(Qt::WA_DeleteOnClose);
 
     // Set Qt::Dialog rather than Qt::Window to disable zoom and avoid a Qt bug with unresponsive zoomed views on OSX
-    m_view->setWindowFlags(Qt::Dialog);
-    m_view->resize(1000, 1000);
+    m_view->setWindowFlags(Qt::Dialog | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     m_view->setWindowTitle(QString("Query Visualization - ID: %1 - Key: %2").arg(m_id, m_key));
+
+    QDesktopWidget widget;
+    int screenId = widget.screenNumber(this);
+    QRect screenRect = widget.availableGeometry(screenId);
+    int width = screenRect.width() - 400;
+    int height = screenRect.height() - 200;
+    int x = screenRect.left() + 200;
+    int y = screenRect.top() + 80;
+    m_view->resize(width, height);
+    m_view->move(x, y);
 
     // Add keyboard shortcut for reloading the view
     QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+r"), m_view);

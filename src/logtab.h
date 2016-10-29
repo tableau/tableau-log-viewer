@@ -26,6 +26,7 @@ public:
     void EndLiveCapture();
     QString GetTabPath() const;
     void SetTabPath(const QString& path);
+    void UpdateStatusBar();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;
@@ -42,7 +43,6 @@ private:
     void RowFindPrev();
     void RowFindNext();
     void RowFindImpl(int offset);
-    void UpdateStatusBar();
     void ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg);
     void ReadFile();
     void ReadDirectoryFiles();
@@ -52,6 +52,7 @@ private:
     void TrimEventCount();
     bool StartFileLiveCapture();
     void StartDirectoryLiveCapture();
+    QString GetDebugInfo() const;
 
     Ui::LogTab *ui;
     StatusBar *m_bar;
@@ -70,7 +71,6 @@ private:
     std::unique_ptr<QDir> m_liveDirectory;
     QHash<QString, std::shared_ptr<QFile>> m_directoryFiles;
     QList<QString> m_excludedFileNames;
-    bool m_firstLiveRead;
     QString m_tabPath;
 
 private slots:

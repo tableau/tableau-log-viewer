@@ -319,6 +319,9 @@ QTabWidget::tab-bar {
    <property name="shortcut">
     <string>Ctrl+T</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionClear_Recent_Files">
    <property name="text">

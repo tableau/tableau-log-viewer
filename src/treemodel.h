@@ -52,23 +52,26 @@ public:
     bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-    TreeItem* GetFirstChildWithKey(const QModelIndex &index, QString key) const;
+    QString GetChildValueString(const QModelIndex &index, QString key) const;
     int MergeIntoModelData(const EventList& events);
     void AddToModelData(const EventList& events);
-    bool HasFilters();
     bool ValidFindOpts();
     void ClearAllEvents();
     void ShowDeltas(qint64 delta);
     bool IsHighlightedRow(int row) const;
     QJsonObject GetEvent(QModelIndex idx) const;
+    QString GetValueFullString(const QModelIndex& idx, bool singleLineFormat = false) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);
+    HighlightOptions GetHighlightFilters() const;
+    void SetHighlightFilters(const HighlightOptions& highlightOpts);
+    void AddHighlightFilter(const SearchOpt& filter);
+    bool HasHighlightFilters() const;
 
     bool m_highlightOnlyMode;
     bool m_liveMode;
-    HighlightOptions m_highlightOpts;
+    ColorLibrary m_colorLibrary;
     SearchOpt m_findOpts;
-    ColorLibrary * m_colorLibrary;
     QList<QString> m_paths;
 
 private:
@@ -77,21 +80,20 @@ private:
     void AddChildren(QJsonObject &obj, TreeItem *parent);
     void AddChild(const QString& key, const QJsonValue& value, TreeItem* parent);
     void InsertChild(int position, const QJsonObject & event);
-    const QString KeyValueString(const QString& key, const QString& value);
-    const QString JsonToString(const QJsonObject& json);
-    void GetFlatJson(const QJsonObject& json, QVector<QString>& stringList);
-    void GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList);
-    QColor ItemHighlightColor(TreeItem * item) const;
-    bool EventHighlightMatch(const QJsonObject & event, const ColumnKeys & map);
+    const QString KeyValueString(const QString& key, const QString& value) const;
+    QString JsonToString(const QJsonObject& json, const QString& lineBreak = "; ") const;
+    void GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const;
+    void GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const;
+    QColor ItemHighlightColor(const QModelIndex& idx) const;
     QString GetDeltaMSecs(QDateTime dateTime) const;
     TreeItem *GetItem(const QModelIndex &index) const;
 
     TreeItem * m_rootItem;
     qint64 m_deltaBase = 0;
-
-    // Used by ToggleHighlightOnly, as not all events might be shown.
     EventListPtr m_allEvents;
     TABTYPE m_fileType;
+    HighlightOptions m_highlightOpts;
+    mutable QHash<TreeItem*, QColor> m_highlightColorCache;
 };
 
 #endif // TREEMODEL_H

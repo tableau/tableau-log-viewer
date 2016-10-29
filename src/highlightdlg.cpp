@@ -12,8 +12,9 @@
 #include <QLineEdit>
 #include <QMap>
 
-HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, ColorLibrary * colorLibrary) :
+HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, const ColorLibrary& colorLibrary) :
     QDialog(parent),
+    m_colorLibrary(colorLibrary),
     ui(new Ui::HighlightDlg)
 {
     ui->setupUi(this);
@@ -22,7 +23,6 @@ HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, Colo
     // Remove close button of the Help tab.
     ui->tabWidget->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
 
-    m_colors = colorLibrary;
     connect(this, &QDialog::accepted, this, &HighlightDlg::accepted);
     BuildTabs(highlightOpts);
 }
@@ -74,7 +74,7 @@ void HighlightDlg::AddNewTab()
     auto newFilter = new FilterTab(nullptr, m_filterTabValueLabel);
     ui->tabWidget->addTab(newFilter, "   ");
     ui->tabWidget->setCurrentIndex(ui->tabWidget->indexOf(newFilter));
-    newFilter->SetBackgroundColor(m_colors->GetNextColor());
+    newFilter->SetBackgroundColor(m_colorLibrary.GetNextColor());
 
     connect(newFilter, &FilterTab::filterValueChanged, this, &HighlightDlg::TextChanged);
 }

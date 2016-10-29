@@ -8,7 +8,6 @@
 #include "pathhelper.h"
 #include "processevent.h"
 #include "savefilterdialog.h"
-#include "treeitem.h"
 #include "zoomabletreeview.h"
 
 #include <map>
@@ -40,9 +39,7 @@ MainWindow::MainWindow()
 {
     setupUi(this);
 
-    m_statusBarLabel = new QLabel("", this);
-    statusBar()->addPermanentWidget(m_statusBarLabel);
-    m_statusBar = new StatusBar(statusBar(), m_statusBarLabel);
+    m_statusBar = new StatusBar(this);
 
     ReadSettings();
     UpdateMenuAndStatusBar();
@@ -101,7 +98,7 @@ void MainWindow::ClearRecentFileMenu()
 void MainWindow::UpdateMenuAndStatusBar()
 {
     TreeModel * model = GetCurrentTreeModel();
-    bool hasFilters = model && model->HasFilters();
+    bool hasFilters = model && model->HasHighlightFilters();
     bool hasFindOpts = model && model->ValidFindOpts();
 
     // Menu items
@@ -135,26 +132,15 @@ void MainWindow::UpdateMenuAndStatusBar()
     // Status bar
     if (model == nullptr)
     {
-        m_statusBarLabel->setText("¯\\_(ツ)_/¯  ");
+        m_statusBar->SetRightLabelText("¯\\_(ツ)_/¯");
         return;
     }
 
-    QString status = "";
-    if (!model->m_highlightOpts.isEmpty())
+    LogTab* currentTab = m_logTabs[model];
+    if (currentTab)
     {
-        status += model->m_highlightOnlyMode ? "show only highlighted: {" : "highlighted: {";
-        for(int i=0; i<model->m_highlightOpts.count(); i++)
-        {
-            SearchOpt highlightOpt = model->m_highlightOpts[i];
-            if(i!=0)
-                status += ", ";
-            status += highlightOpt.m_value;
-        }
-        status += "}  |  ";
+        currentTab->UpdateStatusBar();
     }
-
-    status += QString("events: %1  ").arg(model->rowCount());
-    m_statusBarLabel->setText(status);
 }
 
 void MainWindow::WriteSettings()
@@ -237,6 +223,7 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
     int idx = tabWidget->addTab(logTab, "exported data");
     tabWidget->setCurrentIndex(idx);
+    logTab->setFocus();
 
     QTreeView * exportedView = GetCurrentTreeView();
     TreeModel * exportedModel = GetCurrentTreeModel();
@@ -386,11 +373,16 @@ bool MainWindow::LoadLogFile(QString path)
     return true;
 }
 
-void MainWindow::StartDirectoryLiveCapture(QString directoryPath, const QString& label)
+void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
 {
     directoryPath.replace("\\", "/");
     if(!m_allFiles.contains(directoryPath))
     {
+        if (label.isEmpty())
+        {
+            QFileInfo fi(directoryPath);
+            label = QString("%1 directory").arg(fi.fileName());
+        }
         EventListPtr events = std::make_shared<EventList>();
         SetUpTab(events, true, directoryPath, label);
     }
@@ -428,12 +420,15 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
 
     tabWidget->setTabToolTip(idx, path);
     tabWidget->setCurrentIndex(idx);
+    logTab->setFocus();
+
     bool futureTabsUnderLive = m_options.getFutureTabsUnderLive();
     if (isDirectory || futureTabsUnderLive)
     {
         actionTail_current_tab->setChecked(true);
         on_actionTail_current_tab_triggered();
     }
+    UpdateMenuAndStatusBar();
     return logTab;
 }
 
@@ -445,9 +440,10 @@ void MainWindow::CheckFileOpened(QString path)
         QTreeView * view = GetTreeView(i);
         TreeModel * model = GetTreeModel(view);
         LogTab * currentTab = m_logTabs[model];
-        if ((model->TabType() == TABTYPE::Directory || model->TabType() == TABTYPE::SingleFile) && currentTab->GetTabPath().compare(path) == 0)
+        if (currentTab && currentTab->GetTabPath().compare(path) == 0)
         {
             tabWidget->setCurrentIndex(i);
+            currentTab->setFocus();
         }
     }
 }
@@ -466,10 +462,20 @@ void MainWindow::on_actionBeta_log_directory_triggered()
 
 void MainWindow::on_actionChoose_directory_triggered()
 {
-    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor");
-    if (directoryPath.compare("") != 0)
+    // Use file path of the current tab as default directory.
+    // It works with both file and directory paths.
+    QString defaultDir;
+    TreeModel* model = GetCurrentTreeModel();
+    if (model)
     {
-        StartDirectoryLiveCapture(directoryPath, "Directory");
+        LogTab* currentTab = m_logTabs[model];
+        defaultDir = currentTab->GetTabPath();
+    }
+
+    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", defaultDir);
+    if (!directoryPath.isEmpty())
+    {
+        StartDirectoryLiveCapture(directoryPath, "");
     }
 }
 
@@ -481,7 +487,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
         {
             QFileInfo fi(QString(url.toLocalFile()));
             if (fi.suffix().compare("txt", Qt::CaseInsensitive) != 0 &&
-                fi.suffix().compare("log", Qt::CaseInsensitive) != 0)
+                fi.suffix().compare("log", Qt::CaseInsensitive) != 0 &&
+                !fi.isDir())
                 return;
         }
         e->acceptProposedAction();
@@ -494,7 +501,15 @@ void MainWindow::dropEvent(QDropEvent *e)
     foreach (const QUrl &url, e->mimeData()->urls())
     {
         const QString &fileName = url.toLocalFile();
-        LoadLogFile(fileName);
+        QFileInfo fi(fileName);
+        if (fi.isDir())
+        {
+            StartDirectoryLiveCapture(fileName, "");
+        }
+        else
+        {
+            LoadLogFile(fileName);
+        }
     }
 }
 
@@ -624,9 +639,9 @@ void MainWindow::on_actionRefresh_triggered()
 void MainWindow::on_actionSave_filters_triggered()
 {
     TreeModel * model = GetCurrentTreeModel();
-    if (model && !model->m_highlightOpts.isEmpty())
+    if (model && model->HasHighlightFilters())
     {
-        SaveFilterDialog saveFilterDialog(this, model->m_highlightOpts);
+        SaveFilterDialog saveFilterDialog(this, model->GetHighlightFilters());
         saveFilterDialog.exec();
     }
 }
@@ -672,7 +687,7 @@ void MainWindow::on_menuLoad_filters_triggered(QAction * action)
     }
     QByteArray filterData = loadFile.readAll();
     QJsonDocument filtersDoc(QJsonDocument::fromJson(filterData));
-    model->m_highlightOpts.FromJson(filtersDoc.array());
+    model->SetHighlightFilters(HighlightOptions(filtersDoc.array()));
 
     RefilterTreeView();
     UpdateMenuAndStatusBar();
@@ -693,6 +708,8 @@ void MainWindow::on_actionClose_all_tabs_triggered()
         currentTab->EndLiveCapture();
     }
     tabWidget->clear();
+    m_logTabs.clear();
+    m_allFiles.clear();
     UpdateMenuAndStatusBar();
 }
 
@@ -718,16 +735,19 @@ void MainWindow::on_actionHighlight_triggered()
         return;
 
     // Construct a highlight dialog with our model's current _HighlightOpts.
-    HighlightDlg highlightDlg(this, model->m_highlightOpts, model->m_colorLibrary);
+    HighlightDlg highlightDlg(this, model->GetHighlightFilters(), model->m_colorLibrary);
 
     // Open the dialog and see if ok was pressed. If so we want to update our model's _HighlightOpts member.
     if (highlightDlg.exec() == QDialog::Accepted)
     {
-        model->m_highlightOpts = highlightDlg.m_highlightOpts;
-        if (!model->HasFilters())
+        model->SetHighlightFilters(highlightDlg.m_highlightOpts);
+        model->m_colorLibrary = highlightDlg.m_colorLibrary;
+
+        if (!model->HasHighlightFilters())
         {
             model->m_highlightOnlyMode = false;
         }
+
         RefilterTreeView();
         UpdateMenuAndStatusBar();
     }
@@ -749,7 +769,7 @@ void MainWindow::on_actionHighlight_only_mode_triggered()
         return;
 
     //Don't turn highlight only mode on if there are no filters. But DO turn highlight only mode off if there are no filters
-    if (!model->m_highlightOnlyMode && !model->HasFilters())
+    if (!model->m_highlightOnlyMode && !model->HasHighlightFilters())
         return;
     model->m_highlightOnlyMode = !model->m_highlightOnlyMode;
 
@@ -792,6 +812,20 @@ void MainWindow::on_actionOptions_triggered()
     optionsDlg.exec();
 }
 
+QString msecsToString(qint64 mseconds)
+{
+    const qint64 msPerDay = 24 * 60 * 60 * 1000;
+    qint64 days = mseconds / msPerDay;
+    QTime t = QTime(0, 0).addMSecs(mseconds % msPerDay);
+    QString str = (days > 0) ? QString("%1 day(s), ").arg(days) : "";
+    str += QString("%1:%2:%3.%4 h:m:s")
+            .arg(t.hour(), 2, 10, QChar('0'))
+            .arg(t.minute(), 2, 10, QChar('0'))
+            .arg(t.second(), 2, 10, QChar('0'))
+            .arg(t.msec(), 2, 10, QChar('0'));
+    return str;
+}
+
 void ShowSummary(TreeModel* model, QWidget* parent)
 {
     typedef std::map<QString, int> CounterMap;
@@ -816,7 +850,7 @@ void ShowSummary(TreeModel* model, QWidget* parent)
     for (int i = 0; i < rowCount; i++)
     {
         QModelIndex valIndex = model->index(i, COL::Value);
-        QString valString = model->data(valIndex, Qt::DisplayRole).toString();
+        QString valString = model->GetValueFullString(valIndex);
         QJsonObject event = model->GetEvent(valIndex);
         QString keyString = event["k"].toString();
         auto valObj = event["v"];
@@ -848,7 +882,21 @@ void ShowSummary(TreeModel* model, QWidget* parent)
         }
     }
 
-    QString summaryText = "Number of";
+    QString summaryText;
+    if (rowCount > 0)
+    {
+        auto firstIdx = model->index(0, COL::Time);
+        auto lastIdx = model->index(model->rowCount() - 1, COL::Time);
+        QString firstTimestamp = model->data(firstIdx, Qt::DisplayRole).toString();
+        QString lastTimestamp = model->data(lastIdx, Qt::DisplayRole).toString();
+        auto firstDT = model->data(firstIdx, Qt::UserRole).toLongLong();
+        auto lastDT = model->data(lastIdx, Qt::UserRole).toLongLong();
+        auto diff = (lastDT - firstDT);
+        summaryText += QString("Begin: %1\nEnd: %2\nSpan: %3\n\n")
+                .arg(firstTimestamp).arg(lastTimestamp).arg(msecsToString(diff));
+    }
+
+    summaryText += "Number of";
     summaryText += QString("\n    Event: %L1").arg(rowCount);
     for (const SummaryCounter& counter : counters)
     {
@@ -857,7 +905,9 @@ void ShowSummary(TreeModel* model, QWidget* parent)
         {
             for (const auto& sc : *counter.SubCounters)
             {
-                summaryText += QString("\n    - %1: %L2").arg(sc.first).arg(sc.second);
+                int subCount = sc.second;
+                float subCountPercent = subCount * 100.0 / counter.Count;
+                summaryText += QString("\n    - %1: %L2 (%3%)").arg(sc.first).arg(subCount, 3).arg(subCountPercent, 0, 'f', 1);
             }
         }
     }
@@ -875,26 +925,41 @@ void MainWindow::on_actionShow_summary_triggered()
 
 void MainWindow::on_actionOpen_timeline_triggered()
 {
-    QMessageBox timelineMsg;
+    QMessageBox timelineMsg(this);
     timelineMsg.setText("Timeline is currently not implemented for the TLV QT Port.");
     timelineMsg.exec();
 }
 
 void MainWindow::FindPrev()
 {
-    FindImpl(-1);
+    FindImpl(-1, false);
 }
 void MainWindow::FindNext()
 {
-    FindImpl(1);
+    FindImpl(1, false);
 }
-void MainWindow::FindImpl(int offset)
+
+void MainWindow::FindPrevH()
+{
+    FindImpl(-1, true);
+}
+
+void MainWindow::FindNextH()
+{
+    FindImpl(1, true);
+}
+
+void MainWindow::FindImpl(int offset, bool findHighlight)
 {
     QTreeView * tree = GetCurrentTreeView();;
     TreeModel * model = GetTreeModel(tree);
-    QList<int> lstColumns;
-    for(COL col : model->m_findOpts.m_keys)
-        lstColumns << col;
+
+    if (model->rowCount() == 0)
+        return;
+
+    const QVector<SearchOpt>& filters = (findHighlight) ?
+        model->GetHighlightFilters() :
+        QVector<SearchOpt> {model->m_findOpts};
 
     int start = tree->currentIndex().row();
     // If nothing is selected, the current index is -1. Force to start at 0 to avoid an infinite loop.
@@ -912,72 +977,33 @@ void MainWindow::FindImpl(int offset)
         else if (i < 0)
             i = model->rowCount() - 1;
 
-        if (i == start)
+        for (SearchOpt searchOpt : filters)
         {
-            statusBar()->showMessage(QString("Not found: '%1'").arg(model->m_findOpts.m_value), 3000);
-            return;
-        }
-
-        foreach (int col, lstColumns)
-        {
-            QModelIndex idx = model->index(i, col);
-            auto data = model->data(idx, Qt::DisplayRole).toString();
-            if (model->m_findOpts.HasMatch(data))
-            {
-                tree->setCurrentIndex(idx);
-                statusBar()->showMessage(QString("Found '%1' on line %2").arg(model->m_findOpts.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()), 3000);
-                return;
-            }
-        }
-    }
-}
-
-void MainWindow::FindPrevH()
-{
-    FindImplH(-1);
-}
-
-void MainWindow::FindNextH()
-{
-    FindImplH(1);
-}
-
-
-void MainWindow::FindImplH(int offset)
-{
-    QTreeView * tree = GetCurrentTreeView();;
-    TreeModel * model = GetTreeModel(tree);
-
-    int start = tree->currentIndex().row();
-    int i = start;
-    while (true)
-    {
-        i += offset;
-
-        if (i >= model->rowCount())
-            i = 0;
-        else if (i < 0)
-            i = model->rowCount() - 1;
-
-        if (i == start)
-        {
-            statusBar()->showMessage(QString("Can't find highlighted item"), 3000);
-            return;
-        }
-
-        for(SearchOpt searchOpt : model->m_highlightOpts)
-        {
-            for(COL col : searchOpt.m_keys)
+            for (COL col : searchOpt.m_keys)
             {
                 QModelIndex idx = model->index(i, col);
-                auto data = model->data(idx, Qt::DisplayRole).toString();
+                QString data = (col == COL::Value) ?
+                    model->GetValueFullString(idx, true) :
+                    model->data(idx, Qt::DisplayRole).toString();
                 if (searchOpt.HasMatch(data))
                 {
                     tree->setCurrentIndex(idx);
-                    statusBar()->showMessage(QString("Found highlighted item on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString()), 3000);
+                    QString msg = (filters.size() == 1) ?
+                        QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
+                        QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
+                    statusBar()->showMessage(msg, 3000);
                     return;
                 }
             }
+        }
+
+        if (i == start)
+        {
+            QString msg = (filters.size() == 1) ?
+                QString("Not found: '%1'").arg(filters[0].m_value) :
+                QString("No matching item.");
+            statusBar()->showMessage(msg, 3000);
+            return;
         }
     }
 }

@@ -19,9 +19,11 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
 
     HighlightOptions defaultHighlightOpts = Options::GetInstance().getDefaultHighlightOpts();
     if (!defaultHighlightOpts.isEmpty())
+    {
         m_highlightOpts = defaultHighlightOpts;
+        m_colorLibrary.Exclude(m_highlightOpts.GetColors());
+    }
 
-    m_colorLibrary = new ColorLibrary();
     m_highlightOnlyMode = false;
     m_liveMode = false;
 }
@@ -29,7 +31,6 @@ TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObj
 TreeModel::~TreeModel()
 {
     delete m_rootItem;
-    delete m_colorLibrary;
 }
 
 int TreeModel::columnCount(const QModelIndex & /* parent */) const
@@ -40,7 +41,6 @@ int TreeModel::columnCount(const QModelIndex & /* parent */) const
 QVariant TreeModel::data(const QModelIndex &index, int role) const
 {
     int col = index.column();
-    TreeItem *item = GetItem(index);
 
     switch (role)
     {
@@ -52,7 +52,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::BackgroundRole:
         {
-            QColor highlightColor(ItemHighlightColor(item));
+            QColor highlightColor(ItemHighlightColor(index));
             if (highlightColor != Qt::white)
             {
                 return QBrush(highlightColor);
@@ -61,6 +61,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::UserRole:
         {
+            TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
                 QDateTime dateTime = item->Data(col).toDateTime();
@@ -71,6 +72,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         }
         case Qt::DisplayRole:
         {
+            TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
                 QDateTime dateTime = item->Data(col).toDateTime();
@@ -112,18 +114,22 @@ TreeItem *TreeModel::GetItem(const QModelIndex &index) const
     return m_rootItem;
 }
 
-TreeItem* TreeModel::GetFirstChildWithKey(const QModelIndex &index, QString key) const
+QString TreeModel::GetChildValueString(const QModelIndex &index, QString key) const
 {
-    TreeItem *parent = GetItem(index);
-    for (int i = 0; i < parent->ChildCount(); i++)
-    {
-        auto child = parent->Child(i);
-        if (child->Data(COL::Key) == key)
-        {
-            return child;
-        }
-    }
-    return nullptr;
+    QJsonObject eventObj = GetEvent(index);
+    QJsonValueRef value = eventObj["v"];
+    if (value.isNull() || !value.isObject())
+        return QString();
+
+    QJsonObject valueObj = value.toObject();
+    if (!valueObj.contains(key))
+        return QString();
+
+    QJsonValueRef child = valueObj[key];
+    if (child.isObject())
+        return JsonToString(child.toObject());
+    else
+        return child.toString();
 }
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
@@ -207,6 +213,11 @@ bool TreeModel::removeRows(int position, int count, const QModelIndex &parent)
     int originalCount = rowCount(parent);
     int endPosition = position + count - 1;
 
+    for (int i = position; i <= endPosition; i++)
+    {
+        m_highlightColorCache.remove(parentItem->Child(i));
+    }
+
     beginRemoveRows(parent, position, endPosition);
     success = parentItem->RemoveChildren(position, count);
     endRemoveRows();
@@ -215,7 +226,7 @@ bool TreeModel::removeRows(int position, int count, const QModelIndex &parent)
     {
         if (count == originalCount)
         {
-            m_allEvents->clear();
+            ClearAllEvents();
         }
         else
         {
@@ -266,13 +277,37 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 
 QJsonObject TreeModel::GetEvent(QModelIndex idx) const
 {
-    if (idx.parent().row() == -1)
+    while (idx.parent().isValid())
     {
-        return m_allEvents->at(idx.row());
+        idx = idx.parent();
+    }
+
+    int row = idx.row();
+    if (row < 0)
+    {
+        return QJsonObject();
     }
     else
     {
-        return m_allEvents->at(idx.parent().row());
+        return m_allEvents->at(idx.row());
+    }
+}
+
+QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFormat) const
+{
+    QJsonObject eventObj = GetEvent(idx);
+    QJsonValueRef valueObj = eventObj["v"];
+    if (valueObj.isObject())
+    {
+        return (singleLineFormat) ?
+            JsonToString(valueObj.toObject(), "; ").replace("\n", " ") :
+            JsonToString(valueObj.toObject(), "\n");
+    }
+    else
+    {
+        return (singleLineFormat) ?
+            valueObj.toString().replace("\n", " ") :
+            valueObj.toString();
     }
 }
 
@@ -295,6 +330,12 @@ void TreeModel::SetTabType(TABTYPE type)
 int TreeModel::MergeIntoModelData(const EventList& events)
 {
     int origIter = m_rootItem->ChildCount() - 1;
+    if (events[0]["ts"].toString().isEmpty())
+    {
+        AddToModelData(events);
+        return origIter;
+    }
+
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
         QDateTime mergeTime = QDateTime::fromString(events[mergeIter]["ts"].toString(), "yyyy-MM-ddTHH:mm:ss.zzz");
@@ -325,11 +366,11 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
 void TreeModel::AddToModelData(const EventList& events)
 {
-    foreach(auto event, events)
+    for (const auto& event : events)
     {
         InsertChild(m_rootItem->ChildCount(), event);
-        layoutChanged();
     }
+    layoutChanged();
 }
 
 void TreeModel::InsertChild(int position, const QJsonObject & event)
@@ -346,12 +387,22 @@ void TreeModel::InsertChild(int position, const QJsonObject & event)
     SetupChild(child, event);
 }
 
+void SetValueDisplayString(TreeItem* child, QString str)
+{
+    // Limit string size in the tree view to prevent UI stutters.
+    const int MaxDisplayStringSize = 300;
+
+    str.truncate(MaxDisplayStringSize);
+    str.replace("\n", " ");
+    child->SetData(COL::Value, str);
+}
+
 void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
 {
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
     child->SetData(COL::Time, QDateTime::fromString(QString(event["ts"].toString()), "yyyy-MM-ddTHH:mm:ss.zzz"));
-    child->SetData(COL::PID, event["pid"].toString());
+    child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
     child->SetData(COL::Request, event["req"].toString());
@@ -363,12 +414,12 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     auto v = event["v"];
     if (!v.isObject())
     {
-        child->SetData(COL::Value, v.toString().replace("\n", "\\n"));
+        SetValueDisplayString(child, v.toString());
     }
     else
     {
         QJsonObject obj = v.toObject();
-        child->SetData(COL::Value, JsonToString(obj));
+        SetValueDisplayString(child, JsonToString(obj));
         AddChildren(obj, child);
     }
 
@@ -432,7 +483,7 @@ void TreeModel::AddChild(const QString& key, const QJsonValue& value, TreeItem* 
     else if (value.isObject())
     {
         QJsonObject childObj = value.toObject();
-        child->SetData(COL::Value, JsonToString(childObj));
+        SetValueDisplayString(child, JsonToString(childObj));
         AddChildren(childObj, child);
     }
     else if (value.isArray())
@@ -448,71 +499,61 @@ void TreeModel::AddChild(const QString& key, const QJsonValue& value, TreeItem* 
     }
     else
     {
-        auto val = value.toVariant().toString().replace("\n", "\\n");
-        child->SetData(COL::Value, val);
+        SetValueDisplayString(child, value.toVariant().toString());
     }
 }
 
-QColor TreeModel::ItemHighlightColor(TreeItem * item) const
+QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
 {
-    if (item != nullptr)
-    {
-        // iterate in reverse so the rightmost tab that matches gets applied only
-        for(int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
-        {
-            auto highlightOpt = m_highlightOpts[revItr];
-            for(auto key : highlightOpt.m_keys)
-            {
-                if(highlightOpt.HasMatch(item->Data(key).toString()))
-                {
-                    return highlightOpt.m_backgroundColor;
-                }
-            }
-        }
-    }
-    return Qt::white;
-}
+    TreeItem* item = GetItem(idx);
+    if (item == nullptr || item->Parent() != m_rootItem)
+        return Qt::white;
 
-bool TreeModel::EventHighlightMatch(const QJsonObject & event, const ColumnKeys & map)
-{
+    auto cachedColor = m_highlightColorCache.find(item);
+    if (cachedColor != m_highlightColorCache.end())
+        return cachedColor.value();
+
+    QString valueStr;
+
+    // iterate in reverse so the rightmost tab that matches gets applied only
     for (int revItr=m_highlightOpts.count()-1; revItr>=0; revItr--)
     {
         auto highlightOpt = m_highlightOpts[revItr];
-        for(auto key : highlightOpt.m_keys)
+        for (auto key : highlightOpt.m_keys)
         {
-            QString search;
-            if(key == COL::Value)
+            QString columnStr;
+            if (key == COL::Value)
             {
-                auto v = event["v"];
-                if (!v.isObject())
+                if (valueStr.isNull())
                 {
-                    search = v.toString();
+                    // Cache value string so it's not calculated for all filters.
+                    valueStr = GetValueFullString(idx, true);
                 }
-                else
-                {
-                    QJsonObject obj = v.toObject();
-                    search = JsonToString(obj);
-                }
+                columnStr = valueStr;
             }
             else
             {
-                search = event[map[key]].toString();
+                columnStr = item->Data(key).toString();
             }
-            if(highlightOpt.HasMatch(search))
+
+            if (highlightOpt.HasMatch(columnStr))
             {
-                return true;
+                m_highlightColorCache.insert(item, highlightOpt.m_backgroundColor);
+                return highlightOpt.m_backgroundColor;
             }
         }
     }
-    return false;
+
+    m_highlightColorCache.insert(item, QColor(Qt::white));
+    return Qt::white;
 }
 
-const QString TreeModel::KeyValueString(const QString& key, const QString& value)
+const QString TreeModel::KeyValueString(const QString& key, const QString& value) const
 {
     return key % ": " % value;
 }
 
-const QString TreeModel::JsonToString(const QJsonObject& json)
+QString TreeModel::JsonToString(const QJsonObject& json, const QString& lineBreak) const
 {
     QVector<QString> stringList;
     GetFlatJson(json, stringList);
@@ -523,13 +564,12 @@ const QString TreeModel::JsonToString(const QJsonObject& json)
     QString result;
     for (const QString& str : stringList)
     {
-        result = result % "; " % str;
+        result = result % lineBreak % str;
     }
-    result.replace("\n", "\\n");
-    return result.remove(0, 2);
+    return result.remove(0, lineBreak.size());
 }
 
-void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringList)
+void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const
 {
     for (QJsonObject::ConstIterator iter = json.constBegin(); iter != json.constEnd(); ++iter)
     {
@@ -537,7 +577,7 @@ void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringLis
     }
 }
 
-void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList)
+void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const
 {
     if (value.isDouble())
     {
@@ -569,7 +609,24 @@ void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector
     }
 }
 
-bool TreeModel::HasFilters()
+HighlightOptions TreeModel::GetHighlightFilters() const
+{
+    return m_highlightOpts;
+}
+
+void TreeModel::SetHighlightFilters(const HighlightOptions& highlightOpts)
+{
+    m_highlightOpts = highlightOpts;
+    m_highlightColorCache.clear();
+}
+
+void TreeModel::AddHighlightFilter(const SearchOpt& filter)
+{
+    m_highlightOpts.append(filter);
+    m_highlightColorCache.clear();
+}
+
+bool TreeModel::HasHighlightFilters() const
 {
     return m_highlightOpts.count() > 0;
 }
@@ -582,6 +639,7 @@ bool TreeModel::ValidFindOpts()
 void TreeModel::ClearAllEvents()
 {
     m_allEvents->clear();
+    m_highlightColorCache.clear();
 }
 
 void TreeModel::ShowDeltas(qint64 delta)
@@ -612,7 +670,6 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
 bool TreeModel::IsHighlightedRow(int row) const
 {
     QModelIndex idx = index(row, 0);
-    TreeItem* item = GetItem(idx);
-    bool highlighted = (ItemHighlightColor(item) != Qt::white);
+    bool highlighted = (ItemHighlightColor(idx) != Qt::white);
     return highlighted;
 }

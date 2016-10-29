@@ -9,6 +9,7 @@
 
 #include <QFontDatabase>
 #include <QMenu>
+#include <QJsonDocument>
 
 LogTab::LogTab(QWidget *parent, StatusBar *bar, const EventListPtr events) :
     QWidget(parent),
@@ -16,6 +17,7 @@ LogTab::LogTab(QWidget *parent, StatusBar *bar, const EventListPtr events) :
     m_bar(bar)
 {
     ui->setupUi(this);
+    setFocusProxy(ui->treeView);
     InitTreeView(events);
     InitMenus();
 }
@@ -39,10 +41,13 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     m_bar->ShowMessage(QString("%1 events loaded").arg(QString::number(m_treeModel->rowCount())), 3000);
 
+    bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
+
+    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
-    SetColumn(COL::Time, 190, false);
-    SetColumn(COL::Elapsed, 50, false);
+    SetColumn(COL::Time, 190, hasNoKey);
+    SetColumn(COL::Elapsed, 50, hasNoKey);
     SetColumn(COL::PID, 30, true);
     SetColumn(COL::TID, 50, true);
     SetColumn(COL::Severity, 50, true);
@@ -50,11 +55,10 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::Session, 30, true);
     SetColumn(COL::Site, 180, true);
     SetColumn(COL::User, 30, true);
-    SetColumn(COL::Key, 120, false);
+    SetColumn(COL::Key, 120, hasNoKey);
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
 
     // Connect slots
     connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)),
@@ -123,7 +127,7 @@ void LogTab::InitOneRowMenu()
     actionTimeDeltas->setChecked(false);
     connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
-    QAction *actionOpenFile = new QAction("Open this file", this);
+    QAction *actionOpenFile = new QAction(QIcon(":/ctx-open-file.png"), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);
@@ -167,24 +171,35 @@ void LogTab::keyPressEvent(QKeyEvent *event)
             auto idx = idxList.at(i-1);
             m_treeModel->removeRow(idx.row(), idx.parent());
         }
-        UpdateStatusBar();
         break;
-    case Qt::Key_C:
-        if ((QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+    default:
+        // Check keys with modifiers together and ensure regular key events get propagated.
+        if ((event->key() == Qt::Key_C) &&
+            (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
             (rowCount > 0))
         {
             CopyItemDetails(idxList);
         }
-        break;
-    case Qt::Key_D:
-        if ((QApplication::keyboardModifiers() & Qt::ControlModifier) &&
-            (rowCount == 2))
+        else if ((event->key() == Qt::Key_D) &&
+                 (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+                 (rowCount == 2))
         {
             RowDiffEvents();
         }
-        break;
-    default:
-        QWidget::keyPressEvent(event);
+        else if ((event->key() == Qt::Key_I) &&
+                 (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
+                 (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+        {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Debug Info");
+            msgBox.setText(GetDebugInfo());
+            msgBox.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+            msgBox.exec();
+        }
+        else
+        {
+            QWidget::keyPressEvent(event);
+        }
     }
 }
 
@@ -194,6 +209,7 @@ void LogTab::SetTabPath(const QString& path)
     if (m_treeModel->TabType() == TABTYPE::Directory)
     {
         m_liveDirectory = std::make_unique<QDir>(path);
+        m_liveDirectory->setNameFilters(QStringList({"*.txt", "*.log"}));
     }
     else if (m_treeModel->TabType() == TABTYPE::SingleFile)
     {
@@ -246,18 +262,17 @@ void LogTab::SetUpFile(std::shared_ptr<QFile> file)
         }
         break;
     }
-    if (line.startsWith("{"))
+
+    bool includeAllTextFiles = Options::GetInstance().getCaptureAllTextFiles();
+    if (includeAllTextFiles || line.startsWith("{"))
     {
         int offset = file->size();
         file->seek(offset);
-        qDebug() << "SetUpFile Add:" << file->fileName();
         m_directoryFiles[file->fileName()] = file;
     }
     else
     {
         file->close();
-        qDebug() << "SetUpFile Exclude:" << file->fileName();
-        qDebug() << "  line:" << line;
         m_excludedFileNames.append(file->fileName());
     }
 }
@@ -267,7 +282,6 @@ void LogTab::StartDirectoryLiveCapture()
     SetColumn(COL::File, 110, false);
     m_eventIndex = 1;
     m_treeModel->m_liveMode = true;
-    m_firstLiveRead = true;
     QStringList files = m_liveDirectory->entryList(QDir::Files);
     for (const QString& fileName : files)
     {
@@ -306,7 +320,7 @@ void LogTab::ReadDirectoryFiles()
         auto& fileName = filePathList.at(filePathList.length() - 1);
         while (!file->atEnd())
         {
-            auto line = file->readLine();
+            auto line = file->readLine().trimmed();
             if (line.isEmpty())
             {
                 continue;
@@ -347,19 +361,21 @@ void LogTab::UpdateModelView()
     {
         ui->treeView->scrollToBottom();
     }
-    if (m_firstLiveRead)
-    {
-        ui->treeView->resizeColumnToContents(COL::Time);
-        m_firstLiveRead = false;
-    }
 }
 
 bool LogTab::StartFileLiveCapture()
 {
     QModelIndex idx = m_treeModel->index(m_treeModel->rowCount() - 1, 0);
     auto item_model = idx.model();
-    auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
-    m_eventIndex = idx_info.data().toInt() + 1;
+    if (item_model)
+    {
+        auto idx_info = item_model->index(idx.row(), COL::ID, idx.parent());
+        m_eventIndex = idx_info.data().toInt() + 1;
+    }
+    else
+    {
+        m_eventIndex = 1;
+    }
 
     // Open file/check file exists and is readable
     if (!m_logFile.exists())
@@ -395,7 +411,7 @@ void LogTab::ReadFile()
     }
     while (!m_logFile.atEnd())
     {
-        auto line = m_logFile.readLine();
+        auto line = m_logFile.readLine().trimmed();
         if (line.isEmpty())
         {
             continue;
@@ -481,17 +497,14 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
 {
     auto item_model = idx.model();
     auto idx_key = item_model->index(idx.row(), COL::Key, idx.parent());
-    auto idx_val = item_model->index(idx.row(), COL::Value, idx.parent());
-
-    auto value = idx_val.data().toString();
-    value = value.replace("\\n", "\n");
+    QString value = m_treeModel->GetValueFullString(idx);
 
     auto idx_id = item_model->index(idx.row(), COL::ID, idx.parent());
     valueDlg.m_id = idx_id.data().toString();
     valueDlg.m_key = idx_key.data().toString();
 
     valueDlg.setWindowTitle(QString("ID: %1 - Key: %2").arg(valueDlg.m_id, valueDlg.m_key));
-    bool syntaxHighlight = (valueDlg.m_key != "msg");
+    bool syntaxHighlight = (!valueDlg.m_key.isEmpty() && valueDlg.m_key != "msg");
     valueDlg.SetText(value, syntaxHighlight);
     valueDlg.SetQuery(QString(""));
 
@@ -501,17 +514,21 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
         valueDlg.m_key == "begin-query" ||
         valueDlg.m_key == "end-query")
     {
-        auto childWithQuery = m_treeModel->GetFirstChildWithKey(idx, QString("query"));
-        if (childWithQuery)
+        // Assume that queries starting with < have query function trees or logical-query.
+        // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
+        auto queryText = m_treeModel->GetChildValueString(idx, QString("query"));
+        if (queryText.startsWith("<"))
         {
-            auto queryText = childWithQuery->Data(COL::Value).toString();
-            // Assume that queries starting with < have query function trees or logical-query.
-            // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
-            if (queryText.startsWith("<"))
-            {
-                valueDlg.SetQuery(queryText);
-            }
+            valueDlg.SetQuery(queryText);
         }
+    }
+    else if (valueDlg.m_key == "query-plan")
+    {
+        auto event = m_treeModel->GetEvent(idx);
+        auto valObject = event["v"].toObject();
+        QJsonDocument doc(valObject);
+        QString jsonString(doc.toJson(QJsonDocument::Compact));
+        valueDlg.SetQuery(jsonString);
     }
 }
 
@@ -571,28 +588,39 @@ void LogTab::ChangePrevIndex()
 void LogTab::CopyItemDetails(const QModelIndexList& idxList)
 {
     QString copyText;
+    int columnCount = m_treeModel->columnCount();
+
+    // Header row
+    for (int i = 0; i < columnCount; i++)
+    {
+        if (!(ui->treeView->isColumnHidden(i)))
+        {
+            QString info = m_treeModel->headerData(i, Qt::Horizontal).toString();
+            copyText += info + "\t";
+        }
+    }
+    copyText += "\n";
+
     for (const auto& idx : idxList)
     {
         auto item_model = idx.model();
-        int columnCount = m_treeModel->columnCount();
 
         for (int i = 0; i < columnCount; i++)
         {
             if (!(ui->treeView->isColumnHidden(i)))
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
-                QString info = idx_info.data().toString();
-                if (i == COL::Value)
-                {
-                    info = info.replace("\\n", "\n");
-                }
+                QString info = (i == COL::Value) ?
+                    m_treeModel->GetValueFullString(idx, true).replace("\t", " ") :
+                    idx_info.data().toString();
+
                 if (info.length() > 0)
                 {
                     copyText += info + "\t";
                 }
                 else
                 {
-                    copyText += "N/A\t";
+                    copyText += "-\t";
                 }
             }
         }
@@ -660,11 +688,8 @@ void LogTab::RowDiffEvents()
     QModelIndex firstIdx = idxList[0];
     QModelIndex secondIdx = idxList[1];
 
-    QString firstVal = firstIdx.model()->index(firstIdx.row(), COL::Value, firstIdx.parent()).data().toString();
-    QString secondVal= secondIdx.model()->index(secondIdx.row(), COL::Value, secondIdx.parent()).data().toString();
-
-    firstVal = firstVal.replace("\\n", "\n");
-    secondVal = secondVal.replace("\\n", "\n");
+    QString firstVal = m_treeModel->GetValueFullString(firstIdx);
+    QString secondVal= m_treeModel->GetValueFullString(secondIdx);
 
     // Save the two strings into temp files
     std::unique_ptr<QTemporaryFile> firstFile = std::make_unique<QTemporaryFile>();
@@ -703,10 +728,7 @@ void LogTab::RowDiffEvents()
 void LogTab::RowHideSelected()
 {
     QModelIndex index = ui->treeView->selectionModel()->currentIndex();
-    if (m_treeModel->removeRow(index.row(), index.parent()))
-    {
-        UpdateStatusBar();
-    }
+    m_treeModel->removeRow(index.row(), index.parent());
 }
 
 void LogTab::RowHideSelectedType()
@@ -726,7 +748,6 @@ void LogTab::RowHideSelectedType()
     }
     ui->treeView->setUpdatesEnabled(true);
 
-    UpdateStatusBar();
     m_bar->ShowMessage(QString("%1 '%2' event(s) hidden").arg(QString::number(count), key), 3000);
 }
 
@@ -810,8 +831,8 @@ void LogTab::RowHighlightSelectedType()
     SearchOpt newOpt;
     newOpt.m_keys.append(COL::Key);
     newOpt.m_value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
-    newOpt.m_backgroundColor = m_treeModel->m_colorLibrary->GetNextColor();
-    m_treeModel->m_highlightOpts.append(newOpt);
+    newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
+    m_treeModel->AddHighlightFilter(newOpt);
     menuUpdateNeeded();
 }
 
@@ -836,7 +857,7 @@ void LogTab::InitHeaderMenu()
         QAction *action = new QAction(hdata.toString(), m_headerMenu);
         action->setCheckable(true);
         // Make some columns 'unhidable'
-        if (i == COL::ID || i == COL::Key || i == COL::Value)
+        if (i == COL::ID || i == COL::Value)
         {
             action->setEnabled(false);
         }
@@ -885,21 +906,56 @@ void LogTab::HeaderItemSelected(QAction *action)
 void LogTab::UpdateStatusBar()
 {
     QString status = "";
-    if (!m_treeModel->m_highlightOpts.isEmpty())
+    if (m_treeModel->HasHighlightFilters())
     {
         status += m_treeModel->m_highlightOnlyMode ? "show only highlighted: {" : "highlighted: {";
-        for (int i=0; i< m_treeModel->m_highlightOpts.count(); i++)
+        HighlightOptions highlightOpts(m_treeModel->GetHighlightFilters());
+        for (int i=0; i< highlightOpts.count(); i++)
         {
-            SearchOpt highlightOpt = m_treeModel->m_highlightOpts[i];
+            SearchOpt highlightOpt = highlightOpts[i];
             if (i!=0)
             {
                 status += ", ";
             }
             status += highlightOpt.m_value;
+            if (status.size() > 100)
+            {
+                status += "...";
+                break;
+            }
         }
-        status += "}  |  ";
+        status += "}";
     }
 
-    status += QString("events: %1  ").arg(m_treeModel->rowCount());
     m_bar->SetRightLabelText(status);
+}
+
+QString LogTab::GetDebugInfo() const
+{
+    QString tabType;
+    QString extra;
+    if (m_treeModel->TabType() == TABTYPE::SingleFile)
+    {
+        tabType = "Single File";
+    }
+    else if (m_treeModel->TabType() == TABTYPE::Directory)
+    {
+        tabType = "Directory";
+        extra = "Monitoring files:\n  Include:\n";
+        for (const QString& file : m_directoryFiles.keys())
+        {
+            extra += QString("    %1\n").arg(file);
+        }
+        extra += "  Exclude:\n";
+        for (const auto& file : m_excludedFileNames)
+        {
+            extra += QString("    %1\n").arg(file);
+        }
+    }
+    else if (m_treeModel->TabType() == TABTYPE::ExportedEvents)
+    {
+        tabType = "Exported Events";
+    }
+
+    return QString("Type: %1\nPath: %2\n\n%3").arg(tabType).arg(m_tabPath).arg(extra);
 }

@@ -5,7 +5,6 @@
 #include "statusbar.h"
 #include "treemodel.h"
 #include "ui_mainwindow.h"
-#include "valuedlg.h"
 
 #include <memory>
 #include <QBitArray>
@@ -100,19 +99,16 @@ private:
     void MergeLogFile(QString path);
     void FindPrev();
     void FindNext();
-    void FindImpl(int offset);
     void FindPrevH();
     void FindNextH();
-    void FindImplH(int offset);
+    void FindImpl(int offset, bool findHighlight);
 
-    void StartDirectoryLiveCapture(QString directoryPath, const QString& label);
+    void StartDirectoryLiveCapture(QString directoryPath, QString label);
     void CheckFileOpened(QString path);
     LogTab* SetUpTab(EventListPtr events, bool isDirectory, QString path, QString label);
 
     Options& m_options = Options::GetInstance();
     StatusBar * m_statusBar;
-    QLabel * m_statusBarLabel;
-    QProgressBar * m_statusBarProgressBar;
     QStringList m_recentFiles;
 
     // m_logTabs is used to store all the log tabs that MainWindow has open, by their TreeModels.
