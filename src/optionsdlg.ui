@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>502</width>
-    <height>485</height>
+    <height>486</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,9 @@
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="bottomMargin">
+      <number>3</number>
+     </property>
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">

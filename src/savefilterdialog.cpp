@@ -17,6 +17,7 @@ SaveFilterDialog::SaveFilterDialog(QWidget *parent, const HighlightOptions& filt
 {
     ui->setupUi(this);
     ui->lineEdit->setFocus();
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
 SaveFilterDialog::~SaveFilterDialog()
