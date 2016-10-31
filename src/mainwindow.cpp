@@ -343,6 +343,14 @@ void MainWindow::on_actionClear_all_events_triggered()
     }
 }
 
+inline QString SystemCase(const QString& path)
+{
+#ifdef Q_OS_WIN32
+    return path.toLower();
+#else
+    return path;
+#endif
+}
 
 bool MainWindow::LoadLogFile(QString path)
 {
@@ -362,7 +370,7 @@ bool MainWindow::LoadLogFile(QString path)
     fileName = fi.fileName();
     filePath = fi.filePath();
 	path.replace("\\", "/");
-    if(!m_allFiles.contains(filePath))
+    if (!m_allFiles.contains(SystemCase(filePath)))
     {
         SetUpTab(events, false, path, fileName);
     }
@@ -376,7 +384,7 @@ bool MainWindow::LoadLogFile(QString path)
 void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
 {
     directoryPath.replace("\\", "/");
-    if(!m_allFiles.contains(directoryPath))
+    if (!m_allFiles.contains(SystemCase(directoryPath)))
     {
         if (label.isEmpty())
         {
@@ -399,7 +407,7 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
     connect(logTab, &LogTab::openFile, this, &MainWindow::LoadLogFile);
     int idx = tabWidget->addTab(logTab, label);
-    m_allFiles.append(path);
+    m_allFiles.append(SystemCase(path));
 
     auto tree = tabWidget->widget(idx)->findChild<QTreeView *>();
     TreeModel* model = GetTreeModel(tree);
@@ -544,7 +552,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
     QTreeView * view = GetTreeView(index);
     TreeModel * model = GetTreeModel(view);
     LogTab * currentTab = m_logTabs[model];
-    m_allFiles.removeAll(currentTab->GetTabPath());
+    m_allFiles.removeAll(SystemCase(currentTab->GetTabPath()));
     currentTab->EndLiveCapture();
     m_logTabs.remove(model);
 
