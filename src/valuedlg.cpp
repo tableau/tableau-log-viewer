@@ -23,6 +23,8 @@ ValueDlg::ValueDlg(QWidget *parent) :
     ui(new Ui::ValueDlg)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     // Set a monospaced font.
     const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     ui->textEdit->setFont(fixedFont);
