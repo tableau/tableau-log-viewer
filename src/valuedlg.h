@@ -1,11 +1,9 @@
-#ifndef VALUEDLG_H
-#define VALUEDLG_H
-
-#include "treemodel.h"
+#pragma once
 
 #include <QDialog>
-#include <QNetworkReply>
-#include <QWebEngineView>
+class QNetworkReply;
+class QSettings;
+class QWebEngineView;
 
 namespace Ui {
 class ValueDlg;
@@ -21,8 +19,14 @@ public:
     void SetText(QString value, bool sqlHighlight);
     void SetQuery(QString queryXML);
 
+    static void WriteSettings(QSettings& settings);
+    static void ReadSettings(QSettings& settings);
+
     QString m_id;
     QString m_key;
+
+protected:
+    void reject() override;
 
 private slots:
     void on_visualizeButton_clicked();
@@ -30,6 +34,7 @@ private slots:
     void on_prevButton_clicked();
     void on_nextButton_clicked();
     void on_uploadFinished(QNetworkReply*);
+    void on_loadFinished(bool);
     void on_zoomIn();
     void on_zoomOut();
 
@@ -43,7 +48,6 @@ private:
     QUrl GetVisualizeURL(QNetworkReply * const reply);
     void UploadQuery();
     void VisualizeQuery();
-    void on_loadFinished(bool);
 
     Ui::ValueDlg *ui;
     QString m_queryXML;
@@ -51,6 +55,7 @@ private:
     QString m_visualizationServiceURL;
     QWebEngineView *m_view;
     bool m_reload;
-};
 
-#endif // VALUEDLG_H
+    static QByteArray sm_savedGeometry;
+    static qreal sm_savedFontPointSize;
+};
