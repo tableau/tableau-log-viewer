@@ -1,0 +1,26 @@
+language: cpp
+
+dist: trusty
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - freeglut3-dev
+    - gcc-5
+    - g++-5
+env:
+  - QMAKE_CC=gcc-5 QMAKE_CXX=g++-5 QTHOME=/opt/qt57 BUILDDIR=build-release
+
+before_install:
+- sudo add-apt-repository -y ppa:beineri/opt-qt57-trusty
+- sudo apt-get update -y
+- sudo apt-get install -y qt57declarative qt57graphicaleffects qt57quickcontrols qt57svg qt57tools qt57webengine
+
+script:
+- mkdir $BUILDDIR
+- cd $BUILDDIR
+- source $QTHOME/bin/qt57-env.sh
+- $QTHOME/bin/qmake -spec linux-g++-64 QMAKE_CC=$QMAKE_CC QMAKE_CXX=$QMAKE_CXX ../src/tableau-log-viewer.pro
+- make
