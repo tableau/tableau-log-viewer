@@ -32,6 +32,41 @@ macdeployqt tlv.app
 open tlv.app
 ```
 
+## Building on Linux
+
+### Install a recent GCC with C++14 support
+
+```bash
+sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+sudo apt-get update -y
+sudo apt-get install -y build-essential gcc-5 g++-5
+```
+
+### Install Qt 5.7 components
+
+```bash
+sudo add-apt-repository -y ppa:beineri/opt-qt57-trusty
+sudo apt-get update -y
+sudo apt-get install -y qt57base qt57declarative qt57quickcontrols qt57graphicaleffects qt57tools qt57svg qt57webengine
+```
+
+### Install OpenGL components
+
+```bash
+sudo apt-get install -y freeglut3-dev
+```
+
+### Build
+
+Assumes that Qt 5.7 packages are installed under `/opt/qt57`
+
+```bash
+source /opt/qt57/bin/qt57-env.sh
+mkdir -p build-release
+cd build-release
+$QTHOME/bin/qmake -spec linux-g++-64 QMAKE_CC=gcc-5 QMAKE_CXX=g++-5 ../src/tableau-log-viewer.pro
+make
+```
 
 ## Building on Windows (using command line)
 The following instructions use Qt 5.6 and the Visual Studio 2013 compiler (mscv2013) to compile a 64-bit binary.
