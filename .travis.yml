@@ -1,0 +1,30 @@
+language: cpp
+dist: trusty
+
+os:
+- linux
+#- osx
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - freeglut3-dev
+    - gcc-5
+    - g++-5
+
+env:
+- BUILDDIR=build-release
+
+before_install:
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo script/before_install_linux.sh; export QTDIR=/opt/qt57; export QMAKECC=gcc-5; export QMAKECXX=g++-5; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then script/before_install_osx.sh; export QTDIR=/usr/local/Cellar/qt57; export QMAKECC=clang; export QMAKECXX=clang++; fi
+
+script:
+- echo $QTDIR
+- mkdir $BUILDDIR
+- cd $BUILDDIR
+- source $QTDIR/bin/qt57-env.sh
+- $QTDIR/bin/qmake -spec linux-g++-64 QMAKE_CC=$QMAKECC QMAKE_CXX=$QMAKECXX -Wall ../src/tableau-log-viewer.pro
+- make
