@@ -20,7 +20,6 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFontDatabase>
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -147,28 +146,45 @@ void MainWindow::WriteSettings()
 {
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
-    settings.beginGroup("MainWindow");
-    settings.setValue("size", size());
-    settings.setValue("pos", pos());
-    settings.setValue("recentFiles", m_recentFiles);
 
+    settings.beginGroup("MainWindow");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    settings.setValue("recentFiles", m_recentFiles);
     settings.endGroup();
+
+    ValueDlg::WriteSettings(settings);
+    ZoomableTreeView::WriteSettings(settings);
 }
+
 void MainWindow::ReadSettings()
 {
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
 
     settings.beginGroup("MainWindow");
-    resize(settings.value("size", QSize(900, 500)).toSize());
-    move(settings.value("pos", QPoint(200, 200)).toPoint());
+    if (settings.value("size").isNull())
+    {
+        restoreGeometry(settings.value("geometry").toByteArray());
+        restoreState(settings.value("windowState").toByteArray());
+    }
+    else
+    {
+        // Backcompat: size and pos are now replaced with geometry that works with windowState.
+        resize(settings.value("size").toSize());
+        move(settings.value("pos").toPoint());
+        settings.remove("size");
+        settings.remove("pos");
+    }
     m_recentFiles = settings.value("recentFiles", QStringList()).toStringList();
     settings.endGroup();
 
     //Load Options variables from config file
     m_options.ReadSettings();
-}
 
+    ValueDlg::ReadSettings(settings);
+    ZoomableTreeView::ReadSettings(settings);
+}
 
 EventListPtr MainWindow::GetEventsFromFile(QString path, int & skippedCount)
 {
@@ -723,13 +739,11 @@ void MainWindow::on_actionClose_all_tabs_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    WriteSettings();
     close();
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)
 {
-
     event->ignore();
     WriteSettings();
     event->accept();

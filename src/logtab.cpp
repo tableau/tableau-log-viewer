@@ -29,8 +29,6 @@ LogTab::~LogTab()
 
 void LogTab::InitTreeView(const EventListPtr events)
 {
-    QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    ui->treeView->setFont(fixedFont);
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
     QStringList headers = QString("ID;File;Time;Elapsed;PID;TID;Severity;Request;Session;Site;User;Key;Value").split(";");
@@ -43,7 +41,6 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
 
-    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
     SetColumn(COL::Time, 190, hasNoKey);
@@ -56,6 +53,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::Site, 180, true);
     SetColumn(COL::User, 30, true);
     SetColumn(COL::Key, 120, hasNoKey);
+    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -337,6 +335,7 @@ void LogTab::ReadDirectoryFiles()
 
     if (newEvents.count() > 0)
     {
+        bool firstEntries = (m_treeModel->rowCount() == 0);
         int startRow = m_treeModel->MergeIntoModelData(newEvents);
         newEvents.clear();
 
@@ -352,6 +351,10 @@ void LogTab::ReadDirectoryFiles()
 
         TrimEventCount();
         UpdateModelView();
+        if (firstEntries)
+        {
+            ui->treeView->ResizeColumns();
+        }
     }
 }
 
