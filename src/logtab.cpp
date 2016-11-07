@@ -507,7 +507,11 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
     valueDlg.m_key = idx_key.data().toString();
 
     valueDlg.setWindowTitle(QString("ID: %1 - Key: %2").arg(valueDlg.m_id, valueDlg.m_key));
-    bool syntaxHighlight = (!valueDlg.m_key.isEmpty() && valueDlg.m_key != "msg");
+    int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
+    bool syntaxHighlight = (valueDlg.m_key != "msg" &&
+                            !valueDlg.m_key.isEmpty() &&
+                            syntaxHighlightLimit &&
+                            value.size() <= syntaxHighlightLimit);
     valueDlg.SetText(value, syntaxHighlight);
     valueDlg.SetQuery(QString(""));
 

@@ -40,6 +40,7 @@ void OptionsDlg::WriteSettings()
     auto liveEnable = ui->startFutureLiveCapture->isChecked();
     bool captureAllTextFiles = ui->captureAllTextFiles->isChecked();
     auto currFilter = ui->defaultHighlightComboBox->currentText();
+    int syntaxHighlightLimit = ui->syntaxHighlightLimitSpinBox->value();
 
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -52,6 +53,7 @@ void OptionsDlg::WriteSettings()
     settings.setValue("enableLiveCapture", liveEnable);
     settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
     settings.setValue("defaultHighlightFilter", currFilter);
+    settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
     settings.endGroup();
 
     Options::GetInstance().ReadSettings();
@@ -68,6 +70,7 @@ void OptionsDlg::ReadSettings()
     auto liveEnable = options.getFutureTabsUnderLive();
     bool captureAllTextFiles = options.getCaptureAllTextFiles();
     auto defaultHighlightFilter = options.getDefaultFilterName();
+    int syntaxHighlightLimit = options.getSyntaxHighlightLimit();
 
     for (int i = 0; i < skippedText.length(); i++)
     {
@@ -82,6 +85,7 @@ void OptionsDlg::ReadSettings()
     ui->diffToolPath->setText(diffPath);
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
+    ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
