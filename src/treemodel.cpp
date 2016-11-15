@@ -96,11 +96,13 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             if (col == COL::Value)
             {
                 const int ToolTipLimit = 500;
+                const int ToolTipTailSize = 50;
                 QString tip = GetValueFullString(index);
                 if (tip.size() > ToolTipLimit)
                 {
-                    tip.truncate(ToolTipLimit);
-                    tip += "...";
+                    QString tail = tip.right(ToolTipTailSize);
+                    tip.truncate(ToolTipLimit - ToolTipTailSize);
+                    tip += "\n...\n" + tail;
                 }
                 return tip;
             }
