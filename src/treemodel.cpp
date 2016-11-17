@@ -91,6 +91,28 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             return item->Data(col);
             break;
         }
+        case Qt::ToolTipRole:
+        {
+            if (col == COL::Value)
+            {
+                const int ToolTipLimit = 500;
+                const int ToolTipTailSize = 50;
+                QString tip = GetValueFullString(index);
+                if (tip.size() > ToolTipLimit)
+                {
+                    QString tail = tip.right(ToolTipTailSize);
+                    tip.truncate(ToolTipLimit - ToolTipTailSize);
+                    tip += "\n...\n" + tail;
+                }
+                return tip;
+            }
+            else
+            {
+                TreeItem* item = GetItem(index);
+                return item->Data(col);
+            }
+            break;
+        }
     }
     return QVariant();
 }
