@@ -1013,12 +1013,14 @@ QString LogTab::GetDebugInfo() const
 
 void LogTab::CopyFullPath()
 {
+    QString path = QDir::toNativeSeparators(GetTabPath());
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(path);
 }
 
 void LogTab::OpenContainingDirectory()
 {
+    QString path = GetTabPath();
     if (m_treeModel->TabType() == TABTYPE::SingleFile)
     {
         QFileInfo fi(path);
