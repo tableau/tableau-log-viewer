@@ -908,7 +908,7 @@ void LogTab::InitHeaderMenu()
         QAction *action = new QAction(hdata.toString(), m_headerMenu);
         action->setCheckable(true);
         // Make some columns 'unhidable'
-        if (i == COL::ID || i == COL::Value)
+        if (i == COL::Value)
         {
             action->setEnabled(false);
         }
@@ -1009,4 +1009,20 @@ QString LogTab::GetDebugInfo() const
     }
 
     return QString("Type: %1\nPath: %2\n\n%3").arg(tabType).arg(m_tabPath).arg(extra);
+}
+
+void LogTab::CopyFullPath()
+{
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(path);
+}
+
+void LogTab::OpenContainingDirectory()
+{
+    if (m_treeModel->TabType() == TABTYPE::SingleFile)
+    {
+        QFileInfo fi(path);
+        path = fi.path();
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
