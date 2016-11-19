@@ -7,6 +7,7 @@
 #include "treeitem.h"
 #include "valuedlg.h"
 
+#include <memory>
 #include <QFontDatabase>
 #include <QMenu>
 #include <QJsonDocument>
@@ -78,6 +79,13 @@ void LogTab::InitMenus()
     m_exportToTabAction = new QAction(QIcon(":/ctx-newtab.png"), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
+    m_copyItemsHtmlAction = new QAction(QIcon(":/ctx-copy.png"), "Copy", this);
+    m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetails);
+
+    m_copyItemsTextAction = new QAction(QIcon(":/ctx-copy.png"), "Copy as text", this);
+    connect(m_copyItemsTextAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsText);
+
     InitOneRowMenu();
     InitTwoRowsMenu();
     InitMultipleRowsMenu();
@@ -90,12 +98,18 @@ void LogTab::InitTwoRowsMenu()
     m_twoRowsMenu->addAction(QIcon(":/ctx-book.png"), "Diff selected events",
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_exportToTabAction);
+    m_twoRowsMenu->addSeparator();
+    m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
+    m_twoRowsMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::InitMultipleRowsMenu()
 {
     m_multipleRowsMenu = new QMenu(this);
     m_multipleRowsMenu->addAction(m_exportToTabAction);
+    m_multipleRowsMenu->addSeparator();
+    m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
+    m_multipleRowsMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::InitOneRowMenu()
@@ -147,7 +161,9 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addAction(m_exportToTabAction);
     m_oneRowMenu->addAction(actionOpenFile);
     m_openFileMenuIdx = m_oneRowMenu->actions().size() - 1;
-
+    m_oneRowMenu->addSeparator();
+    m_oneRowMenu->addAction(m_copyItemsHtmlAction);
+    m_oneRowMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::keyPressEvent(QKeyEvent *event)
@@ -176,7 +192,7 @@ void LogTab::keyPressEvent(QKeyEvent *event)
             (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
             (rowCount > 0))
         {
-            CopyItemDetails(idxList);
+            CopyItemDetails();
         }
         else if ((event->key() == Qt::Key_D) &&
                  (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
@@ -592,10 +608,24 @@ void LogTab::ChangePrevIndex()
     }
 }
 
-void LogTab::CopyItemDetails(const QModelIndexList& idxList)
+void LogTab::CopyItemDetailsAsText() const
 {
-    QString copyText;
+    CopyItemDetails(true);
+}
+
+void LogTab::CopyItemDetails(bool textOnly) const
+{
+    QModelIndexList idxList = ui->treeView->selectionModel()->selectedRows();
     int columnCount = m_treeModel->columnCount();
+    if (!columnCount || !idxList.count())
+        return;
+
+    QString copyText;
+    QString copyHtml =
+        "<html><head><style>"
+        "table, th, td { border: 1px solid black; border-collapse: collapse; } "
+        "th, td { font-family: Monaco, Consolas, Monospace; font-size: 10pt; text-align: left; }"
+        "</style></head><body><table>\n<tr>";
 
     // Header row
     for (int i = 0; i < columnCount; i++)
@@ -604,14 +634,16 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
         {
             QString info = m_treeModel->headerData(i, Qt::Horizontal).toString();
             copyText += info + "\t";
+            copyHtml += "<th>" + info + "</th> ";
         }
     }
-    copyText += "\n";
+    copyText[copyText.length() - 1] = '\n';
+    copyHtml += "</tr>\n";
 
     for (const auto& idx : idxList)
     {
         auto item_model = idx.model();
-
+        copyHtml += "<tr>";
         for (int i = 0; i < columnCount; i++)
         {
             if (!(ui->treeView->isColumnHidden(i)))
@@ -624,17 +656,29 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
                 if (info.length() > 0)
                 {
                     copyText += info + "\t";
+                    copyHtml += "<td>" + info + "</td> ";
                 }
                 else
                 {
                     copyText += "-\t";
+                    copyHtml += "<td>-</td> ";
                 }
             }
         }
-        copyText += "\n";
+        copyText[copyText.length() - 1] = '\n';
+        copyHtml += "</tr>\n";
     }
+
+    copyHtml += "</table></body></html>";
+
     QClipboard* clipboard = QApplication::clipboard();
-    clipboard->setText(copyText);
+    auto mime = std::make_unique<QMimeData>();
+    mime->setText(copyText);
+    if (!textOnly)
+    {
+        mime->setHtml(copyHtml);
+    }
+    clipboard->setMimeData(mime.release());
 }
 
 void LogTab::ExportToNewTab()
