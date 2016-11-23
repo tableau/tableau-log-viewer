@@ -1101,8 +1101,8 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
             QAction* actionCopyFullPath = new QAction("Copy full path", this);
             connect(actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);
 
-            QAction* actionOpenDirectory = new QAction("Open containing directory", this);
-            connect(actionOpenDirectory, &QAction::triggered, logTab, &LogTab::OpenContainingDirectory);
+            QAction* actionOpenDirectory = new QAction("Show in folder", this);
+            connect(actionOpenDirectory, &QAction::triggered, logTab, &LogTab::ShowInFolder);
 
             auto tabBarMenu = new QMenu(this);
             tabBarMenu->addAction(actionCopyFullPath);

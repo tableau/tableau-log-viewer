@@ -28,7 +28,7 @@ public:
     void SetTabPath(const QString& path);
     void UpdateStatusBar();
     void CopyFullPath();
-    void OpenContainingDirectory();
+    void ShowInFolder();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;

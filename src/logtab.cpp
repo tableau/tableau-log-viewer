@@ -1018,7 +1018,7 @@ void LogTab::CopyFullPath()
     clipboard->setText(path);
 }
 
-void LogTab::OpenContainingDirectory()
+void LogTab::ShowInFolder()
 {
     QString path = GetTabPath();
     if (m_treeModel->TabType() == TABTYPE::SingleFile)
