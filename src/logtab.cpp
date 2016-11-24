@@ -759,16 +759,28 @@ void LogTab::RowDiffEvents()
     secondOut.flush();
 
     // Initialize the diff tool
-    QStringList args;
-
-    args << firstFile->fileName();
-    args << secondFile->fileName();
-
     QString diffToolPath = Options::GetInstance().getDiffToolPath();
+    if (QSysInfo::productType() == "osx" &&
+        diffToolPath.endsWith(".app"))
+    {
+        // In Mac, if the tool is an app, we need to use "open"
+        diffToolPath = QString("open -a \"%1\" --args").arg(diffToolPath);
+    }
+    else
+    {
+        // Put quotes around the path, in case it has any spaces
+        diffToolPath = QString("\"%1\"").arg(diffToolPath);
+    }
+    QString diffCommand = QString("%1 \"%2\" \"%3\"").arg(
+        diffToolPath,
+        firstFile->fileName(),
+        secondFile->fileName());
 
-    QProcess difftool;
-    if(!difftool.startDetached(diffToolPath, args))
+    qDebug() << "Diff tool path: " << diffCommand;
+    if(!QProcess::startDetached(diffCommand))
+    {
         QMessageBox::information(this, tr("Diff Error!"), tr("Cannot find diff tool. Please set it in application options menu."));
+    }
 
     // We are storing the temp files in a vector. Once the vector goes out of scope, the QTemporaryFiles are automatically deleted.
     // Temp files are under AppData\Local\Temp, but are automitically deleted when the tab or tlv is closed. They remain if TLV crashes.
