@@ -1098,16 +1098,16 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 
             LogTab* logTab = m_logTabs[model];
 
-            QAction* actionCopyFullPath = new QAction("Copy full path", this);
-            connect(actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);
+            QAction actionCopyFullPath("Copy full path", this);
+            connect(&actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);
 
-            QAction* actionOpenDirectory = new QAction("Show in folder", this);
-            connect(actionOpenDirectory, &QAction::triggered, logTab, &LogTab::ShowInFolder);
+            QAction actionOpenDirectory("Show in folder", this);
+            connect(&actionOpenDirectory, &QAction::triggered, logTab, &LogTab::ShowInFolder);
 
-            auto tabBarMenu = new QMenu(this);
-            tabBarMenu->addAction(actionCopyFullPath);
-            tabBarMenu->addAction(actionOpenDirectory);
-            tabBarMenu->popup(mouseEvent->globalPos());
+            QMenu tabBarMenu(this);
+            tabBarMenu.addAction(&actionCopyFullPath);
+            tabBarMenu.addAction(&actionOpenDirectory);
+            tabBarMenu.exec(mouseEvent->globalPos());
             return true;
         }
     }
