@@ -54,6 +54,8 @@ MainWindow::MainWindow()
     menuHelp->addAction(aboutVersionAction);
 
     connect(Ui_MainWindow::menuRecent_files, SIGNAL(triggered(QAction*)), this, SLOT(Recent_files_triggered(QAction*)));
+
+    tabWidget->tabBar()->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -1074,3 +1076,42 @@ void MainWindow::RefilterTreeView()
     model->layoutChanged();
     view->scrollTo(previousIdx, QAbstractItemView::PositionAtCenter);
 }
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj == tabWidget->tabBar() &&
+        event->type() == QEvent::MouseButtonPress)
+    {
+        auto mouseEvent = static_cast<QMouseEvent *>(event);
+        int idx = tabWidget->tabBar()->tabAt(mouseEvent->pos());
+
+        if (mouseEvent->button() == Qt::MidButton)
+        {
+            on_tabWidget_tabCloseRequested(idx);
+            return true;
+        }
+        else if (mouseEvent->button() == Qt::RightButton)
+        {
+            TreeModel* model = GetTreeModel(GetTreeView(idx));
+            if (!model || model->TabType() == TABTYPE::ExportedEvents)
+                return true;
+
+            LogTab* logTab = m_logTabs[model];
+
+            QAction actionCopyFullPath("Copy full path", this);
+            connect(&actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);
+
+            QAction actionOpenDirectory("Show in folder", this);
+            connect(&actionOpenDirectory, &QAction::triggered, logTab, &LogTab::ShowInFolder);
+
+            QMenu tabBarMenu(this);
+            tabBarMenu.addAction(&actionCopyFullPath);
+            tabBarMenu.addAction(&actionOpenDirectory);
+            tabBarMenu.exec(mouseEvent->globalPos());
+            return true;
+        }
+    }
+
+    return QMainWindow::eventFilter(obj, event);
+}
+

@@ -33,6 +33,7 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent * k);
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void Recent_files_triggered(QAction * action);
