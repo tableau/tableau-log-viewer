@@ -281,6 +281,7 @@ void MainWindow::AddRecentFile(const QString& path)
     //Otherwise add it to the top of the list
     else if(path != "")
     {
+        if (m_recentFiles.size() > 14)
         {
             m_recentFiles.removeLast();
         }
@@ -441,12 +442,12 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     {
         model->m_paths.append(path);
         model->SetTabType(TABTYPE::SingleFile);
-    AddRecentFile(path);
     }
     else
     {
         model->SetTabType(TABTYPE::Directory);
     }
+    AddRecentFile(path);
     logTab->SetTabPath(path);
     actionTail_current_tab->setEnabled(model->TabType() != TABTYPE::ExportedEvents);
 
