@@ -65,7 +65,12 @@ MainWindow::~MainWindow()
 void MainWindow::Recent_files_triggered(QAction * action)
 {
     QString path = action->text();
-    if (!LoadLogFile(path))
+    QFileInfo fi(path);
+    if (fi.isDir())
+    {
+        StartDirectoryLiveCapture(path, "");
+    }
+    else if (!LoadLogFile(path))
     {
         RemoveRecentFile(path);
         Ui_MainWindow::menuRecent_files->removeAction(action);
@@ -153,6 +158,7 @@ void MainWindow::WriteSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());
     settings.setValue("recentFiles", m_recentFiles);
+    settings.setValue("lastOpenFolder", m_lastOpenFolder);
     settings.endGroup();
 
     ValueDlg::WriteSettings(settings);
@@ -179,6 +185,7 @@ void MainWindow::ReadSettings()
         settings.remove("pos");
     }
     m_recentFiles = settings.value("recentFiles", QStringList()).toStringList();
+    m_lastOpenFolder = settings.value("lastOpenFolder", QString()).toString();
     settings.endGroup();
 
     //Load Options variables from config file
@@ -274,7 +281,6 @@ void MainWindow::AddRecentFile(const QString& path)
     //Otherwise add it to the top of the list
     else if(path != "")
     {
-        if(m_recentFiles.size() > 9)
         {
             m_recentFiles.removeLast();
         }
@@ -435,7 +441,7 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     {
         model->m_paths.append(path);
         model->SetTabType(TABTYPE::SingleFile);
-        AddRecentFile(path);
+    AddRecentFile(path);
     }
     else
     {
@@ -488,20 +494,11 @@ void MainWindow::on_actionBeta_log_directory_triggered()
 
 void MainWindow::on_actionChoose_directory_triggered()
 {
-    // Use file path of the current tab as default directory.
-    // It works with both file and directory paths.
-    QString defaultDir;
-    TreeModel* model = GetCurrentTreeModel();
-    if (model)
-    {
-        LogTab* currentTab = m_logTabs[model];
-        defaultDir = currentTab->GetTabPath();
-    }
-
-    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", defaultDir);
+    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", m_lastOpenFolder);
     if (!directoryPath.isEmpty())
     {
         StartDirectoryLiveCapture(directoryPath, "");
+        m_lastOpenFolder = directoryPath;
     }
 }
 
