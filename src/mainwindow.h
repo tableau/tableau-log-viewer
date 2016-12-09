@@ -111,6 +111,7 @@ private:
     Options& m_options = Options::GetInstance();
     StatusBar * m_statusBar;
     QStringList m_recentFiles;
+    QString m_lastOpenFolder;
 
     // m_logTabs is used to store all the log tabs that MainWindow has open, by their TreeModels.
     // That way, a user can close or start live capture on any tab at any time, instead of only
