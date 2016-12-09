@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "mainwindow.h"
+#include <QVector>
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +13,9 @@ int main(int argc, char *argv[])
     app.setApplicationVersion(APP_VERSION);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-    std::unique_ptr<MainWindow> mainWin = std::make_unique<MainWindow>();
+    QStringList args = app.arguments();
+
+    std::unique_ptr<MainWindow> mainWin = std::make_unique<MainWindow>(args);
     mainWin->show();
     return app.exec();
 }
