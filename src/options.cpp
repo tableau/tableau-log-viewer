@@ -28,6 +28,7 @@ void Options::ReadSettings()
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
+    m_backgroundColor = settings.value("backgroundColor", DefaultColorWhite).toString();
 
     settings.endGroup();
 
