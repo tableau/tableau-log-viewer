@@ -8,6 +8,9 @@
 #include <QSettings>
 #include <QSysInfo>
 
+const QString Options::DefaultColorWhite { "#ffffff" };
+const QString Options::DefaultColorGray { "#e5e5e5" };
+
 void Options::ReadSettings()
 {
     QString iniPath = PathHelper::GetConfigIniPath();
@@ -101,4 +104,9 @@ void Options::LoadHighlightFilter(const QString& filterName)
 int Options::getSyntaxHighlightLimit() const
 {
     return m_syntaxHighlightLimit;
+}
+
+QString Options::getBackgroundColor() const
+{
+    return m_backgroundColor;
 }

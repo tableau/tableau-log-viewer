@@ -55,6 +55,8 @@ ValueDlg::ValueDlg(QWidget *parent) :
     m_id = QString("");
     m_key = QString("");
 
+    setStyleSheet(QString("QTextEdit { background-color: %1; }").arg(options.getBackgroundColor()));
+
     QFile sqlsyntaxcss(":/sqlsyntax.css");
     sqlsyntaxcss.open(QIODevice::ReadOnly);
     QTextStream textStream(&sqlsyntaxcss);
