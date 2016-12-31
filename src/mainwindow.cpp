@@ -8,6 +8,7 @@
 #include "pathhelper.h"
 #include "processevent.h"
 #include "savefilterdialog.h"
+#include "themeutils.h"
 #include "zoomabletreeview.h"
 
 #include <map>
@@ -41,6 +42,13 @@ MainWindow::MainWindow()
     m_statusBar = new StatusBar(this);
 
     ReadSettings();
+    // Load the theme for the first time
+    // No need to switch the theme if it is set to "Native" (the default)
+    QString themeName = m_options.getTheme();
+    if (themeName != "Native")
+    {
+        ThemeUtils::SwitchTheme(themeName, this);
+    }
     UpdateMenuAndStatusBar();
 
     // About TLV. It will have the Version number, this only needs to be calculated once

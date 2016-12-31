@@ -21,6 +21,7 @@ private:
     QString m_defaultFilterName;
     HighlightOptions m_defaultHighlightOpts;
     int m_syntaxHighlightLimit;
+    QString m_theme;
 
 public:
     static Options& GetInstance()
@@ -41,4 +42,5 @@ public:
     QString getDefaultFilterName();
     HighlightOptions getDefaultHighlightOpts();
     int getSyntaxHighlightLimit() const;
+    QString getTheme();
 };

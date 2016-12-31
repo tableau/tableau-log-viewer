@@ -1,6 +1,7 @@
 #include "treemodel.h"
 
 #include "options.h"
+#include "themeutils.h"
 #include "treeitem.h"
 
 #include <QJsonObject>
@@ -46,14 +47,25 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
     {
         case Qt::TextColorRole:
         {
-            if (col == COL::ID)
+            /*if (col == COL::ID)
+            {
                 return QColor(Qt::gray);
-            break;
+            }*/
+            QColor highlightColor(ItemHighlightColor(index));
+            if (highlightColor == Qt::transparent)
+            {
+                // do nothing if there's no highlight color
+                break;
+            }
+            // Pick a White or Black foreground, depending on which one gives better contrast
+            double whiteContrast = ThemeUtils::ContrastRatio(QColor(Qt::white), highlightColor);
+            double blackContrast = ThemeUtils::ContrastRatio(QColor(Qt::black), highlightColor);
+            return whiteContrast > blackContrast ? QColor(Qt::white) : QColor(Qt::black);
         }
         case Qt::BackgroundRole:
         {
             QColor highlightColor(ItemHighlightColor(index));
-            if (highlightColor != Qt::white)
+            if (highlightColor != Qt::transparent)
             {
                 return QBrush(highlightColor);
             }
@@ -529,7 +541,7 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
 {
     TreeItem* item = GetItem(idx);
     if (item == nullptr || item->Parent() != m_rootItem)
-        return Qt::white;
+        return Qt::transparent;
 
     auto cachedColor = m_highlightColorCache.find(item);
     if (cachedColor != m_highlightColorCache.end())
@@ -566,8 +578,8 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
         }
     }
 
-    m_highlightColorCache.insert(item, QColor(Qt::white));
-    return Qt::white;
+    m_highlightColorCache.insert(item, QColor(Qt::transparent));
+    return Qt::transparent;
 }
 
 const QString TreeModel::KeyValueString(const QString& key, const QString& value) const
@@ -692,6 +704,6 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
 bool TreeModel::IsHighlightedRow(int row) const
 {
     QModelIndex idx = index(row, 0);
-    bool highlighted = (ItemHighlightColor(idx) != Qt::white);
+    bool highlighted = (ItemHighlightColor(idx) != Qt::transparent);
     return highlighted;
 }

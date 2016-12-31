@@ -25,6 +25,7 @@ void Options::ReadSettings()
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
+    m_theme = settings.value("theme", "Native").toString();
 
     settings.endGroup();
 
@@ -101,4 +102,9 @@ void Options::LoadHighlightFilter(const QString& filterName)
 int Options::getSyntaxHighlightLimit() const
 {
     return m_syntaxHighlightLimit;
+}
+
+QString Options::getTheme()
+{
+    return m_theme;
 }
