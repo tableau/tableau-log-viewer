@@ -29,6 +29,7 @@ void Options::ReadSettings()
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
     m_backgroundColor = settings.value("backgroundColor", DefaultColorWhite).toString();
+    m_theme = settings.value("theme", "Native").toString();
 
     settings.endGroup();
 
@@ -110,4 +111,9 @@ int Options::getSyntaxHighlightLimit() const
 QString Options::getBackgroundColor() const
 {
     return m_backgroundColor;
+}
+
+QString Options::getTheme()
+{
+    return m_theme;
 }

@@ -210,6 +210,41 @@
          </widget>
         </item>
         <item>
+         <layout class="QFormLayout" name="themeFormLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="themeLabel">
+            <property name="text">
+             <string>Theme</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="themeComboBox">
+            <item>
+             <property name="text">
+              <string>Native</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Dark Fusion</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Solarized Light</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Solarized Dark</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QFormLayout" name="formLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="syntaxHighlightLimitLabel">

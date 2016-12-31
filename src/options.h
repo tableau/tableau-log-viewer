@@ -22,6 +22,7 @@ private:
     HighlightOptions m_defaultHighlightOpts;
     int m_syntaxHighlightLimit;
     QString m_backgroundColor;
+    QString m_theme;
 
 public:
     static Options& GetInstance()
@@ -46,4 +47,5 @@ public:
 
     const static QString DefaultColorWhite;
     const static QString DefaultColorGray;
+    QString getTheme();
 };

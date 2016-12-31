@@ -25,11 +25,13 @@ private slots:
     void on_chooseDiffTool_clicked();
     void on_useEmbedded_clicked();
     void on_serviceEnable_clicked();
+    void on_themeComboBox_currentTextChanged(const QString &themeName);
 
 private:
     void WriteSettings();
     void ReadSettings();
 
+    QWidget *parent;
     Ui::OptionsDlg *ui;
 };
 
