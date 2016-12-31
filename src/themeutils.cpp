@@ -1,6 +1,8 @@
 #include "theme.h"
 #include "themeutils.h"
 
+#include <algorithm>
+#include <cmath>
 #include <QColor>
 #include <QPalette>
 
