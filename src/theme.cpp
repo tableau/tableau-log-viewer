@@ -1,4 +1,5 @@
 #include "theme.h"
+#include "themeutils.h"
 
 #include <memory>
 #include <QApplication>
@@ -156,5 +157,13 @@ void Theme::Activate()
             QStyleFactory::create(defaultStyle);
         qApp->setStyle(style);
         qApp->setPalette(*m_palette);
+        if (m_isDark)
+        {
+            ThemeUtils::SetDarkIconSet();
+        }
+        else
+        {
+            ThemeUtils::SetLightIconSet();
+        }
     }
 }

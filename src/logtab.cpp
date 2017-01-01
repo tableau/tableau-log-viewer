@@ -4,6 +4,7 @@
 #include "options.h"
 #include "pathhelper.h"
 #include "processevent.h"
+#include "themeutils.h"
 #include "treeitem.h"
 #include "valuedlg.h"
 
@@ -76,14 +77,15 @@ void LogTab::SetColumn(int column, int width, bool isHidden)
 
 void LogTab::InitMenus()
 {
-    m_exportToTabAction = new QAction(QIcon(":/ctx-newtab.png"), "Export event(s) to new tab", this);
+    using namespace ThemeUtils;
+    m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
-    m_copyItemsHtmlAction = new QAction(QIcon(":/ctx-copy.png"), "Copy", this);
+    m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy", this);
     m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
     connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetails);
 
-    m_copyItemsTextAction = new QAction(QIcon(":/ctx-copy.png"), "Copy as text", this);
+    m_copyItemsTextAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as text", this);
     connect(m_copyItemsTextAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsText);
 
     InitOneRowMenu();
@@ -94,8 +96,9 @@ void LogTab::InitMenus()
 
 void LogTab::InitTwoRowsMenu()
 {
+    using namespace ThemeUtils;
     m_twoRowsMenu = new QMenu(this);
-    m_twoRowsMenu->addAction(QIcon(":/ctx-book.png"), "Diff selected events",
+    m_twoRowsMenu->addAction(QIcon(GetThemedIcon(":/ctx-book.png")), "Diff selected events",
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_exportToTabAction);
     m_twoRowsMenu->addSeparator();
@@ -114,32 +117,33 @@ void LogTab::InitMultipleRowsMenu()
 
 void LogTab::InitOneRowMenu()
 {
-    QAction *hideSelected = new QAction(QIcon(":/ctx-hide.png"), "Hide selected event", this);
+    using namespace ThemeUtils;
+    QAction *hideSelected = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide selected event", this);
     connect(hideSelected, &QAction::triggered, this, &LogTab::RowHideSelected);
 
-    QAction *hideSelectedType = new QAction(QIcon(":/ctx-hide.png"), "Hide all events of this type", this);
+    QAction *hideSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide all events of this type", this);
     connect(hideSelectedType, &QAction::triggered, this, &LogTab::RowHideSelectedType);
 
-    QAction *findPrevSelectedType = new QAction(QIcon(":/ctx-up.png"), "Find previous event of this type", this);
+    QAction *findPrevSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-up.png")), "Find previous event of this type", this);
     connect(findPrevSelectedType, &QAction::triggered, this, &LogTab::RowFindPrevSelectedType);
 
-    QAction *findNextSelectedType = new QAction(QIcon(":/ctx-down.png"), "Find next event of this type", this);
+    QAction *findNextSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-down.png")), "Find next event of this type", this);
     connect(findNextSelectedType, &QAction::triggered, this, &LogTab::RowFindNextSelectedType);
 
-    QAction *highlightSelectedType = new QAction(QIcon(":/ctx-highlight.png"), "Highlight all events of this type", this);
+    QAction *highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
     connect(highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
 
-    QAction *actionGlobalTimestamps = new QAction(QIcon(":/ctx-timestamp.png"), "Show global timestamps", this);
+    QAction *actionGlobalTimestamps = new QAction(QIcon(GetThemedIcon(":/ctx-timestamp.png")), "Show global timestamps", this);
     actionGlobalTimestamps->setCheckable(true);
     actionGlobalTimestamps->setChecked(true);
     connect(actionGlobalTimestamps, &QAction::triggered, this, &LogTab::RowShowGlobalTimestamps);
 
-    QAction *actionTimeDeltas = new QAction(QIcon(":/ctx-timedelta.png"), "Show time deltas to this event", this);
+    QAction *actionTimeDeltas = new QAction(QIcon(GetThemedIcon(":/ctx-timedelta.png")), "Show time deltas to this event", this);
     actionTimeDeltas->setCheckable(true);
     actionTimeDeltas->setChecked(false);
     connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
-    QAction *actionOpenFile = new QAction(QIcon(":/ctx-open-file.png"), "Open log file in new tab", this);
+    QAction *actionOpenFile = new QAction(QIcon(GetThemedIcon(":/ctx-open-file.png")), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);

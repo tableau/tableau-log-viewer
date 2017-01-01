@@ -48,6 +48,7 @@ MainWindow::MainWindow()
     if (themeName != "Native")
     {
         ThemeUtils::SwitchTheme(themeName, this);
+        this->actionTail_current_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
     }
     UpdateMenuAndStatusBar();
 
@@ -346,7 +347,7 @@ void MainWindow::on_actionTail_current_tab_triggered()
         if (currentTab->StartLiveCapture())
         {
             view->scrollToBottom();
-            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(":/tab-sync-thin.png"));
+            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
         }
         else
         {

@@ -204,7 +204,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="themeLabel">
             <property name="text">
-             <string>Theme</string>
+             <string>Theme (needs restart to load some Icons)</string>
             </property>
            </widget>
           </item>
