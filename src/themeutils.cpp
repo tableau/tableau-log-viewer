@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <QColor>
+#include <QFileSelector>
 #include <QPalette>
 
 void ThemeUtils::SwitchTheme(const QString& themeName, QWidget* widget)
@@ -32,4 +33,29 @@ double ThemeUtils::ContrastRatio(QColor a, QColor b)
     double light = std::max(luminance1, luminance2);
     double dark = std::min(luminance1, luminance2);
     return (light + 0.05) / (dark + 0.05);
+}
+
+namespace ThemeUtils {
+    QFileSelector m_fileSelector;
+    void SetLightIconSet()
+    {
+        QStringList extraSelectors;
+        //extraSelectors << "lighttheme";
+        m_fileSelector.setExtraSelectors(extraSelectors);
+    }
+    void SetDarkIconSet()
+    {
+        QStringList extraSelectors;
+        extraSelectors << "darktheme";
+        m_fileSelector.setExtraSelectors(extraSelectors);
+    }
+
+    QString GetThemedIcon(const QString& path)
+    {
+        if (m_fileSelector.extraSelectors().empty())
+        {
+            SetLightIconSet();
+        }
+        return m_fileSelector.select(path);
+    }
 }
