@@ -1,5 +1,5 @@
 #!/bin/bash
-add-apt-repository -y ppa:beineri/opt-qt57-trusty
+add-apt-repository -y ppa:beineri/opt-qt571-trusty
 apt-get update -y
 apt-get install -y \
   qt57declarative \
