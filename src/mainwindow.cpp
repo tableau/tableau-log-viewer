@@ -39,6 +39,8 @@ MainWindow::MainWindow()
     setupUi(this);
 
     m_statusBar = new StatusBar(this);
+    //Add Clear all events button (not doable via UI designer)
+    Ui_MainWindow::menuBar->addAction(actionClear_all_events);
 
     ReadSettings();
     UpdateMenuAndStatusBar();
