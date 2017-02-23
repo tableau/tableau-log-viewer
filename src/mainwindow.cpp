@@ -117,6 +117,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     actionRefresh->setEnabled(model);
     actionShow_summary->setEnabled(model);
     actionOpen_timeline->setEnabled(model);
+    actionCreate_info_viz->setEnabled(model);
     actionClose_tab->setEnabled(model);
     actionClose_all_tabs->setEnabled(model);
     //Recent Files
@@ -950,6 +951,231 @@ void MainWindow::on_actionOpen_timeline_triggered()
     QMessageBox timelineMsg(this);
     timelineMsg.setText("Timeline is currently not implemented for the TLV QT Port.");
     timelineMsg.exec();
+}
+
+void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& fields, QMap<QString, QString>& nameValues)
+{
+    for (const auto& field : fields)
+    {
+        auto& val = valJson[field];
+        if (val.isDouble())
+        {
+            double intpart;
+            const int decimals = (modf(val.toDouble(), &intpart) == 0) ? 0 : 3;
+            nameValues[field] = QString::number(val.toDouble(), 'f', decimals);
+        }
+        else if (val.isString())
+        {
+            nameValues[field] = "\"" + val.toString().replace("\n", " ").replace("\"", "\"\"") + "\"";
+        }
+        else if (val.isObject())
+        {
+            ConvertJsonToStringMap(val.toObject(), fields, nameValues);
+        }
+        else if (!nameValues.contains(field))
+        {
+            nameValues[field] = "";
+        }
+    }
+}
+
+void WriteJsonAsCsv(const QJsonObject& valJson, QStringList& fields, QString& outputStr)
+{
+    // If list of fields is not specified, set it to all fields available in the first event.
+    if (fields.isEmpty())
+    {
+        fields = valJson.keys();
+    }
+
+    QMap<QString, QString> nameValues;
+
+    ConvertJsonToStringMap(valJson, fields, nameValues);
+
+    for (const auto& field : fields)
+    {
+        outputStr += nameValues[field] + ",";
+    }
+    outputStr.truncate(outputStr.size() - 1);
+    outputStr += "\n";
+}
+
+bool CreateFolder(const QString& path)
+{
+    QDir folder(path);
+    if (!folder.exists() && !folder.mkpath("."))
+    {
+        QMessageBox warning(
+            QMessageBox::Icon::Warning,
+            "Error creating directory",
+            folder.path());
+        warning.exec();
+        return false;
+    }
+    return true;
+}
+
+bool SaveFile(const QString& path, const QString& filename, const QStringList& headers, const QString& content)
+{
+    QFile file(path + "/" + filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox warning(
+            QMessageBox::Icon::Warning,
+            "Error writing file",
+            file.fileName());
+        warning.exec();
+        return false;
+    }
+
+    QString output = headers.join(',') + "\n" + content;
+    file.write(output.toUtf8().data());
+    file.close();
+    return true;
+}
+
+bool CopyAllFiles(const QString& fromPath, const QString& toPath)
+{
+    QDir fromFolder(fromPath);
+    if (!fromFolder.exists())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Directory not found", fromFolder.path());
+        warning.exec();
+        return false;
+    }
+
+    QDir toFolder(toPath);
+    if (!toFolder.exists())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Directory not found", toFolder.path());
+        warning.exec();
+        return false;
+    }
+
+    QStringList files = fromFolder.entryList(QDir::Files);
+    for (const QString& fileName : files)
+    {
+        QFileInfo fromFile{fromPath + "/" + fileName};
+        QFileInfo toFile{toPath + "/" + fileName};
+
+        if (toFile.exists())
+        {
+            if (fromFile.lastModified() > toFile.lastModified())
+            {
+                QFile::remove(toFile.filePath());
+            }
+            else
+            {
+                // Skip copying if destination is the same version or newer.
+                break;
+            }
+        }
+
+        if (!QFile::copy(fromFile.filePath(), toFile.filePath()))
+        {
+            QMessageBox warning(
+                QMessageBox::Icon::Warning, "Cannot copy file",
+                "From " + fromFile.filePath() + "\nTo " + toFile.filePath());
+            warning.exec();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void GeQueryInfoViz(TreeModel* model)
+{
+    if (!model)
+        return;
+
+    QString outputQuery;
+    QString outputTempTable;
+    QString outputProtocol;
+    QString outputFedTempTable;
+    QStringList fieldsQuery{"cols", "elapsed", "protocol-id", "query", "query-category", "query-hash", "rows"};
+    QStringList fieldsTempTable{"elapsed",    "elapsed-create", "elapsed-insert",    "num-columns",
+                                "num-tuples", "protocol-id",    "source-query-hash", "tablename"};
+    QStringList fieldsProtocol{"id", "created-elapsed", "attributes", "class", "dbname", "server"};
+    QStringList fieldsFedTempTable{"query-hash", "table-name"};
+
+    const int rowCount = model->rowCount();
+    for (int i = 0; i < rowCount; i++)
+    {
+        QModelIndex valIndex = model->index(i, COL::Value);
+        QJsonObject event = model->GetEvent(valIndex);
+        QString keyString = event["k"].toString();
+
+        if (keyString == "end-query")
+        {
+            const QJsonObject& valJson = event["v"].toObject();
+            WriteJsonAsCsv(valJson, fieldsQuery, outputQuery);
+
+            // For federated queries, parsed out all the temp tables used and create a separate list.
+            QString queryText = valJson["query"].toString();
+            if (queryText.contains("FQ_Temp_"))
+            {
+                QRegularExpression regex;
+                if (queryText.startsWith("(restrict"))
+                {
+                    regex.setPattern("table (.*)\\)");
+                }
+                else if (queryText.startsWith("SELECT "))
+                {
+                    regex.setPattern("\"(#Tableau_.*?)\" ");
+                }
+                else
+                {
+                    continue;
+                }
+
+                QString queryHash = QString::number(valJson["query-hash"].toDouble(), 'f', 0);
+                QRegularExpressionMatchIterator i = regex.globalMatch(queryText);
+                while (i.hasNext())
+                {
+                    QRegularExpressionMatch match = i.next();
+                    QString tableName = match.captured(1);
+                    if (!tableName.startsWith("["))
+                    {
+                        // Hyper does not use square brackets for table names, but the table names
+                        // we log in sql-temp-table events have them.
+                        tableName = "[" + tableName + "]";
+                    }
+                    outputFedTempTable += queryHash + ",\"" + tableName + "\"\n";
+                }
+            }
+        }
+        else if (keyString == "end-sql-temp-table-tuples-create")
+        {
+            WriteJsonAsCsv(event["v"].toObject(), fieldsTempTable, outputTempTable);
+        }
+        else if (keyString == "construct-protocol")
+        {
+            WriteJsonAsCsv(event["v"].toObject(), fieldsProtocol, outputProtocol);
+        }
+    }
+
+    if (fieldsQuery.isEmpty())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Error", "No query event found.");
+        warning.exec();
+        return;
+    }
+
+    QString docFolderPath = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0] + "/TLV";
+    if (CreateFolder(docFolderPath) &&
+        SaveFile(docFolderPath, "TLV_Query.csv", fieldsQuery, outputQuery) &&
+        SaveFile(docFolderPath, "TLV_FedTempTable.csv", fieldsFedTempTable, outputFedTempTable) &&
+        SaveFile(docFolderPath, "TLV_TempTable.csv", fieldsTempTable, outputTempTable) &&
+        SaveFile(docFolderPath, "TLV_Protocol.csv", fieldsProtocol, outputProtocol))
+    {
+        CopyAllFiles(":/workbooks", docFolderPath);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(docFolderPath));
+    }
+}
+
+void MainWindow::on_actionCreate_info_viz_triggered()
+{
+    GeQueryInfoViz(GetCurrentTreeModel());
 }
 
 void MainWindow::FindPrev()
