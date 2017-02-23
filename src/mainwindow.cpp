@@ -959,7 +959,7 @@ void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& field
 {
     for (const auto& field : fields)
     {
-        auto& val = valJson[field];
+        const auto& val = valJson[field];
         if (val.isDouble())
         {
             double intpart;
