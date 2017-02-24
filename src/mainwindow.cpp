@@ -1119,7 +1119,7 @@ void GeQueryInfoViz(TreeModel* model)
                 QRegularExpression regex;
                 if (queryText.startsWith("(restrict"))
                 {
-                    regex.setPattern("table (.*)\\)");
+                    regex.setPattern("table (.*?)\\)");
                 }
                 else if (queryText.startsWith("SELECT "))
                 {
