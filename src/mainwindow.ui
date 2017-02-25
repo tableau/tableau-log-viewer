@@ -105,6 +105,7 @@ QTabWidget::tab-bar {
     <addaction name="actionRefresh"/>
     <addaction name="actionShow_summary"/>
     <addaction name="actionOpen_timeline"/>
+    <addaction name="actionCreate_info_viz"/>
     <addaction name="separator"/>
     <addaction name="actionClose_tab"/>
     <addaction name="actionClose_all_tabs"/>
@@ -393,6 +394,17 @@ QTabWidget::tab-bar {
   <action name="actionChoose_directory">
    <property name="text">
     <string>Choose &amp;directory...</string>
+   </property>
+  </action>
+  <action name="actionCreate_info_viz">
+   <property name="text">
+    <string>Create &amp;info viz</string>
+   </property>
+   <property name="toolTip">
+    <string>Create visualization workbook for query analysis</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>

@@ -54,6 +54,13 @@ void OptionsDlg::WriteSettings()
     settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
     settings.setValue("defaultHighlightFilter", currFilter);
     settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
+
+    if (ui->useGrayBackground->isEnabled())
+    {
+        settings.setValue(
+            "backgroundColor",
+            ui->useGrayBackground->isChecked() ? Options::DefaultColorGray : Options::DefaultColorWhite);
+    }
     settings.endGroup();
 
     Options::GetInstance().ReadSettings();
@@ -86,6 +93,12 @@ void OptionsDlg::ReadSettings()
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
     ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
+
+    // Don't change the background color from dialog if it's customized directly in INI file.
+    QString backgroundColor = options.getBackgroundColor();
+    ui->useGrayBackground->setEnabled(
+        backgroundColor == Options::DefaultColorGray || backgroundColor == Options::DefaultColorWhite);
+    ui->useGrayBackground->setChecked(backgroundColor == Options::DefaultColorGray);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
