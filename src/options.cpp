@@ -8,8 +8,6 @@
 #include <QSettings>
 #include <QSysInfo>
 
-const QString Options::DefaultColorWhite { "#ffffff" };
-const QString Options::DefaultColorGray { "#e5e5e5" };
 
 void Options::ReadSettings()
 {
@@ -28,7 +26,6 @@ void Options::ReadSettings()
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
-    m_backgroundColor = settings.value("backgroundColor", DefaultColorWhite).toString();
     m_theme = settings.value("theme", "Native").toString();
 
     settings.endGroup();
@@ -106,11 +103,6 @@ void Options::LoadHighlightFilter(const QString& filterName)
 int Options::getSyntaxHighlightLimit() const
 {
     return m_syntaxHighlightLimit;
-}
-
-QString Options::getBackgroundColor() const
-{
-    return m_backgroundColor;
 }
 
 QString Options::getTheme()
