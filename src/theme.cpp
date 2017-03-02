@@ -21,14 +21,14 @@ std::unique_ptr<QPalette> Theme::GetDarkPalette()
     // https://gist.github.com/QuantumCD/6245215
     auto palette = std::make_unique<QPalette>();
     palette->setColor(QPalette::Window,          QColor(53,53,53));
-    palette->setColor(QPalette::WindowText,      Qt::white);
-    palette->setColor(QPalette::Base,            QColor(25,25,25));
+    palette->setColor(QPalette::WindowText,      QColor(0xf1f1f1));
+    palette->setColor(QPalette::Base,            QColor(0x202020));
     palette->setColor(QPalette::AlternateBase,   QColor(53,53,53));
-    palette->setColor(QPalette::ToolTipBase,     Qt::white);
-    palette->setColor(QPalette::ToolTipText,     Qt::white);
-    palette->setColor(QPalette::Text,            Qt::white);
+    palette->setColor(QPalette::ToolTipBase,     QColor(0xf1f1f1));
+    palette->setColor(QPalette::ToolTipText,     QColor(0xf1f1f1));
+    palette->setColor(QPalette::Text,            QColor(0xf1f1f1));
     palette->setColor(QPalette::Button,          QColor(53,53,53));
-    palette->setColor(QPalette::ButtonText,      Qt::white);
+    palette->setColor(QPalette::ButtonText,      QColor(0xf1f1f1));
     palette->setColor(QPalette::BrightText,      Qt::red);
     palette->setColor(QPalette::Link,            QColor(42, 130, 218));
 
