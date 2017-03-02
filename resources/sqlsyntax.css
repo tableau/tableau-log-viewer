@@ -1,7 +1,6 @@
 /* Whole document settings */
 body{
     font-family: Monaco, Consolas, Monospace, Courier;
-    /*color: #839496;*/
 }
 
 /* Keyword */
@@ -25,17 +24,14 @@ body{
 
 /* Whitespace */
 .w{
-    /*color: #839496; /*black;*/
 }
 
 /* Identifier */
 .i{
-    /*color: #839496; /*black;*/
 }
 
 /* Symbol */
 .sy{
-    /*color: #839496; /*black;*/
 }
 
 /* Open Parenthesis */
@@ -52,20 +48,20 @@ body{
 
 /* Operator */
 .o{
-    /*color: #839496; /*black;*/
+
 }
 
 /* No Match */
 .n{
-    /*color: #839496; /*black;*/
+
 }
 
 /* Integer */
 .in{
-    /*color: #839496; /*black;*/
+
 }
 
 /* Float */
 .f{
-    /*color: #839496; /*black;*/
+
 }
