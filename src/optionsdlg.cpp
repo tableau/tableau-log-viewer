@@ -100,15 +100,12 @@ void OptionsDlg::ReadSettings()
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
     ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
     ui->themeComboBox->setCurrentText(themeName);
-<<<<<<< HEAD
 
     // Don't change the background color from dialog if it's customized directly in INI file.
     QString backgroundColor = options.getBackgroundColor();
     ui->useGrayBackground->setEnabled(
         backgroundColor == Options::DefaultColorGray || backgroundColor == Options::DefaultColorWhite);
     ui->useGrayBackground->setChecked(backgroundColor == Options::DefaultColorGray);
-=======
->>>>>>> 0c158d3bb72c4a28446ecc8872b441367ca5c2c3
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
