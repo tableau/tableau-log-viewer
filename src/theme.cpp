@@ -24,7 +24,7 @@ std::unique_ptr<QPalette> Theme::GetDarkPalette()
     palette->setColor(QPalette::WindowText,      QColor(0xf1f1f1));
     palette->setColor(QPalette::Base,            QColor(0x202020));
     palette->setColor(QPalette::AlternateBase,   QColor(0x353535));
-    palette->setColor(QPalette::ToolTipBase,     QColor(0xf1f1f1));
+    palette->setColor(QPalette::ToolTipBase,     QColor(0x353535));
     palette->setColor(QPalette::ToolTipText,     QColor(0xf1f1f1));
     palette->setColor(QPalette::Text,            QColor(0xf1f1f1));
     palette->setColor(QPalette::Button,          QColor(0x353535));
@@ -46,7 +46,7 @@ std::unique_ptr<QPalette> Theme::GetSolarizedLightPalette()
     palette->setColor(QPalette::WindowText,      QColor(0x657b83));
     palette->setColor(QPalette::Base,            QColor(0xfdf6e3));
     palette->setColor(QPalette::AlternateBase,   QColor(0xeee8d5));
-    palette->setColor(QPalette::ToolTipBase,     QColor(0x657b83));
+    palette->setColor(QPalette::ToolTipBase,     QColor(0xeee8d5));
     palette->setColor(QPalette::ToolTipText,     QColor(0x657b83));
     palette->setColor(QPalette::Text,            QColor(0x657b83));
     palette->setColor(QPalette::Button,          QColor(0xe6ddc1));
@@ -74,7 +74,7 @@ std::unique_ptr<QPalette> Theme::GetSolarizedDarkPalette()
     palette->setColor(QPalette::WindowText,      QColor(0x839496));
     palette->setColor(QPalette::Base,            QColor(0x002b36));
     palette->setColor(QPalette::AlternateBase,   QColor(0x073642));
-    palette->setColor(QPalette::ToolTipBase,     QColor(0x839496));
+    palette->setColor(QPalette::ToolTipBase,     QColor(0x073642));
     palette->setColor(QPalette::ToolTipText,     QColor(0x839496));
     palette->setColor(QPalette::Text,            QColor(0x839496));
     palette->setColor(QPalette::Button,          QColor(0x001e26));
