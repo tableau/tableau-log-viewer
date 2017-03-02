@@ -74,11 +74,7 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/value-previous.png</normaloff>:/value-previous.png</iconset>
+        <string>🡱</string>
        </property>
       </widget>
      </item>
@@ -160,9 +156,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>closeButton</sender>
