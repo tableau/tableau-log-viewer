@@ -74,13 +74,11 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>🡱</string>
+        <string/>
        </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/value-previous.png</normaloff>:/value-previous.png</iconset>
        </property>
       </widget>
      </item>
@@ -95,7 +93,11 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>🡳</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/+darktheme/value-next.png</normaloff>:/+darktheme/value-next.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -158,7 +160,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>closeButton</sender>
