@@ -8,6 +8,7 @@
 #include "pathhelper.h"
 #include "processevent.h"
 #include "savefilterdialog.h"
+#include "themeutils.h"
 #include "zoomabletreeview.h"
 
 #include <map>
@@ -43,6 +44,14 @@ MainWindow::MainWindow()
     Ui_MainWindow::menuBar->addAction(actionClear_all_events);
 
     ReadSettings();
+    // Load the theme for the first time
+    // No need to switch the theme if it is set to "Native" (the default)
+    QString themeName = m_options.getTheme();
+    if (themeName != "Native")
+    {
+        ThemeUtils::SwitchTheme(themeName, this);
+        this->actionTail_current_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
+    }
     UpdateMenuAndStatusBar();
 
     // About TLV. It will have the Version number, this only needs to be calculated once
@@ -348,7 +357,7 @@ void MainWindow::on_actionTail_current_tab_triggered()
         if (currentTab->StartLiveCapture())
         {
             view->scrollToBottom();
-            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(":/tab-sync-thin.png"));
+            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
         }
         else
         {

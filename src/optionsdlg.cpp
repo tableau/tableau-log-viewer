@@ -3,11 +3,13 @@
 
 #include "options.h"
 #include "pathhelper.h"
+#include "themeutils.h"
 
 #include <QBitArray>
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QPalette>
 #include <QSettings>
 
 OptionsDlg::OptionsDlg(QWidget *parent) :
@@ -41,6 +43,7 @@ void OptionsDlg::WriteSettings()
     bool captureAllTextFiles = ui->captureAllTextFiles->isChecked();
     auto currFilter = ui->defaultHighlightComboBox->currentText();
     int syntaxHighlightLimit = ui->syntaxHighlightLimitSpinBox->value();
+    auto themeName = ui->themeComboBox->currentText();
 
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -54,13 +57,7 @@ void OptionsDlg::WriteSettings()
     settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
     settings.setValue("defaultHighlightFilter", currFilter);
     settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
-
-    if (ui->useGrayBackground->isEnabled())
-    {
-        settings.setValue(
-            "backgroundColor",
-            ui->useGrayBackground->isChecked() ? Options::DefaultColorGray : Options::DefaultColorWhite);
-    }
+    settings.setValue("theme", themeName);
     settings.endGroup();
 
     Options::GetInstance().ReadSettings();
@@ -78,6 +75,7 @@ void OptionsDlg::ReadSettings()
     bool captureAllTextFiles = options.getCaptureAllTextFiles();
     auto defaultHighlightFilter = options.getDefaultFilterName();
     int syntaxHighlightLimit = options.getSyntaxHighlightLimit();
+    auto themeName = options.getTheme();
 
     for (int i = 0; i < skippedText.length(); i++)
     {
@@ -93,12 +91,7 @@ void OptionsDlg::ReadSettings()
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
     ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
-
-    // Don't change the background color from dialog if it's customized directly in INI file.
-    QString backgroundColor = options.getBackgroundColor();
-    ui->useGrayBackground->setEnabled(
-        backgroundColor == Options::DefaultColorGray || backgroundColor == Options::DefaultColorWhite);
-    ui->useGrayBackground->setChecked(backgroundColor == Options::DefaultColorGray);
+    ui->themeComboBox->setCurrentText(themeName);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
@@ -159,7 +152,26 @@ void OptionsDlg::on_serviceEnable_clicked()
     ui->serviceURLEdit->setEnabled(true);
 }
 
+void OptionsDlg::on_themeComboBox_currentTextChanged(const QString &themeName)
+{
+    qDebug() << "Theme: " << themeName;
+    ThemeUtils::SwitchTheme(themeName, this->parentWidget());
+}
+
 void OptionsDlg::on_OptionsDlg_accepted()
 {
     WriteSettings();
+}
+
+void OptionsDlg::on_OptionsDlg_rejected()
+{
+    // Revert the theme back if the user cancels the dialog
+    Options& options = Options::GetInstance();
+    auto themeNameSettings = options.getTheme();
+    auto themeNameUi = ui->themeComboBox->currentText();
+    // Only apply a theme change if necessary
+    if (themeNameSettings != themeNameUi)
+    {
+        ThemeUtils::SwitchTheme(themeNameSettings, this->parentWidget());
+    }
 }

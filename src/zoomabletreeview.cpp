@@ -12,9 +12,6 @@ qreal ZoomableTreeView::sm_savedFontPointSize { 0 };
 ZoomableTreeView::ZoomableTreeView(QWidget *parent)
     :QTreeView(parent)
 {
-    Options& options = Options::GetInstance();
-    parent->setStyleSheet(QString("QTreeView { background-color: %1; }").arg(options.getBackgroundColor()));
-
     QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     fixedFont.setPointSizeF(sm_savedFontPointSize);
     this->setFont(fixedFont);

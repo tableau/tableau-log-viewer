@@ -2,6 +2,7 @@
 #include "ui_valuedlg.h"
 
 #include "logtab.h"
+#include "themeutils.h"
 #include "tokenizer.h"
 
 #include <QDebug>
@@ -55,7 +56,8 @@ ValueDlg::ValueDlg(QWidget *parent) :
     m_id = QString("");
     m_key = QString("");
 
-    setStyleSheet(QString("QTextEdit { background-color: %1; }").arg(options.getBackgroundColor()));
+    ui->prevButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-previous.png")));
+    ui->nextButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-next.png")));
 
     QFile sqlsyntaxcss(":/sqlsyntax.css");
     sqlsyntaxcss.open(QIODevice::ReadOnly);

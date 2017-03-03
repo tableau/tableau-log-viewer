@@ -5,61 +5,63 @@ body{
 
 /* Keyword */
 .k{
-    color: rgb(148,41,41);
-    font-weight: bold;
+    /*color: rgb(148,41,41);*/
+    color: #cb4b16;
+    /*font-weight: bold;*/
 }
 
 /* String */
 .s{
-    color: rgb(20,20,232);
+    /*color: rgb(20,20,232);*/
+    color: #268bd2;
 }
 
 /* Tag */
 .t{
-    color: rgb(231,98,225);
+    /*color: rgb(231,98,225);*/
+    color: #d33682;
 }
 
 /* Whitespace */
 .w{
-    color: black;
 }
 
 /* Identifier */
 .i{
-    color: black;
 }
 
 /* Symbol */
 .sy{
-    color: black;
 }
 
 /* Open Parenthesis */
 .op{
-    color: rgb(57,166,57);
+    /*color: rgb(57,166,57);*/
+    color: #859900;
 }
 
 /* Close Parenthesis */
 .cp{
-    color: rgb(57,166,57);
+    /*color: rgb(57,166,57);*/
+    color: #859900;
 }
 
 /* Operator */
 .o{
-    color: black;
+
 }
 
 /* No Match */
 .n{
-    color: black;
+
 }
 
 /* Integer */
 .in{
-    color: black;
+
 }
 
 /* Float */
 .f{
-    color: black;
+
 }
