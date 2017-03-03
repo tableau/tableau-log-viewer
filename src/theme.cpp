@@ -32,6 +32,12 @@ std::unique_ptr<QPalette> Theme::GetDarkPalette()
 
     palette->setColor(QPalette::Highlight,       QColor(0x2a82da));
     palette->setColor(QPalette::HighlightedText, Qt::black);
+    palette->setColor(QPalette::Light,           QColor(0x303030));
+
+    palette->setColor(QPalette::Disabled, QPalette::Text,       QColor(0x909090));
+    palette->setColor(QPalette::Disabled, QPalette::Button,     QColor(0x202020));
+    palette->setColor(QPalette::Disabled, QPalette::ButtonText, QColor(0x909090));
+    palette->setColor(QPalette::Disabled, QPalette::Base,       QColor(0x353535));
     return palette;
 }
 
@@ -57,8 +63,8 @@ std::unique_ptr<QPalette> Theme::GetSolarizedLightPalette()
     palette->setColor(QPalette::Light,           QColor(0xeee8d5));
 
     palette->setColor(QPalette::Disabled, QPalette::Text,       QColor(0x93a1a1));
-    palette->setColor(QPalette::Disabled, QPalette::Button,     QColor(0x93a1a1));
-    palette->setColor(QPalette::Disabled, QPalette::ButtonText, QColor(0xeee8d5));
+    palette->setColor(QPalette::Disabled, QPalette::Button,     QColor(0xfdf6e3));
+    palette->setColor(QPalette::Disabled, QPalette::ButtonText, QColor(0x93a1a1));
     palette->setColor(QPalette::Disabled, QPalette::Base,       QColor(0xe6ddc1));
     return palette;
 }
@@ -85,8 +91,8 @@ std::unique_ptr<QPalette> Theme::GetSolarizedDarkPalette()
     palette->setColor(QPalette::Light,           QColor(0x073642));
 
     palette->setColor(QPalette::Disabled, QPalette::Text,       QColor(0x586e75));
-    palette->setColor(QPalette::Disabled, QPalette::Button,     QColor(0x586e75));
-    palette->setColor(QPalette::Disabled, QPalette::ButtonText, QColor(0x073642));
+    palette->setColor(QPalette::Disabled, QPalette::Button,     QColor(0x002b36));
+    palette->setColor(QPalette::Disabled, QPalette::ButtonText, QColor(0x586e75));
     palette->setColor(QPalette::Disabled, QPalette::Base,       QColor(0x001e26));
     return palette;
 }
