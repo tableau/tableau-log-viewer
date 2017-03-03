@@ -10,9 +10,7 @@
 
 std::unique_ptr<QPalette> Theme::GetNativePalette(QWidget* widget)
 {
-    return std::unique_ptr<QPalette>(
-        new QPalette(widget->style()->standardPalette())
-    );
+    return std::make_unique<QPalette>(widget->style()->standardPalette());
 }
 
 std::unique_ptr<QPalette> Theme::GetDarkPalette()

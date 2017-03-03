@@ -14,7 +14,6 @@
 
 OptionsDlg::OptionsDlg(QWidget *parent) :
     QDialog(parent),
-    parent(parent),
     ui(new Ui::OptionsDlg)
 {
     ui->setupUi(this);
@@ -156,10 +155,23 @@ void OptionsDlg::on_serviceEnable_clicked()
 void OptionsDlg::on_themeComboBox_currentTextChanged(const QString &themeName)
 {
     qDebug() << "Theme: " << themeName;
-    ThemeUtils::SwitchTheme(themeName, parent);
+    ThemeUtils::SwitchTheme(themeName, this->parentWidget());
 }
 
 void OptionsDlg::on_OptionsDlg_accepted()
 {
     WriteSettings();
+}
+
+void OptionsDlg::on_OptionsDlg_rejected()
+{
+    // Revert the theme back if the user cancels the dialog
+    Options& options = Options::GetInstance();
+    auto themeNameSettings = options.getTheme();
+    auto themeNameUi = ui->themeComboBox->currentText();
+    // Only apply a theme change if necessary
+    if (themeNameSettings != themeNameUi)
+    {
+        ThemeUtils::SwitchTheme(themeNameSettings, this->parentWidget());
+    }
 }

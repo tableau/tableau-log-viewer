@@ -2,10 +2,8 @@
 
 #include <memory>
 
-class QColor;
 class QPalette;
 class QString;
-class QStyle;
 class QWidget;
 
 class Theme {

@@ -40,7 +40,6 @@ namespace ThemeUtils {
     void SetLightIconSet()
     {
         QStringList extraSelectors;
-        //extraSelectors << "lighttheme";
         m_fileSelector.setExtraSelectors(extraSelectors);
     }
     void SetDarkIconSet()

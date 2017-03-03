@@ -20,6 +20,7 @@ private slots:
     //Slots use underscores as per QT's automatic connection syntax
     void on_btnAdd_clicked();
     void on_OptionsDlg_accepted();
+    void on_OptionsDlg_rejected();
     void on_listWidget_itemSelectionChanged();
     void on_btnRemove_clicked();
     void on_chooseDiffTool_clicked();
@@ -31,7 +32,6 @@ private:
     void WriteSettings();
     void ReadSettings();
 
-    QWidget *parent;
     Ui::OptionsDlg *ui;
 };
 

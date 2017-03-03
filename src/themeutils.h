@@ -1,5 +1,6 @@
 #pragma once
 
+class QColor;
 class QString;
 
 namespace ThemeUtils {
