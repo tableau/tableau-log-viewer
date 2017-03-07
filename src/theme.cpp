@@ -107,7 +107,7 @@ std::unique_ptr<QPalette> GetEvergreenStatePalette(QWidget*)
     palette->setColor(QPalette::WindowText,      QColor(0xf1f1f1));
     palette->setColor(QPalette::Base,            QColor(0x2e3c18));
     palette->setColor(QPalette::AlternateBase,   QColor(0xffff7f));
-    palette->setColor(QPalette::ToolTipBase,     QColor(0xc8b394));
+    palette->setColor(QPalette::ToolTipBase,     QColor(0x4b3a29));
     palette->setColor(QPalette::ToolTipText,     QColor(0xf1f1f1));
     palette->setColor(QPalette::Text,            QColor(0xdadada));
     palette->setColor(QPalette::Button,          QColor(0x4d6625));
