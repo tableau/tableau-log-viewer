@@ -209,28 +209,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="themeComboBox">
-            <item>
-             <property name="text">
-              <string>Native</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Dark Fusion</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Solarized Light</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Solarized Dark</string>
-             </property>
-            </item>
-           </widget>
+           <widget class="QComboBox" name="themeComboBox"/>
           </item>
          </layout>
         </item>

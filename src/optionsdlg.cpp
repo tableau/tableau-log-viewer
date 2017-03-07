@@ -91,6 +91,7 @@ void OptionsDlg::ReadSettings()
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
     ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
+    ui->themeComboBox->addItems(ThemeUtils::GetThemeNames());
     ui->themeComboBox->setCurrentText(themeName);
 
     // load all saved filters for default filters

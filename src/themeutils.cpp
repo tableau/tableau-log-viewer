@@ -13,6 +13,11 @@ void ThemeUtils::SwitchTheme(const QString& themeName, QWidget* widget)
     theme->Activate();
 }
 
+QStringList ThemeUtils::GetThemeNames()
+{
+    return Theme::GetThemeNames();
+}
+
 double ThemeUtils::Luminance(QColor color)
 {
     // https://www.w3.org/TR/WCAG/#relativeluminancedef
