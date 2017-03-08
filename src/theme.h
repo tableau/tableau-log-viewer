@@ -4,14 +4,11 @@
 
 class QPalette;
 class QString;
+class QStringList;
 class QWidget;
 
 class Theme {
 private:
-    static std::unique_ptr<QPalette> GetNativePalette(QWidget* widget);
-    static std::unique_ptr<QPalette> GetDarkPalette();
-    static std::unique_ptr<QPalette> GetSolarizedLightPalette();
-    static std::unique_ptr<QPalette> GetSolarizedDarkPalette();
     static QString GetDefaultStyle();
     static QString sm_defaultStyle;
 
@@ -20,6 +17,7 @@ private:
     std::unique_ptr<QPalette> m_palette;
 public:
     Theme(bool isFusionStyle, bool isDark, std::unique_ptr<QPalette> palette);
+    static QStringList GetThemeNames();
     static std::unique_ptr<Theme> ThemeFactory(const QString& themeName, QWidget* widget);
     void Activate();
 };

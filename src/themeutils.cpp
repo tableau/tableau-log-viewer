@@ -4,13 +4,26 @@
 #include <algorithm>
 #include <cmath>
 #include <QColor>
+#include <QDebug>
 #include <QFileSelector>
 #include <QPalette>
 
 void ThemeUtils::SwitchTheme(const QString& themeName, QWidget* widget)
 {
     auto theme = Theme::ThemeFactory(themeName, widget);
-    theme->Activate();
+    if (theme)
+    {
+        theme->Activate();
+    }
+    else
+    {
+        qDebug() << "Unsupported theme:" << themeName;
+    }
+}
+
+QStringList ThemeUtils::GetThemeNames()
+{
+    return Theme::GetThemeNames();
 }
 
 double ThemeUtils::Luminance(QColor color)

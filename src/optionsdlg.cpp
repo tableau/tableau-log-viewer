@@ -91,6 +91,13 @@ void OptionsDlg::ReadSettings()
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
     ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
+
+    const auto& themeNames = ThemeUtils::GetThemeNames();
+    ui->themeComboBox->addItems(themeNames);
+    if (!themeNames.contains(themeName))
+    {
+        themeName = "Native";
+    }
     ui->themeComboBox->setCurrentText(themeName);
 
     // load all saved filters for default filters
@@ -154,7 +161,6 @@ void OptionsDlg::on_serviceEnable_clicked()
 
 void OptionsDlg::on_themeComboBox_currentTextChanged(const QString &themeName)
 {
-    qDebug() << "Theme: " << themeName;
     ThemeUtils::SwitchTheme(themeName, this->parentWidget());
 }
 
@@ -168,6 +174,11 @@ void OptionsDlg::on_OptionsDlg_rejected()
     // Revert the theme back if the user cancels the dialog
     Options& options = Options::GetInstance();
     auto themeNameSettings = options.getTheme();
+    if (!ThemeUtils::GetThemeNames().contains(themeNameSettings))
+    {
+        themeNameSettings = "Native";
+    }
+
     auto themeNameUi = ui->themeComboBox->currentText();
     // Only apply a theme change if necessary
     if (themeNameSettings != themeNameUi)
