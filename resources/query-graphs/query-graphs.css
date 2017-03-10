@@ -168,8 +168,18 @@ html, body {
   stroke-dasharray: 5 3;
 }
 
+.dotted-link {
+  stroke-width: 1.5;
+  stroke-dasharray: 1.5 2;
+}
+
 marker#arrow {
   fill: #ccc;
+}
+
+/* Run Query */
+path.run-query {
+  fill: #fff;
 }
 
 /* Joins */
@@ -201,4 +211,10 @@ rect.table-header {
 
 rect.table-border {
   fill: none;
+}
+text.table-text {
+  text-anchor: middle;
+  font-family: Monaco, Consolas, monospace;
+  stroke: none;
+  fill: hsl(0, 0%, 40%);
 }
