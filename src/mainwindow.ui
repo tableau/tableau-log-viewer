@@ -104,7 +104,6 @@ QTabWidget::tab-bar {
     <addaction name="actionClear_all_events"/>
     <addaction name="actionRefresh"/>
     <addaction name="actionShow_summary"/>
-    <addaction name="actionOpen_timeline"/>
     <addaction name="actionCreate_info_viz"/>
     <addaction name="separator"/>
     <addaction name="actionClose_tab"/>
@@ -311,17 +310,6 @@ QTabWidget::tab-bar {
   <action name="actionOptions">
    <property name="text">
     <string>&amp;Options...</string>
-   </property>
-  </action>
-  <action name="actionOpen_timeline">
-   <property name="text">
-    <string>Open &amp;timeline</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+T</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionClear_Recent_Files">

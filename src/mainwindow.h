@@ -68,7 +68,6 @@ private slots:
     void on_actionFind_next_triggered();
     void on_actionFind_previous_triggered();
 
-    void on_actionOpen_timeline_triggered();
     void on_actionOptions_triggered();
     void on_tabWidget_currentChanged(int index);
     void on_tabWidget_tabCloseRequested(int index);

@@ -27,6 +27,7 @@
         <file alias="query-graphs/query-graphs.css">../resources/query-graphs/query-graphs.css</file>
         <file alias="query-graphs/query-graphs.min.js">../resources/query-graphs/query-graphs.min.js</file>
         <file alias="workbooks/QueryInfo.twb">../resources/workbooks/QueryInfo.twb</file>
+        <file alias="workbooks/Timeline.twb">../resources/workbooks/Timeline.twb</file>
     </qresource>
     <qresource prefix="/+darktheme">
         <file alias="tab-sync.png">../resources/images/darktheme/tab-sync.png</file>

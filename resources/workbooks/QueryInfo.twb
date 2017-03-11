@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<!-- build cpp.17.0222.1600                                 -->
-<workbook source-build='0.0.0 (0000.17.0222.1600)' source-platform='win' version='10.3' xmlns:user='http://www.tableausoftware.com/xml/user'>
+<workbook source-build='' source-platform='win' version='10.0' xmlns:user='http://www.tableausoftware.com/xml/user'>
   <preferences>
     <preference name='ui.encoding.shelf.height' value='24' />
     <preference name='ui.shelf.height' value='26' />
