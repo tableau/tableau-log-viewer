@@ -127,7 +127,6 @@ void MainWindow::UpdateMenuAndStatusBar()
     actionClear_all_events->setEnabled(model);
     actionRefresh->setEnabled(model);
     actionShow_summary->setEnabled(model);
-    actionOpen_timeline->setEnabled(model);
     actionCreate_info_viz->setEnabled(model);
     actionClose_tab->setEnabled(model);
     actionClose_all_tabs->setEnabled(model);
@@ -957,13 +956,6 @@ void MainWindow::on_actionShow_summary_triggered()
     ShowSummary(GetCurrentTreeModel(), this);
 }
 
-void MainWindow::on_actionOpen_timeline_triggered()
-{
-    QMessageBox timelineMsg(this);
-    timelineMsg.setText("Timeline is currently not implemented for the TLV QT Port.");
-    timelineMsg.exec();
-}
-
 void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& fields, QMap<QString, QString>& nameValues)
 {
     for (const auto& field : fields)
@@ -977,7 +969,9 @@ void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& field
         }
         else if (val.isString())
         {
-            nameValues[field] = "\"" + val.toString().replace("\n", " ").replace("\"", "\"\"") + "\"";
+            QString strVal = val.toString();
+            strVal.truncate(32000); // Excel cannot handle more than ~32K chars.
+            nameValues[field] = "\"" % strVal.replace("\n", "\\n").replace("\"", "\"\"") % "\"";
         }
         else if (val.isObject())
         {
@@ -1077,7 +1071,7 @@ bool CopyAllFiles(const QString& fromPath, const QString& toPath)
             else
             {
                 // Skip copying if destination is the same version or newer.
-                break;
+                continue;
             }
         }
 
@@ -1103,11 +1097,13 @@ void GeQueryInfoViz(TreeModel* model)
     QString outputTempTable;
     QString outputProtocol;
     QString outputFedTempTable;
+    QString outputElapsedEvent;
     QStringList fieldsQuery{"cols", "elapsed", "protocol-id", "query", "query-category", "query-hash", "rows"};
     QStringList fieldsTempTable{"elapsed",    "elapsed-create", "elapsed-insert",    "num-columns",
                                 "num-tuples", "protocol-id",    "source-query-hash", "tablename"};
     QStringList fieldsProtocol{"id", "created-elapsed", "attributes", "class", "dbname", "server"};
     QStringList fieldsFedTempTable{"query-hash", "table-name"};
+    QStringList fieldsElapsedEvent{"line-id", "time", "elapsed", "begin", "file", "pid", "event", "value"};
 
     const int rowCount = model->rowCount();
     for (int i = 0; i < rowCount; i++)
@@ -1115,6 +1111,28 @@ void GeQueryInfoViz(TreeModel* model)
         QModelIndex valIndex = model->index(i, COL::Value);
         QJsonObject event = model->GetEvent(valIndex);
         QString keyString = event["k"].toString();
+
+        auto elapsed = model->index(i, COL::Elapsed).data().toDouble();
+        if (elapsed != 0.0)
+        {
+            auto strId = model->index(i, COL::ID).data().toString();
+            auto strTime = event["ts"].toString();
+            auto strElapsed = QString::number(elapsed, 'f', 3);
+            auto beginTime = model->index(i, COL::Time).data(Qt::UserRole).toLongLong() - (elapsed * 1000);
+            auto strFile = model->index(i, COL::File).data().toString();
+            auto strPid = model->index(i, COL::PID).data().toString();
+            auto strValue = model->GetValueFullString(valIndex);
+            if (strValue.size() > 3000)
+            {
+                strValue.truncate(3000);
+                strValue += "...";
+            }
+            strValue.replace("\n", "\\n").replace("\"", "\"\"");
+            outputElapsedEvent += QString("%1,\"%2\",%3,%4,\"%5\",%6,\"%7\",\"%8\"\n")
+                                      .arg(
+                                          strId, strTime, strElapsed, QString::number(beginTime, 'f', 0), strFile,
+                                          strPid, keyString, strValue);
+        }
 
         if (keyString == "end-query")
         {
@@ -1149,9 +1167,9 @@ void GeQueryInfoViz(TreeModel* model)
                     {
                         // Hyper does not use square brackets for table names, but the table names
                         // we log in sql-temp-table events have them.
-                        tableName = "[" + tableName + "]";
+                        tableName = "[" % tableName % "]";
                     }
-                    outputFedTempTable += queryHash + ",\"" + tableName + "\"\n";
+                    outputFedTempTable += queryHash % ",\"" % tableName % "\"\n";
                 }
             }
         }
@@ -1165,9 +1183,9 @@ void GeQueryInfoViz(TreeModel* model)
         }
     }
 
-    if (fieldsQuery.isEmpty())
+    if (outputElapsedEvent.isEmpty())
     {
-        QMessageBox warning(QMessageBox::Icon::Warning, "Error", "No query event found.");
+        QMessageBox warning(QMessageBox::Icon::Warning, "Error", "No parsable event found.");
         warning.exec();
         return;
     }
@@ -1177,7 +1195,8 @@ void GeQueryInfoViz(TreeModel* model)
         SaveFile(docFolderPath, "TLV_Query.csv", fieldsQuery, outputQuery) &&
         SaveFile(docFolderPath, "TLV_FedTempTable.csv", fieldsFedTempTable, outputFedTempTable) &&
         SaveFile(docFolderPath, "TLV_TempTable.csv", fieldsTempTable, outputTempTable) &&
-        SaveFile(docFolderPath, "TLV_Protocol.csv", fieldsProtocol, outputProtocol))
+        SaveFile(docFolderPath, "TLV_Protocol.csv", fieldsProtocol, outputProtocol) &&
+        SaveFile(docFolderPath, "TLV_ElapsedEvent.csv", fieldsElapsedEvent, outputElapsedEvent))
     {
         CopyAllFiles(":/workbooks", docFolderPath);
         QDesktopServices::openUrl(QUrl::fromLocalFile(docFolderPath));
