@@ -971,7 +971,7 @@ void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& field
         {
             QString strVal = val.toString();
             strVal.truncate(32000); // Excel cannot handle more than ~32K chars.
-            nameValues[field] = "\"" % strVal.replace("\n", " ").replace("\"", "\"\"") % "\"";
+            nameValues[field] = "\"" % strVal.replace("\n", "\\n").replace("\"", "\"\"") % "\"";
         }
         else if (val.isObject())
         {
@@ -1071,7 +1071,7 @@ bool CopyAllFiles(const QString& fromPath, const QString& toPath)
             else
             {
                 // Skip copying if destination is the same version or newer.
-                break;
+                continue;
             }
         }
 

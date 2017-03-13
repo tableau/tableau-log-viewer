@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<workbook source-build='' source-platform='win' version='10.0' xmlns:user='http://www.tableausoftware.com/xml/user'>
+<workbook source-build='' source-platform='win' version='10.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
   <preferences>
     <preference name='ui.encoding.shelf.height' value='24' />
     <preference name='ui.shelf.height' value='26' />
   </preferences>
   <datasources>
-    <datasource caption='Federated Queries TT' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 3)' version='10.3'>
+    <datasource caption='Federated Queries TT' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 3)' version='10.1'>
       <connection class='federated'>
         <named-connections>
           <named-connection caption='TLV_Query' name='textscan.1ocujm31p6zq7z1dhp74k13dk4gs (copy 3)'>
@@ -445,12 +445,12 @@
       <column-instance column='[elapsed-insert]' derivation='Sum' name='[sum:elapsed-insert:qk]' pivot='key' type='quantitative' />
       <column-instance column='[num-columns]' derivation='Sum' name='[sum:num-columns:qk]' pivot='key' type='quantitative' />
       <column-instance column='[num-tuples]' derivation='Sum' name='[sum:num-tuples:qk]' pivot='key' type='quantitative' />
-      <layout dim-ordering='alphabetic' dim-percentage='0.500722' measure-ordering='alphabetic' measure-percentage='0.499278' show-structure='true' />
+      <layout dim-ordering='alphabetic' dim-percentage='0.50056' measure-ordering='alphabetic' measure-percentage='0.49944' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
     </datasource>
-    <datasource caption='Query' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)' version='10.3'>
+    <datasource caption='Query' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)' version='10.1'>
       <connection class='federated'>
         <named-connections>
           <named-connection caption='TLV_Query' name='textscan.1ocujm31p6zq7z1dhp74k13dk4gs (copy 2)'>
@@ -632,7 +632,7 @@
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
     </datasource>
-    <datasource caption='Fed Queries TT' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)' version='10.3'>
+    <datasource caption='Fed Queries TT' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)' version='10.1'>
       <connection class='federated'>
         <named-connections>
           <named-connection caption='TLV_Query' name='textscan.1ocujm31p6zq7z1dhp74k13dk4gs (copy)'>
@@ -920,7 +920,7 @@
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
     </datasource>
-    <datasource caption='Federated Queries All' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0' version='10.3'>
+    <datasource caption='Federated Queries All' inline='true' name='federated.1rk91d40ovra4217qhx6l1k0ozg0' version='10.1'>
       <connection class='federated'>
         <named-connections>
           <named-connection caption='TLV_Query' name='textscan.1ocujm31p6zq7z1dhp74k13dk4gs'>
@@ -1655,6 +1655,12 @@
       <column caption='Log Check Text' datatype='string' name='[Calculation_1966102756865593345]' role='dimension' type='nominal'>
         <calculation class='tableau' formula='IF [Calculation_1966102756864421888] THEN&#13;&#10;    &quot;&quot;&#13;&#10;ELSE&#13;&#10;    &quot;This log data set does not contain needed data to show related database protocols and remote queries. This could be a result of old log format.&quot;&#13;&#10;END' />
       </column>
+      <column caption='Query LF' datatype='string' name='[Calculation_2137239551474237440]' role='dimension' type='nominal'>
+        <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query], &apos;\n&apos;, CHAR(10))' />
+      </column>
+      <column caption='Query 1 LF' datatype='string' name='[Calculation_2137239551474974721]' role='dimension' type='nominal'>
+        <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query (TLV_Query.csv1)], &apos;\n&apos;, CHAR(10))' />
+      </column>
       <column caption='Is Federated Data' datatype='boolean' name='[Is New Format (copy)]' role='dimension' type='nominal'>
         <calculation class='tableau' formula='{ FIXED [query-hash (TLV_FedTempTable.csv)] : COUNT([table-name]) } &gt; 0' />
       </column>
@@ -1732,12 +1738,12 @@
           <groupfilter function='level-members' level='[table-name]' />
         </groupfilter>
       </group>
-      <layout dim-ordering='alphabetic' dim-percentage='0.525253' measure-ordering='alphabetic' measure-percentage='0.474747' show-structure='true' />
+      <layout dim-ordering='alphabetic' dim-percentage='0.553191' measure-ordering='alphabetic' measure-percentage='0.446809' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
     </datasource>
-    <datasource caption='Query-Protocol' inline='true' name='federated.0p79bhr1gzmey8149hqg706h99xz' version='10.3'>
+    <datasource caption='Query-Protocol' inline='true' name='federated.0p79bhr1gzmey8149hqg706h99xz' version='10.1'>
       <connection class='federated'>
         <named-connections>
           <named-connection caption='TLV_Protocol' name='textscan.0krskwq18ikrub137lsx6128d3gb'>
@@ -2048,6 +2054,9 @@
           <alias key='&quot;[federated.0p79bhr1gzmey8149hqg706h99xz].[sum:elapsed:qk]&quot;' value='Execution Time' />
         </aliases>
       </column>
+      <column caption='Query LF' datatype='string' name='[Calculation_2137239551475671042]' role='dimension' type='nominal'>
+        <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query], &apos;\n&apos;, CHAR(10))' />
+      </column>
       <column datatype='integer' name='[Number of Records]' role='measure' type='quantitative' user:auto-column='numrec'>
         <calculation class='tableau' formula='1' />
       </column>
@@ -2157,7 +2166,7 @@
           <groupfilter function='level-members' level='[none:server:nk]' />
         </groupfilter>
       </group>
-      <layout dim-ordering='alphabetic' dim-percentage='0.561328' measure-ordering='alphabetic' measure-percentage='0.438672' show-structure='true' />
+      <layout dim-ordering='alphabetic' dim-percentage='0.558791' measure-ordering='alphabetic' measure-percentage='0.441209' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
@@ -2219,7 +2228,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2234,7 +2243,7 @@
               </style-rule>
             </style>
           </pane>
-          <pane id='1' selection-relaxation-option='selection-relaxation-allow' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)].[sum:Number of Records:qk]'>
+          <pane id='1' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)].[sum:Number of Records:qk]'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2251,7 +2260,7 @@
               </style-rule>
             </style>
           </pane>
-          <pane id='2' selection-relaxation-option='selection-relaxation-allow' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)].[ctd:query-hash:qk]'>
+          <pane id='2' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy 2)].[ctd:query-hash:qk]'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2318,7 +2327,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane id='2' selection-relaxation-option='selection-relaxation-disallow'>
+          <pane id='2'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2331,7 +2340,7 @@
               </style-rule>
             </style>
           </pane>
-          <pane id='3' selection-relaxation-option='selection-relaxation-disallow' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[sum:elapsed:qk]'>
+          <pane id='3' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[sum:elapsed:qk]'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2347,7 +2356,7 @@
               </style-rule>
             </style>
           </pane>
-          <pane id='4' selection-relaxation-option='selection-relaxation-disallow' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[ctd:query-hash:qk]'>
+          <pane id='4' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[ctd:query-hash:qk]'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2363,7 +2372,7 @@
               </style-rule>
             </style>
           </pane>
-          <pane id='5' selection-relaxation-option='selection-relaxation-disallow' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[sum:rows:qk]'>
+          <pane id='5' x-axis-name='[federated.1rk91d40ovra4217qhx6l1k0ozg0 (copy)].[sum:rows:qk]'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2435,10 +2444,12 @@
             </groupfilter>
           </filter>
           <filter class='categorical' column='[federated.0p79bhr1gzmey8149hqg706h99xz].[Action (Class,Query Hash,Server)]'>
-            <groupfilter function='crossjoin' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
-              <groupfilter function='empty-level' member='[class]' />
-              <groupfilter function='empty-level' member='[query-hash]' />
-              <groupfilter function='empty-level' member='[server]' />
+            <groupfilter function='crossjoin' user:ui-action-filter='[Action1]' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
+              <groupfilter function='member' level='[class]' member='&quot;postgres&quot;' />
+              <groupfilter function='crossjoin'>
+                <groupfilter function='member' level='[query-hash]' member='2417400296' />
+                <groupfilter function='member' level='[server]' member='&quot;postgres.test.tsi.lan&quot;' />
+              </groupfilter>
             </groupfilter>
           </filter>
           <slices>
@@ -2459,7 +2470,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2525,7 +2536,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2590,7 +2601,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane id='8' selection-relaxation-option='selection-relaxation-allow'>
+          <pane id='8'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2651,7 +2662,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane id='3' selection-relaxation-option='selection-relaxation-allow'>
+          <pane id='3'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2746,7 +2757,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane id='2' selection-relaxation-option='selection-relaxation-disallow'>
+          <pane id='2'>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2799,7 +2810,7 @@
         </view>
         <style />
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2836,9 +2847,12 @@
             <column caption='Log Check Text' datatype='string' name='[Calculation_1966102756865593345]' role='dimension' type='nominal'>
               <calculation class='tableau' formula='IF [Calculation_1966102756864421888] THEN&#13;&#10;    &quot;&quot;&#13;&#10;ELSE&#13;&#10;    &quot;This log data set does not contain needed data to show related database protocols and remote queries. This could be a result of old log format.&quot;&#13;&#10;END' />
             </column>
+            <column caption='Query LF' datatype='string' name='[Calculation_2137239551474237440]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query], &apos;\n&apos;, CHAR(10))' />
+            </column>
             <column caption='Class' datatype='string' name='[class]' role='dimension' type='nominal' />
+            <column-instance column='[Calculation_2137239551474237440]' derivation='None' name='[none:Calculation_2137239551474237440:nk]' pivot='key' type='nominal' />
             <column-instance column='[query-hash]' derivation='None' name='[none:query-hash:ok]' pivot='key' type='ordinal' />
-            <column-instance column='[query]' derivation='None' name='[none:query:nk]' pivot='key' type='nominal' />
             <column caption='Query Category' datatype='string' name='[query-category]' role='dimension' type='nominal' />
             <column aggregation='Sum' caption='Query Hash' datatype='integer' name='[query-hash]' role='dimension' type='ordinal' />
             <column caption='Query' datatype='string' name='[query]' role='dimension' type='nominal' />
@@ -2890,22 +2904,22 @@
         </view>
         <style>
           <style-rule element='cell'>
-            <format attr='height' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query:nk]' value='178' />
             <format attr='width' value='10' />
+            <format attr='height' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474237440:nk]' value='871' />
             <format attr='vertical-align' value='top' />
           </style-rule>
           <style-rule element='header'>
-            <format attr='width' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query:nk]' value='948' />
+            <format attr='width' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474237440:nk]' value='1304' />
           </style-rule>
           <style-rule element='label'>
-            <format attr='vertical-align' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query:nk]' value='top' />
+            <format attr='vertical-align' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474237440:nk]' value='top' />
           </style-rule>
           <style-rule element='worksheet'>
             <format attr='display-field-labels' scope='rows' value='false' />
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -2923,7 +2937,7 @@
             </style>
           </pane>
         </panes>
-        <rows>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query:nk]</rows>
+        <rows>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474237440:nk]</rows>
         <cols />
       </table>
     </worksheet>
@@ -2977,7 +2991,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -3059,10 +3073,12 @@
             </groupfilter>
           </filter>
           <filter class='categorical' column='[federated.0p79bhr1gzmey8149hqg706h99xz].[Action (Class,Query Hash,Server)]'>
-            <groupfilter function='crossjoin' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
-              <groupfilter function='empty-level' member='[class]' />
-              <groupfilter function='empty-level' member='[query-hash]' />
-              <groupfilter function='empty-level' member='[server]' />
+            <groupfilter function='crossjoin' user:ui-action-filter='[Action1]' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
+              <groupfilter function='member' level='[class]' member='&quot;postgres&quot;' />
+              <groupfilter function='crossjoin'>
+                <groupfilter function='member' level='[query-hash]' member='2417400296' />
+                <groupfilter function='member' level='[server]' member='&quot;postgres.test.tsi.lan&quot;' />
+              </groupfilter>
             </groupfilter>
           </filter>
           <slices>
@@ -3081,7 +3097,7 @@
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -3127,10 +3143,13 @@
             <datasource caption='Query-Protocol' name='federated.0p79bhr1gzmey8149hqg706h99xz' />
           </datasources>
           <datasource-dependencies datasource='federated.0p79bhr1gzmey8149hqg706h99xz'>
+            <column caption='Query LF' datatype='string' name='[Calculation_2137239551475671042]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query], &apos;\n&apos;, CHAR(10))' />
+            </column>
             <column-instance column='[query-hash]' derivation='Attribute' name='[attr:query-hash:qk]' pivot='key' type='quantitative' />
             <column caption='Class' datatype='string' name='[class]' role='dimension' type='nominal' />
             <column caption='Id' datatype='integer' name='[id]' role='dimension' type='ordinal' />
-            <column-instance column='[query]' derivation='None' name='[none:query:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Calculation_2137239551475671042]' derivation='None' name='[none:Calculation_2137239551475671042:nk]' pivot='key' type='nominal' />
             <column caption='Query Category' datatype='string' name='[query-category]' role='dimension' type='nominal' />
             <column aggregation='Sum' caption='Query Hash' datatype='integer' name='[query-hash]' role='dimension' type='ordinal' />
             <column caption='Query' datatype='string' name='[query]' role='dimension' type='nominal' />
@@ -3153,10 +3172,12 @@
             </groupfilter>
           </filter>
           <filter class='categorical' column='[federated.0p79bhr1gzmey8149hqg706h99xz].[Action (Class,Query Hash,Server)]'>
-            <groupfilter function='crossjoin' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
-              <groupfilter function='empty-level' member='[class]' />
-              <groupfilter function='empty-level' member='[query-hash]' />
-              <groupfilter function='empty-level' member='[server]' />
+            <groupfilter function='crossjoin' user:ui-action-filter='[Action1]' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate'>
+              <groupfilter function='member' level='[class]' member='&quot;postgres&quot;' />
+              <groupfilter function='crossjoin'>
+                <groupfilter function='member' level='[query-hash]' member='2417400296' />
+                <groupfilter function='member' level='[server]' member='&quot;postgres.test.tsi.lan&quot;' />
+              </groupfilter>
             </groupfilter>
           </filter>
           <slices>
@@ -3168,24 +3189,22 @@
         </view>
         <style>
           <style-rule element='cell'>
-            <format attr='height' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]' value='257' />
+            <format attr='height' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:Calculation_2137239551475671042:nk]' value='806' />
             <format attr='vertical-align' value='top' />
           </style-rule>
           <style-rule element='header'>
-            <format attr='width' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]' value='956' />
-            <format attr='text-align' data-class='subtotal' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]' value='auto' />
-            <format attr='vertical-align' data-class='subtotal' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]' value='auto' />
             <format attr='height-header' value='14' />
+            <format attr='width' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:Calculation_2137239551475671042:nk]' value='1204' />
           </style-rule>
           <style-rule element='label'>
-            <format attr='vertical-align' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]' value='top' />
+            <format attr='vertical-align' field='[federated.0p79bhr1gzmey8149hqg706h99xz].[none:Calculation_2137239551475671042:nk]' value='top' />
           </style-rule>
           <style-rule element='worksheet'>
             <format attr='display-field-labels' scope='rows' value='false' />
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -3201,7 +3220,7 @@
             </style>
           </pane>
         </panes>
-        <rows>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query:nk]</rows>
+        <rows>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:Calculation_2137239551475671042:nk]</rows>
         <cols />
       </table>
     </worksheet>
@@ -3225,10 +3244,13 @@
             <column caption='Log Check Text' datatype='string' name='[Calculation_1966102756865593345]' role='dimension' type='nominal'>
               <calculation class='tableau' formula='IF [Calculation_1966102756864421888] THEN&#13;&#10;    &quot;&quot;&#13;&#10;ELSE&#13;&#10;    &quot;This log data set does not contain needed data to show related database protocols and remote queries. This could be a result of old log format.&quot;&#13;&#10;END' />
             </column>
+            <column caption='Query 1 LF' datatype='string' name='[Calculation_2137239551474974721]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='// Convert back to actual LINEFEED.&#13;&#10;REPLACE([query (TLV_Query.csv1)], &apos;\n&apos;, CHAR(10))' />
+            </column>
             <column caption='Class' datatype='string' name='[class]' role='dimension' type='nominal' />
             <column caption='cols (TLV Query.csv1)' datatype='integer' name='[cols (TLV_Query.csv1)]' role='measure' type='quantitative' />
             <column caption='elapsed (TLV Query.csv1)' datatype='real' name='[elapsed (TLV_Query.csv1)]' role='measure' type='quantitative' />
-            <column-instance column='[query (TLV_Query.csv1)]' derivation='None' name='[none:query (TLV_Query.csv1):nk]' pivot='key' type='nominal' />
+            <column-instance column='[Calculation_2137239551474974721]' derivation='None' name='[none:Calculation_2137239551474974721:nk]' pivot='key' type='nominal' />
             <column-instance column='[query-hash]' derivation='None' name='[none:query-hash:ok]' pivot='key' type='ordinal' />
             <column caption='Query 1' datatype='string' name='[query (TLV_Query.csv1)]' role='dimension' type='nominal' />
             <column caption='Query Category' datatype='string' name='[query-category]' role='dimension' type='nominal' />
@@ -3287,21 +3309,21 @@
         <style>
           <style-rule element='cell'>
             <format attr='width' value='10' />
-            <format attr='height' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]' value='179' />
+            <format attr='height' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474974721:nk]' value='853' />
             <format attr='vertical-align' value='top' />
           </style-rule>
           <style-rule element='header'>
-            <format attr='width' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]' value='956' />
+            <format attr='width' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474974721:nk]' value='1140' />
           </style-rule>
           <style-rule element='label'>
-            <format attr='vertical-align' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]' value='top' />
+            <format attr='vertical-align' field='[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474974721:nk]' value='top' />
           </style-rule>
           <style-rule element='worksheet'>
             <format attr='display-field-labels' scope='rows' value='false' />
           </style-rule>
         </style>
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -3324,7 +3346,7 @@
             </style>
           </pane>
         </panes>
-        <rows>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]</rows>
+        <rows>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474974721:nk]</rows>
         <cols />
       </table>
     </worksheet>
@@ -3364,7 +3386,7 @@
         </view>
         <style />
         <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
+          <pane>
             <view>
               <breakdown value='auto' />
             </view>
@@ -3518,7 +3540,7 @@
           <zoom type='fit-width' />
         </viewpoint>
       </viewpoints>
-      <active id='1' />
+      <active id='-1' />
     </window>
     <window class='dashboard' name='All Queries'>
       <viewpoints>
@@ -3532,9 +3554,38 @@
         <viewpoint name='DB Info' />
         <viewpoint name='Query Stats' />
         <viewpoint name='Query Text' />
-        <viewpoint name='Top Elapsed' />
+        <viewpoint name='Top Elapsed'>
+          <selection-collection>
+            <tuple-selection>
+              <tuple-reference>
+                <tuple-descriptor>
+                  <pane-descriptor>
+                    <x-fields>
+                      <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[sum:elapsed:qk]</field>
+                    </x-fields>
+                    <y-fields>
+                      <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query-hash:ok]</field>
+                    </y-fields>
+                  </pane-descriptor>
+                  <columns>
+                    <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:class:nk]</field>
+                    <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query-hash:ok]</field>
+                    <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:server:nk]</field>
+                    <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[sum:elapsed:qk]</field>
+                  </columns>
+                </tuple-descriptor>
+                <tuple>
+                  <value>&quot;postgres&quot;</value>
+                  <value>2417400296</value>
+                  <value>&quot;postgres.test.tsi.lan&quot;</value>
+                  <value>0.067000000000000004</value>
+                </tuple>
+              </tuple-reference>
+            </tuple-selection>
+          </selection-collection>
+        </viewpoint>
       </viewpoints>
-      <active id='1' />
+      <active id='-1' />
     </window>
     <window class='worksheet' hidden='true' name='All Query'>
       <cards>
@@ -3845,8 +3896,10 @@
         </edge>
       </cards>
       <viewpoint>
+        <zoom type='entire-view' />
         <highlight>
           <color-one-way>
+            <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474237440:nk]</field>
             <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]</field>
             <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query-hash:ok]</field>
             <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query:nk]</field>
@@ -3945,8 +3998,10 @@
         </edge>
       </cards>
       <viewpoint>
+        <zoom type='entire-view' />
         <highlight>
           <color-one-way>
+            <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:Calculation_2137239551475671042:nk]</field>
             <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:class:nk]</field>
             <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:dbname:nk]</field>
             <field>[federated.0p79bhr1gzmey8149hqg706h99xz].[none:query-category:nk]</field>
@@ -3978,8 +4033,10 @@
         </edge>
       </cards>
       <viewpoint>
+        <zoom type='entire-view' />
         <highlight>
           <color-one-way>
+            <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:Calculation_2137239551474974721:nk]</field>
             <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query (TLV_Query.csv1):nk]</field>
             <field>[federated.1rk91d40ovra4217qhx6l1k0ozg0].[none:query-hash:ok]</field>
           </color-one-way>
