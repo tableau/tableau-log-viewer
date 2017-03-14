@@ -5,21 +5,18 @@ body{
 
 /* Keyword */
 .k{
-    /*color: rgb(148,41,41);*/
     color: #cb4b16;
     /*font-weight: bold;*/
 }
 
 /* String */
 .s{
-    /*color: rgb(20,20,232);*/
     color: #268bd2;
 }
 
 /* Tag */
 .t{
-    /*color: rgb(231,98,225);*/
-    color: #d33682;
+    color: #cc6f6f;
 }
 
 /* Whitespace */
@@ -36,13 +33,11 @@ body{
 
 /* Open Parenthesis */
 .op{
-    /*color: rgb(57,166,57);*/
     color: #859900;
 }
 
 /* Close Parenthesis */
 .cp{
-    /*color: rgb(57,166,57);*/
     color: #859900;
 }
 

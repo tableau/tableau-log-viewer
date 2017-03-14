@@ -41,7 +41,7 @@ void Tokenizer::SetSQL()
 {
     m_rules = {
         LexicalRule(TokenType::String, QRegularExpression("\\G'([^']*)'")),
-        LexicalRule(TokenType::Tag, QRegularExpression("\\G([a-zA-Z\\d_\\$-]+:)")),
+        LexicalRule(TokenType::Tag, QRegularExpression("\\G([a-zA-Z\\d_\\$-]+:\\s)")),
         LexicalRule(TokenType::Keyword, QRegularExpression("\\G(ON|COMMIT|PRESERVE|INTEGER|ROWS|LOCAL|TEMPORARY|ELSE|CASE|END|WHEN|THEN|CREATE|INSERT|DROP|DELETE|INDEX|TABLE|SELECT|WHERE|INTO|VALUES|ON|AS|FROM|AND|NOT|LEFT|RIGHT|INNER|OUTER|JOIN|ORDER|GROUP|BY|IN|OR|SUM)\\b", QRegularExpression::CaseInsensitiveOption)),
         LexicalRule(TokenType::Whitespace, QRegularExpression("\\G([\\s]+)")),
         LexicalRule(TokenType::Float, QRegularExpression("\\G[\\d]+\\.[\\d]+")),
