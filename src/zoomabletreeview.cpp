@@ -1,12 +1,21 @@
 #include "zoomabletreeview.h"
+#include "options.h"
 
 #include <QApplication>
 #include <QDebug>
+#include <QFontDatabase>
+#include <QSettings>
 #include <QWheelEvent>
+
+qreal ZoomableTreeView::sm_savedFontPointSize { 0 };
 
 ZoomableTreeView::ZoomableTreeView(QWidget *parent)
     :QTreeView(parent)
-{}
+{
+    QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    fixedFont.setPointSizeF(sm_savedFontPointSize);
+    this->setFont(fixedFont);
+}
 
 void ZoomableTreeView::SetAutoResizeColumns(const std::vector<int>& columns)
 {
@@ -28,15 +37,12 @@ void ZoomableTreeView::ResizeFont(int delta)
 {
     QFont font = this->font();
 
-    // Keep the original font size here, as it can't be determined correctly in constructor.
-    if (m_defaultFontSize < 0)
-        m_defaultFontSize = font.pointSize();
-
     // Set the font size, make sure it fits in a reasonable range
     int pointSize;
     if (delta == 0)
     {
-        pointSize = m_defaultFontSize;
+        QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+        pointSize = font.pointSize();
     }
     else
     {
@@ -45,6 +51,7 @@ void ZoomableTreeView::ResizeFont(int delta)
     }
     font.setPointSize(pointSize);
     this->setFont(font);
+    sm_savedFontPointSize = pointSize;
 
     ResizeColumns();
 }
@@ -84,4 +91,18 @@ void ZoomableTreeView::keyPressEvent(QKeyEvent* event)
     {
         QTreeView::keyPressEvent(event);
     }
+}
+
+void ZoomableTreeView::WriteSettings(QSettings& settings)
+{
+    settings.beginGroup("TreeView");
+    settings.setValue("fontPointSize", sm_savedFontPointSize);
+    settings.endGroup();
+}
+
+void ZoomableTreeView::ReadSettings(QSettings& settings)
+{
+    settings.beginGroup("TreeView");
+    sm_savedFontPointSize = settings.value("fontPointSize").toReal();
+    settings.endGroup();
 }

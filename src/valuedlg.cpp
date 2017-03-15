@@ -2,6 +2,7 @@
 #include "ui_valuedlg.h"
 
 #include "logtab.h"
+#include "themeutils.h"
 #include "tokenizer.h"
 
 #include <QDebug>
@@ -18,13 +19,20 @@
 #include <QTextStream>
 #include <QWebEngineView>
 
+QByteArray ValueDlg::sm_savedGeometry { QByteArray() };
+qreal ValueDlg::sm_savedFontPointSize { 0 };
+
 ValueDlg::ValueDlg(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ValueDlg)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    restoreGeometry(sm_savedGeometry);
+
     // Set a monospaced font.
-    const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    fixedFont.setPointSizeF(sm_savedFontPointSize);
     ui->textEdit->setFont(fixedFont);
 
     auto prevKey = QKeySequence(Qt::CTRL + Qt::Key_Up);
@@ -48,6 +56,9 @@ ValueDlg::ValueDlg(QWidget *parent) :
     m_id = QString("");
     m_key = QString("");
 
+    ui->prevButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-previous.png")));
+    ui->nextButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-next.png")));
+
     QFile sqlsyntaxcss(":/sqlsyntax.css");
     sqlsyntaxcss.open(QIODevice::ReadOnly);
     QTextStream textStream(&sqlsyntaxcss);
@@ -56,6 +67,7 @@ ValueDlg::ValueDlg(QWidget *parent) :
 
     QTextDocument * textDoc = new QTextDocument(ui->textEdit);
     textDoc->setDefaultStyleSheet(styleSheet);
+    textDoc->setDefaultFont(fixedFont);
     ui->textEdit->setDocument(textDoc);
 }
 
@@ -288,4 +300,32 @@ void ValueDlg::on_loadFinished(bool loaded)
         m_view->reload();
     }
     m_view->show();
+}
+
+void ValueDlg::reject()
+{
+    sm_savedGeometry = saveGeometry();
+    sm_savedFontPointSize = ui->textEdit->document()->defaultFont().pointSize();
+    QDialog::reject();
+}
+
+// Persist the dialog state into QSettings.
+//
+// WriteSettings and ReadSettings should only be called once during app start and close,
+// so the dialog state between multiple instances will not interfere each other.
+//
+void ValueDlg::WriteSettings(QSettings& settings)
+{
+    settings.beginGroup("ValueDialog");
+    settings.setValue("geometry", sm_savedGeometry);
+    settings.setValue("fontPointSize", sm_savedFontPointSize);
+    settings.endGroup();
+}
+
+void ValueDlg::ReadSettings(QSettings& settings)
+{
+    settings.beginGroup("ValueDialog");
+    sm_savedGeometry = settings.value("geometry").toByteArray();
+    sm_savedFontPointSize = settings.value("fontPointSize").toReal();
+    settings.endGroup();
 }

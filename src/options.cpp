@@ -1,10 +1,13 @@
 #include "options.h"
+#include "pathhelper.h"
 
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
+#include <QSettings>
 #include <QSysInfo>
+
 
 void Options::ReadSettings()
 {
@@ -22,6 +25,8 @@ void Options::ReadSettings()
     m_futureTabsUnderLive = settings.value("enableLiveCapture").toBool();
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
+    m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
+    m_theme = settings.value("theme", "Native").toString();
 
     settings.endGroup();
 
@@ -93,4 +98,14 @@ void Options::LoadHighlightFilter(const QString& filterName)
     QJsonDocument filtersDoc(QJsonDocument::fromJson(filterData));
     m_defaultHighlightOpts.FromJson(filtersDoc.array());
     // Currently this does not apply to already open tabs, but I think that's fine.
+}
+
+int Options::getSyntaxHighlightLimit() const
+{
+    return m_syntaxHighlightLimit;
+}
+
+QString Options::getTheme()
+{
+    return m_theme;
 }

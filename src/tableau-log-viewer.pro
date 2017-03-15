@@ -37,7 +37,9 @@ HEADERS     = \
     treeitem.h \
     treemodel.h \
     valuedlg.h \
-    zoomabletreeview.h
+    zoomabletreeview.h \
+    themeutils.h \
+    theme.h
 
 SOURCES     = \
     colorlibrary.cpp \
@@ -59,7 +61,9 @@ SOURCES     = \
     treeitem.cpp \
     treemodel.cpp \
     valuedlg.cpp \
-    zoomabletreeview.cpp
+    zoomabletreeview.cpp \
+    themeutils.cpp \
+    theme.cpp
 
 RESOURCES   = resources.qrc
 

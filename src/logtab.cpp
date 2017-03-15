@@ -4,9 +4,11 @@
 #include "options.h"
 #include "pathhelper.h"
 #include "processevent.h"
+#include "themeutils.h"
 #include "treeitem.h"
 #include "valuedlg.h"
 
+#include <memory>
 #include <QFontDatabase>
 #include <QMenu>
 #include <QJsonDocument>
@@ -29,8 +31,6 @@ LogTab::~LogTab()
 
 void LogTab::InitTreeView(const EventListPtr events)
 {
-    QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    ui->treeView->setFont(fixedFont);
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
     QStringList headers = QString("ID;File;Time;Elapsed;PID;TID;Severity;Request;Session;Site;User;Key;Value").split(";");
@@ -43,7 +43,6 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
 
-    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
     SetColumn(COL::ID, 80, false);
     SetColumn(COL::File, 110, true);
     SetColumn(COL::Time, 190, hasNoKey);
@@ -56,6 +55,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::Site, 180, true);
     SetColumn(COL::User, 30, true);
     SetColumn(COL::Key, 120, hasNoKey);
+    ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -77,8 +77,16 @@ void LogTab::SetColumn(int column, int width, bool isHidden)
 
 void LogTab::InitMenus()
 {
-    m_exportToTabAction = new QAction(QIcon(":/ctx-newtab.png"), "Export event(s) to new tab", this);
+    using namespace ThemeUtils;
+    m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
+
+    m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy", this);
+    m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetails);
+
+    m_copyItemsTextAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as text", this);
+    connect(m_copyItemsTextAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsText);
 
     InitOneRowMenu();
     InitTwoRowsMenu();
@@ -88,46 +96,54 @@ void LogTab::InitMenus()
 
 void LogTab::InitTwoRowsMenu()
 {
+    using namespace ThemeUtils;
     m_twoRowsMenu = new QMenu(this);
-    m_twoRowsMenu->addAction(QIcon(":/ctx-book.png"), "Diff selected events",
+    m_twoRowsMenu->addAction(QIcon(GetThemedIcon(":/ctx-book.png")), "Diff selected events",
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_exportToTabAction);
+    m_twoRowsMenu->addSeparator();
+    m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
+    m_twoRowsMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::InitMultipleRowsMenu()
 {
     m_multipleRowsMenu = new QMenu(this);
     m_multipleRowsMenu->addAction(m_exportToTabAction);
+    m_multipleRowsMenu->addSeparator();
+    m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
+    m_multipleRowsMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::InitOneRowMenu()
 {
-    QAction *hideSelected = new QAction(QIcon(":/ctx-hide.png"), "Hide selected event", this);
+    using namespace ThemeUtils;
+    QAction *hideSelected = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide selected event", this);
     connect(hideSelected, &QAction::triggered, this, &LogTab::RowHideSelected);
 
-    QAction *hideSelectedType = new QAction(QIcon(":/ctx-hide.png"), "Hide all events of this type", this);
+    QAction *hideSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide all events of this type", this);
     connect(hideSelectedType, &QAction::triggered, this, &LogTab::RowHideSelectedType);
 
-    QAction *findPrevSelectedType = new QAction(QIcon(":/ctx-up.png"), "Find previous event of this type", this);
+    QAction *findPrevSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-up.png")), "Find previous event of this type", this);
     connect(findPrevSelectedType, &QAction::triggered, this, &LogTab::RowFindPrevSelectedType);
 
-    QAction *findNextSelectedType = new QAction(QIcon(":/ctx-down.png"), "Find next event of this type", this);
+    QAction *findNextSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-down.png")), "Find next event of this type", this);
     connect(findNextSelectedType, &QAction::triggered, this, &LogTab::RowFindNextSelectedType);
 
-    QAction *highlightSelectedType = new QAction(QIcon(":/ctx-highlight.png"), "Highlight all events of this type", this);
+    QAction *highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
     connect(highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
 
-    QAction *actionGlobalTimestamps = new QAction(QIcon(":/ctx-timestamp.png"), "Show global timestamps", this);
+    QAction *actionGlobalTimestamps = new QAction(QIcon(GetThemedIcon(":/ctx-timestamp.png")), "Show global timestamps", this);
     actionGlobalTimestamps->setCheckable(true);
     actionGlobalTimestamps->setChecked(true);
     connect(actionGlobalTimestamps, &QAction::triggered, this, &LogTab::RowShowGlobalTimestamps);
 
-    QAction *actionTimeDeltas = new QAction(QIcon(":/ctx-timedelta.png"), "Show time deltas to this event", this);
+    QAction *actionTimeDeltas = new QAction(QIcon(GetThemedIcon(":/ctx-timedelta.png")), "Show time deltas to this event", this);
     actionTimeDeltas->setCheckable(true);
     actionTimeDeltas->setChecked(false);
     connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
-    QAction *actionOpenFile = new QAction(QIcon(":/ctx-open-file.png"), "Open log file in new tab", this);
+    QAction *actionOpenFile = new QAction(QIcon(GetThemedIcon(":/ctx-open-file.png")), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);
@@ -149,7 +165,9 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addAction(m_exportToTabAction);
     m_oneRowMenu->addAction(actionOpenFile);
     m_openFileMenuIdx = m_oneRowMenu->actions().size() - 1;
-
+    m_oneRowMenu->addSeparator();
+    m_oneRowMenu->addAction(m_copyItemsHtmlAction);
+    m_oneRowMenu->addAction(m_copyItemsTextAction);
 }
 
 void LogTab::keyPressEvent(QKeyEvent *event)
@@ -178,7 +196,7 @@ void LogTab::keyPressEvent(QKeyEvent *event)
             (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
             (rowCount > 0))
         {
-            CopyItemDetails(idxList);
+            CopyItemDetails();
         }
         else if ((event->key() == Qt::Key_D) &&
                  (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
@@ -337,6 +355,7 @@ void LogTab::ReadDirectoryFiles()
 
     if (newEvents.count() > 0)
     {
+        bool firstEntries = (m_treeModel->rowCount() == 0);
         int startRow = m_treeModel->MergeIntoModelData(newEvents);
         newEvents.clear();
 
@@ -352,6 +371,10 @@ void LogTab::ReadDirectoryFiles()
 
         TrimEventCount();
         UpdateModelView();
+        if (firstEntries)
+        {
+            ui->treeView->ResizeColumns();
+        }
     }
 }
 
@@ -504,7 +527,11 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
     valueDlg.m_key = idx_key.data().toString();
 
     valueDlg.setWindowTitle(QString("ID: %1 - Key: %2").arg(valueDlg.m_id, valueDlg.m_key));
-    bool syntaxHighlight = (!valueDlg.m_key.isEmpty() && valueDlg.m_key != "msg");
+    int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
+    bool syntaxHighlight = (valueDlg.m_key != "msg" &&
+                            !valueDlg.m_key.isEmpty() &&
+                            syntaxHighlightLimit &&
+                            value.size() <= syntaxHighlightLimit);
     valueDlg.SetText(value, syntaxHighlight);
     valueDlg.SetQuery(QString(""));
 
@@ -585,10 +612,24 @@ void LogTab::ChangePrevIndex()
     }
 }
 
-void LogTab::CopyItemDetails(const QModelIndexList& idxList)
+void LogTab::CopyItemDetailsAsText() const
 {
-    QString copyText;
+    CopyItemDetails(true);
+}
+
+void LogTab::CopyItemDetails(bool textOnly) const
+{
+    QModelIndexList idxList = ui->treeView->selectionModel()->selectedRows();
     int columnCount = m_treeModel->columnCount();
+    if (!columnCount || !idxList.count())
+        return;
+
+    QString copyText;
+    QString copyHtml =
+        "<html><head><style>"
+        "table, th, td { border: 1px solid black; border-collapse: collapse; } "
+        "th, td { font-family: Monaco, Consolas, Monospace; font-size: 10pt; text-align: left; }"
+        "</style></head><body><table>\n<tr>";
 
     // Header row
     for (int i = 0; i < columnCount; i++)
@@ -597,14 +638,16 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
         {
             QString info = m_treeModel->headerData(i, Qt::Horizontal).toString();
             copyText += info + "\t";
+            copyHtml += "<th>" + info + "</th> ";
         }
     }
-    copyText += "\n";
+    copyText[copyText.length() - 1] = '\n';
+    copyHtml += "</tr>\n";
 
     for (const auto& idx : idxList)
     {
         auto item_model = idx.model();
-
+        copyHtml += "<tr>";
         for (int i = 0; i < columnCount; i++)
         {
             if (!(ui->treeView->isColumnHidden(i)))
@@ -617,17 +660,29 @@ void LogTab::CopyItemDetails(const QModelIndexList& idxList)
                 if (info.length() > 0)
                 {
                     copyText += info + "\t";
+                    copyHtml += "<td>" + info + "</td> ";
                 }
                 else
                 {
                     copyText += "-\t";
+                    copyHtml += "<td>-</td> ";
                 }
             }
         }
-        copyText += "\n";
+        copyText[copyText.length() - 1] = '\n';
+        copyHtml += "</tr>\n";
     }
+
+    copyHtml += "</table></body></html>";
+
     QClipboard* clipboard = QApplication::clipboard();
-    clipboard->setText(copyText);
+    auto mime = std::make_unique<QMimeData>();
+    mime->setText(copyText);
+    if (!textOnly)
+    {
+        mime->setHtml(copyHtml);
+    }
+    clipboard->setMimeData(mime.release());
 }
 
 void LogTab::ExportToNewTab()
@@ -708,16 +763,28 @@ void LogTab::RowDiffEvents()
     secondOut.flush();
 
     // Initialize the diff tool
-    QStringList args;
-
-    args << firstFile->fileName();
-    args << secondFile->fileName();
-
     QString diffToolPath = Options::GetInstance().getDiffToolPath();
+    if (QSysInfo::productType() == "osx" &&
+        diffToolPath.endsWith(".app"))
+    {
+        // In Mac, if the tool is an app, we need to use "open"
+        diffToolPath = QString("open -a \"%1\" --args").arg(diffToolPath);
+    }
+    else
+    {
+        // Put quotes around the path, in case it has any spaces
+        diffToolPath = QString("\"%1\"").arg(diffToolPath);
+    }
+    QString diffCommand = QString("%1 \"%2\" \"%3\"").arg(
+        diffToolPath,
+        firstFile->fileName(),
+        secondFile->fileName());
 
-    QProcess difftool;
-    if(!difftool.startDetached(diffToolPath, args))
+    qDebug() << "Diff tool path: " << diffCommand;
+    if(!QProcess::startDetached(diffCommand))
+    {
         QMessageBox::information(this, tr("Diff Error!"), tr("Cannot find diff tool. Please set it in application options menu."));
+    }
 
     // We are storing the temp files in a vector. Once the vector goes out of scope, the QTemporaryFiles are automatically deleted.
     // Temp files are under AppData\Local\Temp, but are automitically deleted when the tab or tlv is closed. They remain if TLV crashes.
@@ -857,7 +924,7 @@ void LogTab::InitHeaderMenu()
         QAction *action = new QAction(hdata.toString(), m_headerMenu);
         action->setCheckable(true);
         // Make some columns 'unhidable'
-        if (i == COL::ID || i == COL::Value)
+        if (i == COL::Value)
         {
             action->setEnabled(false);
         }
@@ -958,4 +1025,22 @@ QString LogTab::GetDebugInfo() const
     }
 
     return QString("Type: %1\nPath: %2\n\n%3").arg(tabType).arg(m_tabPath).arg(extra);
+}
+
+void LogTab::CopyFullPath()
+{
+    QString path = QDir::toNativeSeparators(GetTabPath());
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(path);
+}
+
+void LogTab::ShowInFolder()
+{
+    QString path = GetTabPath();
+    if (m_treeModel->TabType() == TABTYPE::SingleFile)
+    {
+        QFileInfo fi(path);
+        path = fi.path();
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }

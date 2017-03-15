@@ -20,11 +20,13 @@ private slots:
     //Slots use underscores as per QT's automatic connection syntax
     void on_btnAdd_clicked();
     void on_OptionsDlg_accepted();
+    void on_OptionsDlg_rejected();
     void on_listWidget_itemSelectionChanged();
     void on_btnRemove_clicked();
     void on_chooseDiffTool_clicked();
     void on_useEmbedded_clicked();
     void on_serviceEnable_clicked();
+    void on_themeComboBox_currentTextChanged(const QString &themeName);
 
 private:
     void WriteSettings();

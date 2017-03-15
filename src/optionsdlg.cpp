@@ -3,11 +3,13 @@
 
 #include "options.h"
 #include "pathhelper.h"
+#include "themeutils.h"
 
 #include <QBitArray>
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QPalette>
 #include <QSettings>
 
 OptionsDlg::OptionsDlg(QWidget *parent) :
@@ -40,6 +42,8 @@ void OptionsDlg::WriteSettings()
     auto liveEnable = ui->startFutureLiveCapture->isChecked();
     bool captureAllTextFiles = ui->captureAllTextFiles->isChecked();
     auto currFilter = ui->defaultHighlightComboBox->currentText();
+    int syntaxHighlightLimit = ui->syntaxHighlightLimitSpinBox->value();
+    auto themeName = ui->themeComboBox->currentText();
 
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -52,6 +56,8 @@ void OptionsDlg::WriteSettings()
     settings.setValue("enableLiveCapture", liveEnable);
     settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
     settings.setValue("defaultHighlightFilter", currFilter);
+    settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
+    settings.setValue("theme", themeName);
     settings.endGroup();
 
     Options::GetInstance().ReadSettings();
@@ -68,6 +74,8 @@ void OptionsDlg::ReadSettings()
     auto liveEnable = options.getFutureTabsUnderLive();
     bool captureAllTextFiles = options.getCaptureAllTextFiles();
     auto defaultHighlightFilter = options.getDefaultFilterName();
+    int syntaxHighlightLimit = options.getSyntaxHighlightLimit();
+    auto themeName = options.getTheme();
 
     for (int i = 0; i < skippedText.length(); i++)
     {
@@ -82,6 +90,15 @@ void OptionsDlg::ReadSettings()
     ui->diffToolPath->setText(diffPath);
     ui->startFutureLiveCapture->setChecked(liveEnable);
     ui->captureAllTextFiles->setChecked(captureAllTextFiles);
+    ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
+
+    const auto& themeNames = ThemeUtils::GetThemeNames();
+    ui->themeComboBox->addItems(themeNames);
+    if (!themeNames.contains(themeName))
+    {
+        themeName = "Native";
+    }
+    ui->themeComboBox->setCurrentText(themeName);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));
@@ -142,7 +159,30 @@ void OptionsDlg::on_serviceEnable_clicked()
     ui->serviceURLEdit->setEnabled(true);
 }
 
+void OptionsDlg::on_themeComboBox_currentTextChanged(const QString &themeName)
+{
+    ThemeUtils::SwitchTheme(themeName, this->parentWidget());
+}
+
 void OptionsDlg::on_OptionsDlg_accepted()
 {
     WriteSettings();
+}
+
+void OptionsDlg::on_OptionsDlg_rejected()
+{
+    // Revert the theme back if the user cancels the dialog
+    Options& options = Options::GetInstance();
+    auto themeNameSettings = options.getTheme();
+    if (!ThemeUtils::GetThemeNames().contains(themeNameSettings))
+    {
+        themeNameSettings = "Native";
+    }
+
+    auto themeNameUi = ui->themeComboBox->currentText();
+    // Only apply a theme change if necessary
+    if (themeNameSettings != themeNameUi)
+    {
+        ThemeUtils::SwitchTheme(themeNameSettings, this->parentWidget());
+    }
 }

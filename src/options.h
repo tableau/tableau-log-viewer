@@ -1,20 +1,15 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#pragma once
 
 #include "highlightoptions.h"
-#include "pathhelper.h"
 
 #include <QBitArray>
-#include <QSettings>
-#include <QString>
-#include <QStringList>
 
 class Options
 {
 private:
     Options(){ ReadSettings(); }
-    Options(const Options&);
-    Options& operator= (const Options&);
+    Options(const Options&) = delete;
+    Options& operator= (const Options&) = delete;
 
     QStringList m_skippedText;
     QBitArray m_skippedState;
@@ -25,15 +20,17 @@ private:
     bool m_captureAllTextFiles;
     QString m_defaultFilterName;
     HighlightOptions m_defaultHighlightOpts;
+    int m_syntaxHighlightLimit;
+    QString m_theme;
 
 public:
     static Options& GetInstance()
     {
-        static Options sm_options;
-        return sm_options;
+        static Options options;
+        return options;
     }
-    static void DeleteInstance();
     void ReadSettings();
+    void LoadHighlightFilter(const QString& filterName);
 
     QStringList getSkippedText();
     QBitArray getSkippedState();
@@ -44,7 +41,6 @@ public:
     bool getCaptureAllTextFiles();
     QString getDefaultFilterName();
     HighlightOptions getDefaultHighlightOpts();
-    void LoadHighlightFilter(const QString& filterName);
+    int getSyntaxHighlightLimit() const;
+    QString getTheme();
 };
-
-#endif // OPTIONS_H

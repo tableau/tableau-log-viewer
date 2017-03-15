@@ -26,5 +26,24 @@
         <file alias="query-graphs/query-graphs.tlv.html">../resources/query-graphs/query-graphs.tlv.html</file>
         <file alias="query-graphs/query-graphs.css">../resources/query-graphs/query-graphs.css</file>
         <file alias="query-graphs/query-graphs.min.js">../resources/query-graphs/query-graphs.min.js</file>
+        <file alias="workbooks/QueryInfo.twb">../resources/workbooks/QueryInfo.twb</file>
+        <file alias="workbooks/Timeline.twb">../resources/workbooks/Timeline.twb</file>
+    </qresource>
+    <qresource prefix="/+darktheme">
+        <file alias="tab-sync.png">../resources/images/darktheme/tab-sync.png</file>
+        <file alias="tab-sync-thin.png">../resources/images/darktheme/tab-sync-thin.png</file>
+        <file alias="ctx-down.png">../resources/images/darktheme/ctx-down.png</file>
+        <file alias="ctx-highlight.png">../resources/images/darktheme/ctx-highlight.png</file>
+        <file alias="ctx-newtab.png">../resources/images/darktheme/ctx-newtab.png</file>
+        <file alias="ctx-timedelta.png">../resources/images/darktheme/ctx-timedelta.png</file>
+        <file alias="ctx-timestamp.png">../resources/images/darktheme/ctx-timestamp.png</file>
+        <file alias="ctx-up.png">../resources/images/darktheme/ctx-up.png</file>
+        <file alias="ctx-hide.png">../resources/images/darktheme/ctx-hide.png</file>
+        <file alias="ctx-diff.png">../resources/images/darktheme/ctx-diff.png</file>
+        <file alias="ctx-book.png">../resources/images/darktheme/ctx-book.png</file>
+        <file alias="ctx-copy.png">../resources/images/darktheme/ctx-copy.png</file>
+        <file alias="ctx-open-file.png">../resources/images/darktheme/ctx-open-file.png</file>
+        <file alias="value-next.png">../resources/images/darktheme/value-next.png</file>
+        <file alias="value-previous.png">../resources/images/darktheme/value-previous.png</file>
     </qresource>
 </RCC>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>330</width>
-    <height>130</height>
+    <height>126</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,14 +16,26 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>330</width>
+    <height>126</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>330</width>
+    <height>126</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>Name the filter collection</string>
+   <string>Save Filters</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>90</y>
+     <y>80</y>
      <width>291</width>
      <height>32</height>
     </rect>
@@ -39,10 +51,13 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>60</y>
+     <y>40</y>
      <width>291</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Use alphanumeric characters, underscores, dashes, periods, and spaces.</string>
    </property>
    <property name="maxLength">
     <number>100</number>
@@ -53,32 +68,15 @@
     <rect>
      <x>20</x>
      <y>10</y>
-     <width>321</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>Give a name to the Highlight Filters Collection</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>40</y>
-     <width>241</width>
-     <height>16</height>
+     <width>291</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Use alphanumeric characters</string>
+    <string>Highlight filters collection name:</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
    </property>
   </widget>
  </widget>

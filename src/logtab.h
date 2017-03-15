@@ -27,6 +27,8 @@ public:
     QString GetTabPath() const;
     void SetTabPath(const QString& path);
     void UpdateStatusBar();
+    void CopyFullPath();
+    void ShowInFolder();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;
@@ -39,7 +41,8 @@ private:
     void InitHeaderMenu();
     void SetColumn(int column, int width, bool isHidden);
     void ShowItemDetails(const QModelIndex&);
-    void CopyItemDetails(const QModelIndexList& idxList);
+    void CopyItemDetails(bool textOnly = false) const;
+    void CopyItemDetailsAsText() const;
     void RowFindPrev();
     void RowFindNext();
     void RowFindImpl(int offset);
@@ -64,6 +67,8 @@ private:
     ValueDlg *m_valueDlg;
     std::vector<std::unique_ptr<QTemporaryFile>> m_tempFiles;
     QAction *m_exportToTabAction;
+    QAction *m_copyItemsHtmlAction;
+    QAction *m_copyItemsTextAction;
     int m_openFileMenuIdx;
     int m_eventIndex;
     QFile m_logFile;

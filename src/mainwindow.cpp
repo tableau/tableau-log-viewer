@@ -8,6 +8,7 @@
 #include "pathhelper.h"
 #include "processevent.h"
 #include "savefilterdialog.h"
+#include "themeutils.h"
 #include "zoomabletreeview.h"
 
 #include <map>
@@ -20,7 +21,6 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFontDatabase>
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -40,8 +40,18 @@ MainWindow::MainWindow()
     setupUi(this);
 
     m_statusBar = new StatusBar(this);
+    //Add Clear all events button (not doable via UI designer)
+    Ui_MainWindow::menuBar->addAction(actionClear_all_events);
 
     ReadSettings();
+    // Load the theme for the first time
+    // No need to switch the theme if it is set to "Native" (the default)
+    QString themeName = m_options.getTheme();
+    if (themeName != "Native")
+    {
+        ThemeUtils::SwitchTheme(themeName, this);
+        this->actionTail_current_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
+    }
     UpdateMenuAndStatusBar();
 
     // About TLV. It will have the Version number, this only needs to be calculated once
@@ -55,6 +65,8 @@ MainWindow::MainWindow()
     menuHelp->addAction(aboutVersionAction);
 
     connect(Ui_MainWindow::menuRecent_files, SIGNAL(triggered(QAction*)), this, SLOT(Recent_files_triggered(QAction*)));
+
+    tabWidget->tabBar()->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -64,7 +76,12 @@ MainWindow::~MainWindow()
 void MainWindow::Recent_files_triggered(QAction * action)
 {
     QString path = action->text();
-    if (!LoadLogFile(path))
+    QFileInfo fi(path);
+    if (fi.isDir())
+    {
+        StartDirectoryLiveCapture(path, "");
+    }
+    else if (!LoadLogFile(path))
     {
         RemoveRecentFile(path);
         Ui_MainWindow::menuRecent_files->removeAction(action);
@@ -110,7 +127,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     actionClear_all_events->setEnabled(model);
     actionRefresh->setEnabled(model);
     actionShow_summary->setEnabled(model);
-    actionOpen_timeline->setEnabled(model);
+    actionCreate_info_viz->setEnabled(model);
     actionClose_tab->setEnabled(model);
     actionClose_all_tabs->setEnabled(model);
     //Recent Files
@@ -147,28 +164,47 @@ void MainWindow::WriteSettings()
 {
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
-    settings.beginGroup("MainWindow");
-    settings.setValue("size", size());
-    settings.setValue("pos", pos());
-    settings.setValue("recentFiles", m_recentFiles);
 
+    settings.beginGroup("MainWindow");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    settings.setValue("recentFiles", m_recentFiles);
+    settings.setValue("lastOpenFolder", m_lastOpenFolder);
     settings.endGroup();
+
+    ValueDlg::WriteSettings(settings);
+    ZoomableTreeView::WriteSettings(settings);
 }
+
 void MainWindow::ReadSettings()
 {
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
 
     settings.beginGroup("MainWindow");
-    resize(settings.value("size", QSize(900, 500)).toSize());
-    move(settings.value("pos", QPoint(200, 200)).toPoint());
+    if (settings.value("size").isNull())
+    {
+        restoreGeometry(settings.value("geometry").toByteArray());
+        restoreState(settings.value("windowState").toByteArray());
+    }
+    else
+    {
+        // Backcompat: size and pos are now replaced with geometry that works with windowState.
+        resize(settings.value("size").toSize());
+        move(settings.value("pos").toPoint());
+        settings.remove("size");
+        settings.remove("pos");
+    }
     m_recentFiles = settings.value("recentFiles", QStringList()).toStringList();
+    m_lastOpenFolder = settings.value("lastOpenFolder", QString()).toString();
     settings.endGroup();
 
     //Load Options variables from config file
     m_options.ReadSettings();
-}
 
+    ValueDlg::ReadSettings(settings);
+    ZoomableTreeView::ReadSettings(settings);
+}
 
 EventListPtr MainWindow::GetEventsFromFile(QString path, int & skippedCount)
 {
@@ -256,7 +292,7 @@ void MainWindow::AddRecentFile(const QString& path)
     //Otherwise add it to the top of the list
     else if(path != "")
     {
-        if(m_recentFiles.size() > 9)
+        if (m_recentFiles.size() > 14)
         {
             m_recentFiles.removeLast();
         }
@@ -320,7 +356,7 @@ void MainWindow::on_actionTail_current_tab_triggered()
         if (currentTab->StartLiveCapture())
         {
             view->scrollToBottom();
-            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(":/tab-sync-thin.png"));
+            tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
         }
         else
         {
@@ -343,6 +379,14 @@ void MainWindow::on_actionClear_all_events_triggered()
     }
 }
 
+inline QString SystemCase(const QString& path)
+{
+#ifdef Q_OS_WIN32
+    return path.toLower();
+#else
+    return path;
+#endif
+}
 
 bool MainWindow::LoadLogFile(QString path)
 {
@@ -362,7 +406,7 @@ bool MainWindow::LoadLogFile(QString path)
     fileName = fi.fileName();
     filePath = fi.filePath();
 	path.replace("\\", "/");
-    if(!m_allFiles.contains(filePath))
+    if (!m_allFiles.contains(SystemCase(filePath)))
     {
         SetUpTab(events, false, path, fileName);
     }
@@ -376,7 +420,7 @@ bool MainWindow::LoadLogFile(QString path)
 void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
 {
     directoryPath.replace("\\", "/");
-    if(!m_allFiles.contains(directoryPath))
+    if (!m_allFiles.contains(SystemCase(directoryPath)))
     {
         if (label.isEmpty())
         {
@@ -399,7 +443,7 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
     connect(logTab, &LogTab::openFile, this, &MainWindow::LoadLogFile);
     int idx = tabWidget->addTab(logTab, label);
-    m_allFiles.append(path);
+    m_allFiles.append(SystemCase(path));
 
     auto tree = tabWidget->widget(idx)->findChild<QTreeView *>();
     TreeModel* model = GetTreeModel(tree);
@@ -409,12 +453,12 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     {
         model->m_paths.append(path);
         model->SetTabType(TABTYPE::SingleFile);
-        AddRecentFile(path);
     }
     else
     {
         model->SetTabType(TABTYPE::Directory);
     }
+    AddRecentFile(path);
     logTab->SetTabPath(path);
     actionTail_current_tab->setEnabled(model->TabType() != TABTYPE::ExportedEvents);
 
@@ -462,20 +506,11 @@ void MainWindow::on_actionBeta_log_directory_triggered()
 
 void MainWindow::on_actionChoose_directory_triggered()
 {
-    // Use file path of the current tab as default directory.
-    // It works with both file and directory paths.
-    QString defaultDir;
-    TreeModel* model = GetCurrentTreeModel();
-    if (model)
-    {
-        LogTab* currentTab = m_logTabs[model];
-        defaultDir = currentTab->GetTabPath();
-    }
-
-    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", defaultDir);
+    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", m_lastOpenFolder);
     if (!directoryPath.isEmpty())
     {
         StartDirectoryLiveCapture(directoryPath, "");
+        m_lastOpenFolder = directoryPath;
     }
 }
 
@@ -544,7 +579,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
     QTreeView * view = GetTreeView(index);
     TreeModel * model = GetTreeModel(view);
     LogTab * currentTab = m_logTabs[model];
-    m_allFiles.removeAll(currentTab->GetTabPath());
+    m_allFiles.removeAll(SystemCase(currentTab->GetTabPath()));
     currentTab->EndLiveCapture();
     m_logTabs.remove(model);
 
@@ -715,13 +750,11 @@ void MainWindow::on_actionClose_all_tabs_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    WriteSettings();
     close();
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)
 {
-
     event->ignore();
     WriteSettings();
     event->accept();
@@ -923,11 +956,256 @@ void MainWindow::on_actionShow_summary_triggered()
     ShowSummary(GetCurrentTreeModel(), this);
 }
 
-void MainWindow::on_actionOpen_timeline_triggered()
+void ConvertJsonToStringMap(const QJsonObject& valJson, const QStringList& fields, QMap<QString, QString>& nameValues)
 {
-    QMessageBox timelineMsg(this);
-    timelineMsg.setText("Timeline is currently not implemented for the TLV QT Port.");
-    timelineMsg.exec();
+    for (const auto& field : fields)
+    {
+        const auto& val = valJson[field];
+        if (val.isDouble())
+        {
+            double intpart;
+            const int decimals = (modf(val.toDouble(), &intpart) == 0) ? 0 : 3;
+            nameValues[field] = QString::number(val.toDouble(), 'f', decimals);
+        }
+        else if (val.isString())
+        {
+            QString strVal = val.toString();
+            strVal.truncate(32000); // Excel cannot handle more than ~32K chars.
+            nameValues[field] = "\"" % strVal.replace("\n", "\\n").replace("\"", "\"\"") % "\"";
+        }
+        else if (val.isObject())
+        {
+            ConvertJsonToStringMap(val.toObject(), fields, nameValues);
+        }
+        else if (!nameValues.contains(field))
+        {
+            nameValues[field] = "";
+        }
+    }
+}
+
+void WriteJsonAsCsv(const QJsonObject& valJson, QStringList& fields, QString& outputStr)
+{
+    // If list of fields is not specified, set it to all fields available in the first event.
+    if (fields.isEmpty())
+    {
+        fields = valJson.keys();
+    }
+
+    QMap<QString, QString> nameValues;
+
+    ConvertJsonToStringMap(valJson, fields, nameValues);
+
+    for (const auto& field : fields)
+    {
+        outputStr += nameValues[field] + ",";
+    }
+    outputStr.truncate(outputStr.size() - 1);
+    outputStr += "\n";
+}
+
+bool CreateFolder(const QString& path)
+{
+    QDir folder(path);
+    if (!folder.exists() && !folder.mkpath("."))
+    {
+        QMessageBox warning(
+            QMessageBox::Icon::Warning,
+            "Error creating directory",
+            folder.path());
+        warning.exec();
+        return false;
+    }
+    return true;
+}
+
+bool SaveFile(const QString& path, const QString& filename, const QStringList& headers, const QString& content)
+{
+    QFile file(path + "/" + filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox warning(
+            QMessageBox::Icon::Warning,
+            "Error writing file",
+            file.fileName());
+        warning.exec();
+        return false;
+    }
+
+    QString output = headers.join(',') + "\n" + content;
+    file.write(output.toUtf8().data());
+    file.close();
+    return true;
+}
+
+bool CopyAllFiles(const QString& fromPath, const QString& toPath)
+{
+    QDir fromFolder(fromPath);
+    if (!fromFolder.exists())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Directory not found", fromFolder.path());
+        warning.exec();
+        return false;
+    }
+
+    QDir toFolder(toPath);
+    if (!toFolder.exists())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Directory not found", toFolder.path());
+        warning.exec();
+        return false;
+    }
+
+    QStringList files = fromFolder.entryList(QDir::Files);
+    for (const QString& fileName : files)
+    {
+        QFileInfo fromFile{fromPath + "/" + fileName};
+        QFileInfo toFile{toPath + "/" + fileName};
+
+        if (toFile.exists())
+        {
+            if (fromFile.lastModified() > toFile.lastModified())
+            {
+                QFile::remove(toFile.filePath());
+            }
+            else
+            {
+                // Skip copying if destination is the same version or newer.
+                continue;
+            }
+        }
+
+        if (!QFile::copy(fromFile.filePath(), toFile.filePath()))
+        {
+            QMessageBox warning(
+                QMessageBox::Icon::Warning, "Cannot copy file",
+                "From " + fromFile.filePath() + "\nTo " + toFile.filePath());
+            warning.exec();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void GeQueryInfoViz(TreeModel* model)
+{
+    if (!model)
+        return;
+
+    QString outputQuery;
+    QString outputTempTable;
+    QString outputProtocol;
+    QString outputFedTempTable;
+    QString outputElapsedEvent;
+    QStringList fieldsQuery{"cols", "elapsed", "protocol-id", "query", "query-category", "query-hash", "rows"};
+    QStringList fieldsTempTable{"elapsed",    "elapsed-create", "elapsed-insert",    "num-columns",
+                                "num-tuples", "protocol-id",    "source-query-hash", "tablename"};
+    QStringList fieldsProtocol{"id", "created-elapsed", "attributes", "class", "dbname", "server"};
+    QStringList fieldsFedTempTable{"query-hash", "table-name"};
+    QStringList fieldsElapsedEvent{"line-id", "time", "elapsed", "begin", "file", "pid", "event", "value"};
+
+    const int rowCount = model->rowCount();
+    for (int i = 0; i < rowCount; i++)
+    {
+        QModelIndex valIndex = model->index(i, COL::Value);
+        QJsonObject event = model->GetEvent(valIndex);
+        QString keyString = event["k"].toString();
+
+        auto elapsed = model->index(i, COL::Elapsed).data().toDouble();
+        if (elapsed != 0.0)
+        {
+            auto strId = model->index(i, COL::ID).data().toString();
+            auto strTime = event["ts"].toString();
+            auto strElapsed = QString::number(elapsed, 'f', 3);
+            auto beginTime = model->index(i, COL::Time).data(Qt::UserRole).toLongLong() - (elapsed * 1000);
+            auto strFile = model->index(i, COL::File).data().toString();
+            auto strPid = model->index(i, COL::PID).data().toString();
+            auto strValue = model->GetValueFullString(valIndex);
+            if (strValue.size() > 3000)
+            {
+                strValue.truncate(3000);
+                strValue += "...";
+            }
+            strValue.replace("\n", "\\n").replace("\"", "\"\"");
+            outputElapsedEvent += QString("%1,\"%2\",%3,%4,\"%5\",%6,\"%7\",\"%8\"\n")
+                                      .arg(
+                                          strId, strTime, strElapsed, QString::number(beginTime, 'f', 0), strFile,
+                                          strPid, keyString, strValue);
+        }
+
+        if (keyString == "end-query")
+        {
+            const QJsonObject& valJson = event["v"].toObject();
+            WriteJsonAsCsv(valJson, fieldsQuery, outputQuery);
+
+            // For federated queries, parsed out all the temp tables used and create a separate list.
+            QString queryText = valJson["query"].toString();
+            if (queryText.contains("FQ_Temp_"))
+            {
+                QRegularExpression regex;
+                if (queryText.startsWith("(restrict"))
+                {
+                    regex.setPattern("table (.*?)\\)");
+                }
+                else if (queryText.startsWith("SELECT "))
+                {
+                    regex.setPattern("\"(#Tableau_.*?)\" ");
+                }
+                else
+                {
+                    continue;
+                }
+
+                QString queryHash = QString::number(valJson["query-hash"].toDouble(), 'f', 0);
+                QRegularExpressionMatchIterator i = regex.globalMatch(queryText);
+                while (i.hasNext())
+                {
+                    QRegularExpressionMatch match = i.next();
+                    QString tableName = match.captured(1);
+                    if (!tableName.startsWith("["))
+                    {
+                        // Hyper does not use square brackets for table names, but the table names
+                        // we log in sql-temp-table events have them.
+                        tableName = "[" % tableName % "]";
+                    }
+                    outputFedTempTable += queryHash % ",\"" % tableName % "\"\n";
+                }
+            }
+        }
+        else if (keyString == "end-sql-temp-table-tuples-create")
+        {
+            WriteJsonAsCsv(event["v"].toObject(), fieldsTempTable, outputTempTable);
+        }
+        else if (keyString == "construct-protocol")
+        {
+            WriteJsonAsCsv(event["v"].toObject(), fieldsProtocol, outputProtocol);
+        }
+    }
+
+    if (outputElapsedEvent.isEmpty())
+    {
+        QMessageBox warning(QMessageBox::Icon::Warning, "Error", "No parsable event found.");
+        warning.exec();
+        return;
+    }
+
+    QString docFolderPath = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0] + "/TLV";
+    if (CreateFolder(docFolderPath) &&
+        SaveFile(docFolderPath, "TLV_Query.csv", fieldsQuery, outputQuery) &&
+        SaveFile(docFolderPath, "TLV_FedTempTable.csv", fieldsFedTempTable, outputFedTempTable) &&
+        SaveFile(docFolderPath, "TLV_TempTable.csv", fieldsTempTable, outputTempTable) &&
+        SaveFile(docFolderPath, "TLV_Protocol.csv", fieldsProtocol, outputProtocol) &&
+        SaveFile(docFolderPath, "TLV_ElapsedEvent.csv", fieldsElapsedEvent, outputElapsedEvent))
+    {
+        CopyAllFiles(":/workbooks", docFolderPath);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(docFolderPath));
+    }
+}
+
+void MainWindow::on_actionCreate_info_viz_triggered()
+{
+    GeQueryInfoViz(GetCurrentTreeModel());
 }
 
 void MainWindow::FindPrev()
@@ -1052,3 +1330,42 @@ void MainWindow::RefilterTreeView()
     model->layoutChanged();
     view->scrollTo(previousIdx, QAbstractItemView::PositionAtCenter);
 }
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj == tabWidget->tabBar() &&
+        event->type() == QEvent::MouseButtonPress)
+    {
+        auto mouseEvent = static_cast<QMouseEvent *>(event);
+        int idx = tabWidget->tabBar()->tabAt(mouseEvent->pos());
+
+        if (mouseEvent->button() == Qt::MidButton)
+        {
+            on_tabWidget_tabCloseRequested(idx);
+            return true;
+        }
+        else if (mouseEvent->button() == Qt::RightButton)
+        {
+            TreeModel* model = GetTreeModel(GetTreeView(idx));
+            if (!model || model->TabType() == TABTYPE::ExportedEvents)
+                return true;
+
+            LogTab* logTab = m_logTabs[model];
+
+            QAction actionCopyFullPath("Copy full path", this);
+            connect(&actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);
+
+            QAction actionOpenDirectory("Show in folder", this);
+            connect(&actionOpenDirectory, &QAction::triggered, logTab, &LogTab::ShowInFolder);
+
+            QMenu tabBarMenu(this);
+            tabBarMenu.addAction(&actionCopyFullPath);
+            tabBarMenu.addAction(&actionOpenDirectory);
+            tabBarMenu.exec(mouseEvent->globalPos());
+            return true;
+        }
+    }
+
+    return QMainWindow::eventFilter(obj, event);
+}
+
