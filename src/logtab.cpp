@@ -620,29 +620,37 @@ void LogTab::ChangePrevIndex()
 
 void NormalizeLogText(QString& logText)
 {
-    logText.replace(QRegularExpression("id: (-)?\\d+"), "id: N");
-    logText.replace(QRegularExpression("pid=\\d+"), "pid=N");
-    logText.replace(QRegularExpression("elapsed: \\d+(.\\d+)?"), "elapsed: N.N");
-    logText.replace(QRegularExpression("elapsed=\\d+.\\d+"), "elapsed=N.N");
-    logText.replace(QRegularExpression("elapsed-create: \\d+.\\d+"), "elapsed-create: N.N");
-    logText.replace(QRegularExpression("elapsed-index: \\d+.\\d+"), "elapsed-index: N.N");
-    logText.replace(QRegularExpression("elapsed-insert: \\d+.\\d+"), "elapsed-insert: N.N");
-    logText.replace(QRegularExpression(":thread-session: \\d+;"), ":thread-session: N;");
-    logText.replace(QRegularExpression(":thread-session: \\(MISMATCH\\) \\d+"), ":thread-session: (MISMATCH) N;");
-    logText.replace(QRegularExpression(":thread-session='\\d+'"), ":thread-session='N'");
-    logText.replace(QRegularExpression("this: 0x\\w+"), "this: 0x0N");
-    logText.replace(QRegularExpression("query-hash: \\d+"), "query-hash: N");
-    logText.replace(QRegularExpression("\\w:[\\\\/\\w]+[\\\\/]TableauTemp[\\\\/]"), "TableauTemp/");
-    logText.replace(QRegularExpression("[/\\w]+/tableau-temp/"), "TableauTemp/");
-    logText.replace(QRegularExpression("TableauTemp/[f]?tde_\\w{28}"), "TableauTemp/tde_ID");
-    logText.replace(QRegularExpression("[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"), "GUID");
-    logText.replace(QRegularExpression("#Tableau_[\\w_]+_Connect"), "#Tableau_ID_Connect");
-    logText.replace(QRegularExpression("#Tableau_\\d+_\\d+"), "#Tableau_N_N");
-    logText.replace(QRegularExpression("#Tableau_\\d+_GUID_\\d+"), "#Tableau_N_GUID_N");
-    logText.replace(QRegularExpression("[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [AP]M"), "TIMESTAMP");
-    logText.replace(QRegularExpression("(\")?tab.domain:\\S+(\")?"), "\"tab.endpoint\"");
-    logText.replace(QRegularExpression("\"tab.pipe:\\S+\""), "\"tab.endpoint\"");
-    logText.replace(QRegularExpression("i: \\d+; n: \\d+; test: "), "i: N; n: N; test: ");
+    std::map<QString, QString> replacements
+    {
+        {"id: (-)?\\d+", "id: N"},
+        {"pid=\\d+", "pid=N"},
+        {"elapsed: \\d+(.\\d+)?", "elapsed: N.N"},
+        {"elapsed=\\d+.\\d+", "elapsed=N.N"},
+        {"elapsed-create: \\d+.\\d+", "elapsed-create: N.N"},
+        {"elapsed-index: \\d+.\\d+", "elapsed-index: N.N"},
+        {"elapsed-insert: \\d+.\\d+", "elapsed-insert: N.N"},
+        {":thread-session: \\d+;", ":thread-session: N;"},
+        {":thread-session: \\(MISMATCH\\) \\d+", ":thread-session: (MISMATCH) N;"},
+        {":thread-session='\\d+'", ":thread-session='N'"},
+        {"this: 0x\\w+", "this: 0x0N"},
+        {"query-hash: \\d+", "query-hash: N"},
+        {"\\w:[\\\\/\\w]+[\\\\/]TableauTemp[\\\\/]", "TableauTemp/"},
+        {"[/\\w]+/tableau-temp/", "TableauTemp/"},
+        {"TableauTemp/[f]?tde_\\w{28}", "TableauTemp/tde_ID"},
+        {"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}", "GUID"},
+        {"#Tableau_[\\w_]+_Connect", "#Tableau_ID_Connect"},
+        {"#Tableau_\\d+_\\d+", "#Tableau_N_N"},
+        {"#Tableau_\\d+_GUID_\\d+", "#Tableau_N_GUID_N"},
+        {"[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [AP]M", "TIMESTAMP"},
+        {"(\")?tab.domain:\\S+(\")?", "\"tab.endpoint\""},
+        {"\"tab.pipe:\\S+\"", "\"tab.endpoint\""},
+        {"i: \\d+; n: \\d+; test: ", "i: N; n: N; test: "},
+    };
+
+    for (const auto& repl : replacements)
+    {
+        logText.replace(QRegularExpression(repl.first), repl.second);
+    }
 }
 
 void LogTab::CopyItemDetailsAsHtml() const
