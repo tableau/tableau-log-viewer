@@ -41,8 +41,10 @@ private:
     void InitHeaderMenu();
     void SetColumn(int column, int width, bool isHidden);
     void ShowItemDetails(const QModelIndex&);
-    void CopyItemDetails(bool textOnly = false) const;
+    void CopyItemDetails(bool textOnly, bool normalized) const;
+    void CopyItemDetailsAsHtml() const;
     void CopyItemDetailsAsText() const;
+    void CopyItemDetailsAsNormalizedText() const;
     void RowFindPrev();
     void RowFindNext();
     void RowFindImpl(int offset);
@@ -69,6 +71,7 @@ private:
     QAction *m_exportToTabAction;
     QAction *m_copyItemsHtmlAction;
     QAction *m_copyItemsTextAction;
+    QAction *m_copyItemsNormalizedTextAction;
     int m_openFileMenuIdx;
     int m_eventIndex;
     QFile m_logFile;

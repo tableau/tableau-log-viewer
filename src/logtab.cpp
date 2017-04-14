@@ -81,12 +81,15 @@ void LogTab::InitMenus()
     m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
-    m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy", this);
+    m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as HTML", this);
     m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-    connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetails);
+    connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsHtml);
 
     m_copyItemsTextAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as text", this);
     connect(m_copyItemsTextAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsText);
+
+    m_copyItemsNormalizedTextAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as normalized text", this);
+    connect(m_copyItemsNormalizedTextAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsNormalizedText);
 
     InitOneRowMenu();
     InitTwoRowsMenu();
@@ -104,6 +107,7 @@ void LogTab::InitTwoRowsMenu()
     m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
     m_twoRowsMenu->addAction(m_copyItemsTextAction);
+    m_twoRowsMenu->addAction(m_copyItemsNormalizedTextAction);
 }
 
 void LogTab::InitMultipleRowsMenu()
@@ -113,6 +117,7 @@ void LogTab::InitMultipleRowsMenu()
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
     m_multipleRowsMenu->addAction(m_copyItemsTextAction);
+    m_multipleRowsMenu->addAction(m_copyItemsNormalizedTextAction);
 }
 
 void LogTab::InitOneRowMenu()
@@ -168,6 +173,7 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(m_copyItemsHtmlAction);
     m_oneRowMenu->addAction(m_copyItemsTextAction);
+    m_oneRowMenu->addAction(m_copyItemsNormalizedTextAction);
 }
 
 void LogTab::keyPressEvent(QKeyEvent *event)
@@ -196,7 +202,7 @@ void LogTab::keyPressEvent(QKeyEvent *event)
             (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
             (rowCount > 0))
         {
-            CopyItemDetails();
+            CopyItemDetailsAsHtml();
         }
         else if ((event->key() == Qt::Key_D) &&
                  (QApplication::keyboardModifiers() & Qt::ControlModifier) &&
@@ -612,12 +618,49 @@ void LogTab::ChangePrevIndex()
     }
 }
 
-void LogTab::CopyItemDetailsAsText() const
+void NormalizeLogText(QString& logText)
 {
-    CopyItemDetails(true);
+    logText.replace(QRegularExpression("id: (-)?\\d+"), "id: N");
+    logText.replace(QRegularExpression("pid=\\d+"), "pid=N");
+    logText.replace(QRegularExpression("elapsed: \\d+(.\\d+)?"), "elapsed: N.N");
+    logText.replace(QRegularExpression("elapsed=\\d+.\\d+"), "elapsed=N.N");
+    logText.replace(QRegularExpression("elapsed-create: \\d+.\\d+"), "elapsed-create: N.N");
+    logText.replace(QRegularExpression("elapsed-index: \\d+.\\d+"), "elapsed-index: N.N");
+    logText.replace(QRegularExpression("elapsed-insert: \\d+.\\d+"), "elapsed-insert: N.N");
+    logText.replace(QRegularExpression(":thread-session: \\d+;"), ":thread-session: N;");
+    logText.replace(QRegularExpression(":thread-session: \\(MISMATCH\\) \\d+"), ":thread-session: (MISMATCH) N;");
+    logText.replace(QRegularExpression(":thread-session='\\d+'"), ":thread-session='N'");
+    logText.replace(QRegularExpression("this: 0x\\w+"), "this: 0x0N");
+    logText.replace(QRegularExpression("query-hash: \\d+"), "query-hash: N");
+    logText.replace(QRegularExpression("\\w:[\\\\/\\w]+[\\\\/]TableauTemp[\\\\/]"), "TableauTemp/");
+    logText.replace(QRegularExpression("[/\\w]+/tableau-temp/"), "TableauTemp/");
+    logText.replace(QRegularExpression("TableauTemp/[f]?tde_\\w{28}"), "TableauTemp/tde_ID");
+    logText.replace(QRegularExpression("[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"), "GUID");
+    logText.replace(QRegularExpression("#Tableau_[\\w_]+_Connect"), "#Tableau_ID_Connect");
+    logText.replace(QRegularExpression("#Tableau_\\d+_\\d+"), "#Tableau_N_N");
+    logText.replace(QRegularExpression("#Tableau_\\d+_GUID_\\d+"), "#Tableau_N_GUID_N");
+    logText.replace(QRegularExpression("[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [AP]M"), "TIMESTAMP");
+    logText.replace(QRegularExpression("(\")?tab.domain:\\S+(\")?"), "\"tab.endpoint\"");
+    logText.replace(QRegularExpression("\"tab.pipe:\\S+\""), "\"tab.endpoint\"");
+    logText.replace(QRegularExpression("i: \\d+; n: \\d+; test: "), "i: N; n: N; test: ");
 }
 
-void LogTab::CopyItemDetails(bool textOnly) const
+void LogTab::CopyItemDetailsAsHtml() const
+{
+    CopyItemDetails(false, false);
+}
+
+void LogTab::CopyItemDetailsAsText() const
+{
+    CopyItemDetails(true, false);
+}
+
+void LogTab::CopyItemDetailsAsNormalizedText() const
+{
+    CopyItemDetails(true, true);
+}
+
+void LogTab::CopyItemDetails(bool textOnly, bool normalized) const
 {
     QModelIndexList idxList = ui->treeView->selectionModel()->selectedRows();
     int columnCount = m_treeModel->columnCount();
@@ -634,7 +677,9 @@ void LogTab::CopyItemDetails(bool textOnly) const
     // Header row
     for (int i = 0; i < columnCount; i++)
     {
-        if (!(ui->treeView->isColumnHidden(i)))
+        // Only copy columns that are not hidden. And in normalized mode, only copy Key and Value columns as others have
+        // mostly transient values that are not useful for comparisons.
+        if (!(ui->treeView->isColumnHidden(i)) && (!normalized || (i == COL::Key) || (i == COL::Value)))
         {
             QString info = m_treeModel->headerData(i, Qt::Horizontal).toString();
             copyText += info + "\t";
@@ -650,7 +695,7 @@ void LogTab::CopyItemDetails(bool textOnly) const
         copyHtml += "<tr>";
         for (int i = 0; i < columnCount; i++)
         {
-            if (!(ui->treeView->isColumnHidden(i)))
+            if (!(ui->treeView->isColumnHidden(i)) && (!normalized || (i == COL::Key) || (i == COL::Value)))
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
                 QString info = (i == COL::Value) ?
@@ -677,10 +722,16 @@ void LogTab::CopyItemDetails(bool textOnly) const
 
     QClipboard* clipboard = QApplication::clipboard();
     auto mime = std::make_unique<QMimeData>();
-    mime->setText(copyText);
     if (!textOnly)
     {
+        mime->setText(copyText);
         mime->setHtml(copyHtml);
+    }
+    else
+    {
+        if (normalized)
+            NormalizeLogText(copyText);
+        mime->setText(copyText);
     }
     clipboard->setMimeData(mime.release());
 }
