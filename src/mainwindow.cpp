@@ -149,6 +149,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     menuLoad_filters->setEnabled(model);
     actionSave_filters->setEnabled(hasFilters);
     //Find
+    actionFind->setEnabled(model);
     actionFind_next->setEnabled(hasFindOpts);
     actionFind_previous->setEnabled(hasFindOpts);
     //Live capture
