@@ -21,11 +21,6 @@
         <file alias="ctx-book.png">../resources/images/ctx-book.png</file>
         <file alias="ctx-copy.png">../resources/images/ctx-copy.png</file>
         <file alias="ctx-open-file.png">../resources/images/ctx-open-file.png</file>
-        <file alias="ctx-clear.png">../resources/images/ctx-clear.png</file>
-        <file alias="ctx-refresh.png">../resources/images/ctx-refresh.png</file>
-        <file alias="ctx-find.png">../resources/images/ctx-find.png</file>
-        <file alias="ctx-summary.png">../resources/images/ctx-summary.png</file>
-        <file alias="ctx-livecapture.png">../resources/images/ctx-livecapture.png</file>
         <file alias="value-next.png">../resources/images/value-next.png</file>
         <file alias="value-previous.png">../resources/images/value-previous.png</file>
         <file alias="query-graphs/query-graphs.tlv.html">../resources/query-graphs/query-graphs.tlv.html</file>
@@ -48,11 +43,6 @@
         <file alias="ctx-book.png">../resources/images/darktheme/ctx-book.png</file>
         <file alias="ctx-copy.png">../resources/images/darktheme/ctx-copy.png</file>
         <file alias="ctx-open-file.png">../resources/images/darktheme/ctx-open-file.png</file>
-        <file alias="ctx-clear.png">../resources/images/darktheme/ctx-clear.png</file>
-        <file alias="ctx-refresh.png">../resources/images/darktheme/ctx-refresh.png</file>
-        <file alias="ctx-find.png">../resources/images/darktheme/ctx-find.png</file>
-        <file alias="ctx-summary.png">../resources/images/darktheme/ctx-summary.png</file>
-        <file alias="ctx-livecapture.png">../resources/images/darktheme/ctx-livecapture.png</file>
         <file alias="value-next.png">../resources/images/darktheme/value-next.png</file>
         <file alias="value-previous.png">../resources/images/darktheme/value-previous.png</file>
     </qresource>

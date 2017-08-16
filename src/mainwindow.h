@@ -37,7 +37,6 @@ protected:
 
 private slots:
     void Recent_files_triggered(QAction * action);
-    void UpdateTheme();
     void UpdateMenuAndStatusBar();
     void ExportEventsToTab(QModelIndexList list);
     bool LoadLogFile(QString);
