@@ -40,18 +40,12 @@ MainWindow::MainWindow()
     setupUi(this);
 
     m_statusBar = new StatusBar(this);
-    //Add Clear all events button (not doable via UI designer)
-    Ui_MainWindow::menuBar->addAction(actionClear_all_events);
 
     ReadSettings();
+
     // Load the theme for the first time
-    // No need to switch the theme if it is set to "Native" (the default)
-    QString themeName = m_options.getTheme();
-    if (themeName != "Native")
-    {
-        ThemeUtils::SwitchTheme(themeName, this);
-        this->actionTail_current_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
-    }
+    UpdateTheme();
+
     UpdateMenuAndStatusBar();
 
     // About TLV. It will have the Version number, this only needs to be calculated once
@@ -112,6 +106,21 @@ void MainWindow::ClearRecentFileMenu()
     Ui_MainWindow::menuRecent_files->addSeparator();
 }
 
+void MainWindow::UpdateTheme()
+{
+    QString themeName = m_options.getTheme();
+
+    ThemeUtils::SwitchTheme(themeName, this);
+
+    // Update toolbar Icons theme
+    this->actionTail_current_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-livecapture.png")));
+    this->actionHighlight_only_mode->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-highlight.png")));
+    this->actionClear_all_events->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-clear.png")));
+    this->actionShow_summary->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-summary.png")));
+    this->actionRefresh->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-refresh.png")));
+    this->actionFind->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-find.png")));
+}
+
 void MainWindow::UpdateMenuAndStatusBar()
 {
     TreeModel * model = GetCurrentTreeModel();
@@ -140,6 +149,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     menuLoad_filters->setEnabled(model);
     actionSave_filters->setEnabled(hasFilters);
     //Find
+    actionFind->setEnabled(model);
     actionFind_next->setEnabled(hasFindOpts);
     actionFind_previous->setEnabled(hasFindOpts);
     //Live capture
@@ -841,8 +851,14 @@ void MainWindow::on_actionFind_previous_triggered()
 
 void MainWindow::on_actionOptions_triggered()
 {
+    QString prevThemeName = m_options.getTheme();
+
     OptionsDlg optionsDlg(this);
     optionsDlg.exec();
+
+    //Update if user change theme
+    if (prevThemeName != m_options.getTheme())
+        UpdateTheme();
 }
 
 QString msecsToString(qint64 mseconds)

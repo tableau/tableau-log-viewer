@@ -16,6 +16,18 @@
   <property name="windowTitle">
    <string>Tableau Log Viewer</string>
   </property>
+  <property name="iconSize">
+   <size>
+    <width>18</width>
+    <height>18</height>
+   </size>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonTextUnderIcon</enum>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <property name="leftMargin">
@@ -168,6 +180,23 @@ QTabWidget::tab-bar {
    <addaction name="menuFind"/>
    <addaction name="menuHelp"/>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionClear_all_events"/>
+   <addaction name="actionHighlight_only_mode"/>
+   <addaction name="actionFind"/>
+   <addaction name="actionTail_current_tab"/>
+   <addaction name="actionShow_summary"/>
+  </widget>
   <action name="actionOpen_in_new_tab">
    <property name="text">
     <string>&amp;Open in new tab...</string>
@@ -190,6 +219,10 @@ QTabWidget::tab-bar {
   <action name="actionRefresh">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-refresh.png</normaloff>:/ctx-refresh.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Refresh</string>
@@ -270,6 +303,10 @@ QTabWidget::tab-bar {
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-highlight.png</normaloff>:/ctx-highlight.png</iconset>
+   </property>
    <property name="text">
     <string>Highlight &amp;only mode</string>
    </property>
@@ -278,6 +315,10 @@ QTabWidget::tab-bar {
    </property>
   </action>
   <action name="actionFind">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-find.png</normaloff>:/ctx-find.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Find...</string>
    </property>
@@ -328,7 +369,7 @@ QTabWidget::tab-bar {
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/tab-sync-thin.png</normaloff>:/tab-sync-thin.png</iconset>
+     <normaloff>:/ctx-livecapture.png</normaloff>:/ctx-livecapture.png</iconset>
    </property>
    <property name="text">
     <string>Live &amp;mode</string>
@@ -338,6 +379,10 @@ QTabWidget::tab-bar {
    </property>
   </action>
   <action name="actionClear_all_events">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-clear.png</normaloff>:/ctx-clear.png</iconset>
+   </property>
    <property name="text">
     <string>Clear all &amp;events</string>
    </property>
@@ -356,6 +401,10 @@ QTabWidget::tab-bar {
    </property>
   </action>
   <action name="actionShow_summary">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-summary.png</normaloff>:/ctx-summary.png</iconset>
+   </property>
    <property name="text">
     <string>Show &amp;summary</string>
    </property>
