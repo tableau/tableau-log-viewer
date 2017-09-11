@@ -637,6 +637,18 @@ void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector
             GetFlatJson(itemKey, itemValue, stringList);
         }
     }
+    else if (value.isBool())
+    {
+        stringList.append(KeyValueString(key, QString(value.toBool() ? "true" : "false")));
+    }
+    else if (value.isNull())
+    {
+        stringList.append(KeyValueString(key, QString("null")));
+    }
+    else if (value.isUndefined())
+    {
+        stringList.append(KeyValueString(key, QString("undefined")));
+    }
     else
     {
         stringList.append(KeyValueString(key, value.toString()));
