@@ -41,6 +41,16 @@ void LogTab::InitTreeView(const EventListPtr events)
 
     m_bar->ShowMessage(QString("%1 events loaded").arg(QString::number(m_treeModel->rowCount())), 3000);
 
+    // Display only time if all events occured on the same day
+    bool multipleDays = true;
+    if (events->size() >= 2) {
+       QModelIndex idx = ui->treeView->currentIndex();
+       auto firstDatetime = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
+       auto lastDatetime = m_treeModel->index(m_treeModel->rowCount()-1, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
+       multipleDays = firstDatetime.date() != lastDatetime.date();
+    }
+    m_treeModel->SetTimeMode(multipleDays ? TimeMode::GlobalDateTime : TimeMode::GlobalTime);
+
     bool hasNoKey = (events->size() > 0 && events->at(0)["k"].toString().isEmpty());
 
     SetColumn(COL::ID, 80, false);
@@ -138,22 +148,25 @@ void LogTab::InitOneRowMenu()
     QAction *highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
     connect(highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
 
-    QAction *actionGlobalTimestamps = new QAction(QIcon(GetThemedIcon(":/ctx-timestamp.png")), "Show global timestamps", this);
-    actionGlobalTimestamps->setCheckable(true);
-    actionGlobalTimestamps->setChecked(true);
-    connect(actionGlobalTimestamps, &QAction::triggered, this, &LogTab::RowShowGlobalTimestamps);
+    m_showGlobalDateTime = new QAction(QIcon(GetThemedIcon(":/ctx-datetime.png")), "Show global date && time", this);
+    m_showGlobalDateTime->setCheckable(true);
+    connect(m_showGlobalDateTime, &QAction::triggered, this, &LogTab::RowShowGlobalDateTime);
 
-    QAction *actionTimeDeltas = new QAction(QIcon(GetThemedIcon(":/ctx-timedelta.png")), "Show time deltas to this event", this);
-    actionTimeDeltas->setCheckable(true);
-    actionTimeDeltas->setChecked(false);
-    connect(actionTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
+    m_showGlobalTime = new QAction(QIcon(GetThemedIcon(":/ctx-time.png")), "Show global time", this);
+    m_showGlobalTime->setCheckable(true);
+    connect(m_showGlobalTime, &QAction::triggered, this, &LogTab::RowShowGlobalTime);
+
+    m_showTimeDeltas = new QAction(QIcon(GetThemedIcon(":/ctx-time.png")), "Show time deltas to this event", this);
+    m_showTimeDeltas->setCheckable(true);
+    connect(m_showTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
     QAction *actionOpenFile = new QAction(QIcon(GetThemedIcon(":/ctx-open-file.png")), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);
-    group->addAction(actionGlobalTimestamps);
-    group->addAction(actionTimeDeltas);
+    group->addAction(m_showGlobalDateTime);
+    group->addAction(m_showGlobalTime);
+    group->addAction(m_showTimeDeltas);
     group->setExclusive(true);
 
     m_oneRowMenu = new QMenu(this);
@@ -164,8 +177,9 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addAction(findPrevSelectedType);
     m_oneRowMenu->addAction(highlightSelectedType);
     m_oneRowMenu->addSeparator();
-    m_oneRowMenu->addAction(actionGlobalTimestamps);
-    m_oneRowMenu->addAction(actionTimeDeltas);
+    m_oneRowMenu->addAction(m_showGlobalDateTime);
+    m_oneRowMenu->addAction(m_showGlobalTime);
+    m_oneRowMenu->addAction(m_showTimeDeltas);
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(m_exportToTabAction);
     m_oneRowMenu->addAction(actionOpenFile);
@@ -783,6 +797,11 @@ void LogTab::RowRightClicked(const QPoint& pos)
         auto menuActions = m_oneRowMenu->actions();
         menuActions[m_openFileMenuIdx]->setVisible(isDirectoryTab);
 
+        TimeMode timeMode = m_treeModel->GetTimeMode();
+        m_showGlobalDateTime->setChecked(timeMode==TimeMode::GlobalDateTime);
+        m_showGlobalTime->setChecked(timeMode==TimeMode::GlobalTime);
+        m_showTimeDeltas->setChecked(timeMode==TimeMode::TimeDeltas);
+
         m_oneRowMenu->popup(ui->treeView->viewport()->mapToGlobal(pos));
     }
     else if (rowCount == 2)
@@ -962,9 +981,14 @@ void LogTab::RowHighlightSelectedType()
     menuUpdateNeeded();
 }
 
-void LogTab::RowShowGlobalTimestamps()
+void LogTab::RowShowGlobalDateTime()
 {
-    m_treeModel->ShowDeltas(0);
+    m_treeModel->SetTimeMode(TimeMode::GlobalDateTime);
+}
+
+void LogTab::RowShowGlobalTime()
+{
+    m_treeModel->SetTimeMode(TimeMode::GlobalTime);
 }
 
 void LogTab::RowShowTimeDeltas()
