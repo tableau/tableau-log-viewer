@@ -13,8 +13,8 @@
         <file alias="ctx-down.png">../resources/images/ctx-down.png</file>
         <file alias="ctx-highlight.png">../resources/images/ctx-highlight.png</file>
         <file alias="ctx-newtab.png">../resources/images/ctx-newtab.png</file>
-        <file alias="ctx-timedelta.png">../resources/images/ctx-timedelta.png</file>
-        <file alias="ctx-timestamp.png">../resources/images/ctx-timestamp.png</file>
+        <file alias="ctx-time.png">../resources/images/ctx-time.png</file>
+        <file alias="ctx-datetime.png">../resources/images/ctx-datetime.png</file>
         <file alias="ctx-up.png">../resources/images/ctx-up.png</file>
         <file alias="ctx-hide.png">../resources/images/ctx-hide.png</file>
         <file alias="ctx-diff.png">../resources/images/ctx-diff.png</file>

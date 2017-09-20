@@ -91,10 +91,15 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                 if (!dateTime.isValid())
                     return "";
 
-                if (m_deltaBase == 0)
-                    return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
-                else
-                    return GetDeltaMSecs(dateTime);
+                switch (m_timeMode)
+                {
+                   case TimeMode::GlobalDateTime:
+                      return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
+                   case TimeMode::GlobalTime:
+                      return dateTime.toString("hh:mm:ss.zzz");
+                   case TimeMode::TimeDeltas:
+                      return GetDeltaMSecs(dateTime);
+                }
             }
             if (item->Data(col).type() == QVariant::Double)
             {
@@ -688,15 +693,25 @@ void TreeModel::ClearAllEvents()
     m_highlightColorCache.clear();
 }
 
+void TreeModel::SetTimeMode(TimeMode mode)
+{
+    m_timeMode = mode;
+}
+
+TimeMode TreeModel::GetTimeMode() const
+{
+    return m_timeMode;
+}
+
 void TreeModel::ShowDeltas(qint64 delta)
 {
+    m_timeMode = TimeMode::TimeDeltas;
     m_deltaBase = delta;
 }
 
 QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
 {
     auto msecs = dateTime.toMSecsSinceEpoch() - m_deltaBase;
-    QString formattedTime;
     bool isNegative = msecs < 0;
     msecs = msecs < 0 ? -msecs : msecs;
     int hours = msecs/(1000*60*60);
@@ -704,13 +719,12 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
     int seconds = (msecs-(minutes*1000*60)-(hours*1000*60*60))/1000;
     int milliseconds = msecs-(seconds*1000)-(minutes*1000*60)-(hours*1000*60*60);
 
-    formattedTime.append(QString("%1").arg(isNegative ? "-" : "") +
-                         QString("%1").arg(hours, 2, 10, QLatin1Char('0')) + ":" +
-                         QString("%1").arg(minutes, 2, 10, QLatin1Char('0')) + ":" +
-                         QString("%1").arg(seconds, 2, 10, QLatin1Char('0')) + ":" +
-                         QString("%1").arg(milliseconds, 3, 10, QLatin1Char('0')));
-
-    return formattedTime;
+    return QString("%1%2:%3:%4:%5")
+        .arg(isNegative ? "-" : "")
+        .arg(hours, 2, 10, QLatin1Char('0'))
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(seconds, 2, 10, QLatin1Char('0'))
+        .arg(milliseconds, 3, 10, QLatin1Char('0'));
 }
 
 bool TreeModel::IsHighlightedRow(int row) const

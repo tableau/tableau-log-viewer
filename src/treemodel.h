@@ -27,6 +27,12 @@ enum class TABTYPE {
     ExportedEvents
 };
 
+enum class TimeMode {
+   GlobalDateTime,
+   GlobalTime,
+   TimeDeltas,
+};
+
 class TreeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -57,6 +63,8 @@ public:
     void AddToModelData(const EventList& events);
     bool ValidFindOpts();
     void ClearAllEvents();
+    void SetTimeMode(TimeMode mode);
+    TimeMode GetTimeMode() const;
     void ShowDeltas(qint64 delta);
     bool IsHighlightedRow(int row) const;
     QJsonObject GetEvent(QModelIndex idx) const;
@@ -89,6 +97,7 @@ private:
     TreeItem *GetItem(const QModelIndex &index) const;
 
     TreeItem * m_rootItem;
+    TimeMode m_timeMode = TimeMode::GlobalDateTime;
     qint64 m_deltaBase = 0;
     EventListPtr m_allEvents;
     TABTYPE m_fileType;

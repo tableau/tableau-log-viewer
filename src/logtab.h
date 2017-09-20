@@ -72,6 +72,9 @@ private:
     QAction *m_copyItemsHtmlAction;
     QAction *m_copyItemsTextAction;
     QAction *m_copyItemsNormalizedTextAction;
+    QAction *m_showGlobalDateTime;
+    QAction *m_showGlobalTime;
+    QAction *m_showTimeDeltas;
     int m_openFileMenuIdx;
     int m_eventIndex;
     QFile m_logFile;
@@ -90,7 +93,8 @@ private slots:
     void RowFindNextSelectedType();
     void RowFindPrevSelectedType();
     void RowHighlightSelectedType();
-    void RowShowGlobalTimestamps();
+    void RowShowGlobalDateTime();
+    void RowShowGlobalTime();
     void RowShowTimeDeltas();
     void HeaderRightClicked(const QPoint& pos);
     void HeaderItemSelected(QAction* action);
