@@ -9,6 +9,7 @@
 #include "valuedlg.h"
 
 #include <memory>
+#include <QSet>
 #include <QFontDatabase>
 #include <QMenu>
 #include <QJsonDocument>
@@ -91,6 +92,9 @@ void LogTab::InitMenus()
     m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
+    m_highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
+    connect(m_highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
+
     m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as HTML", this);
     m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
     connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsHtml);
@@ -115,6 +119,8 @@ void LogTab::InitTwoRowsMenu()
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_exportToTabAction);
     m_twoRowsMenu->addSeparator();
+    m_twoRowsMenu->addAction(m_highlightSelectedType);
+    m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
     m_twoRowsMenu->addAction(m_copyItemsTextAction);
     m_twoRowsMenu->addAction(m_copyItemsNormalizedTextAction);
@@ -124,6 +130,8 @@ void LogTab::InitMultipleRowsMenu()
 {
     m_multipleRowsMenu = new QMenu(this);
     m_multipleRowsMenu->addAction(m_exportToTabAction);
+    m_multipleRowsMenu->addSeparator();
+    m_multipleRowsMenu->addAction(m_highlightSelectedType);
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
     m_multipleRowsMenu->addAction(m_copyItemsTextAction);
@@ -144,9 +152,6 @@ void LogTab::InitOneRowMenu()
 
     QAction *findNextSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-down.png")), "Find next event of this type", this);
     connect(findNextSelectedType, &QAction::triggered, this, &LogTab::RowFindNextSelectedType);
-
-    QAction *highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
-    connect(highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
 
     m_showGlobalDateTime = new QAction(QIcon(GetThemedIcon(":/ctx-datetime.png")), "Show global date && time", this);
     m_showGlobalDateTime->setCheckable(true);
@@ -175,7 +180,7 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(findNextSelectedType);
     m_oneRowMenu->addAction(findPrevSelectedType);
-    m_oneRowMenu->addAction(highlightSelectedType);
+    m_oneRowMenu->addAction(m_highlightSelectedType);
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(m_showGlobalDateTime);
     m_oneRowMenu->addAction(m_showGlobalTime);
@@ -972,12 +977,25 @@ void LogTab::RowFindImpl(int offset)
 
 void LogTab::RowHighlightSelectedType()
 {
-    QModelIndex idx = ui->treeView->currentIndex();
-    SearchOpt newOpt;
-    newOpt.m_keys.append(COL::Key);
-    newOpt.m_value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
-    newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
-    m_treeModel->AddHighlightFilter(newOpt);
+    // Figure out which ones are already filtered
+    QSet<QString> alreadyFiltered;
+    for (const auto& filter : m_treeModel->GetHighlightFilters()) {
+       if ((filter.m_keys.size()==1) && (filter.m_keys[0]==COL::Key)) {
+          alreadyFiltered.insert(filter.m_value);
+       }
+    }
+    // Highlight all selected types
+    auto idxList = ui->treeView->selectionModel()->selectedRows();
+    for (const auto& idx : idxList) {
+       QString value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
+       if (alreadyFiltered.contains(value)) continue;
+       SearchOpt newOpt;
+       newOpt.m_keys.append(COL::Key);
+       newOpt.m_value = value;
+       newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
+       m_treeModel->AddHighlightFilter(newOpt);
+       alreadyFiltered.insert(value);
+    }
     menuUpdateNeeded();
 }
 

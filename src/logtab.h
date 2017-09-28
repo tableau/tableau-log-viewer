@@ -69,6 +69,7 @@ private:
     ValueDlg *m_valueDlg;
     std::vector<std::unique_ptr<QTemporaryFile>> m_tempFiles;
     QAction *m_exportToTabAction;
+    QAction *m_highlightSelectedType;
     QAction *m_copyItemsHtmlAction;
     QAction *m_copyItemsTextAction;
     QAction *m_copyItemsNormalizedTextAction;
