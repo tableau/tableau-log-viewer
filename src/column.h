@@ -1,7 +1,7 @@
 #ifndef COLUMN_H
 #define COLUMN_H
 
-enum COL {
+enum COL : short {
     ID = 0,
     File,
     Time,

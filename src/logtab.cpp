@@ -80,7 +80,7 @@ void LogTab::InitTreeView(const EventListPtr events)
             this, SLOT(HeaderRightClicked(QPoint)));
 }
 
-void LogTab::SetColumn(int column, int width, bool isHidden)
+void LogTab::SetColumn(COL column, int width, bool isHidden)
 {
     ui->treeView->setColumnWidth(column, width);
     ui->treeView->setColumnHidden(column, isHidden);
@@ -89,11 +89,38 @@ void LogTab::SetColumn(int column, int width, bool isHidden)
 void LogTab::InitMenus()
 {
     using namespace ThemeUtils;
+
     m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
+    // Top-level `Highlight all events ofselected types`
     m_highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
-    connect(m_highlightSelectedType, &QAction::triggered, this, &LogTab::RowHighlightSelectedType);
+    connect(m_highlightSelectedType, &QAction::triggered, [this]() { RowHighlightSelected(COL::Key); });
+    // Populate the `Highlight all events of` submenu
+    m_highlightSelectedMenu = new QMenu("Highlight all events of",this);
+    m_highlightSelectedMenu->setIcon(QIcon(GetThemedIcon(":/ctx-highlight.png")));
+    {
+        // This thread
+        QAction* highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this type", m_highlightSelectedMenu);
+        connect(highlightSelectedType, &QAction::triggered, [this]() { RowHighlightSelected(COL::Key); });
+        m_highlightSelectedMenu->addAction(highlightSelectedType);
+        // This session
+        QAction* highlightSelectedSession = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this session", m_highlightSelectedMenu);
+        connect(highlightSelectedSession, &QAction::triggered, [this]() { RowHighlightSelected(COL::Session); });
+        m_highlightSelectedMenu->addAction(highlightSelectedSession);
+        // This request
+        QAction* highlightSelectedRequest = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this request", m_highlightSelectedMenu);
+        connect(highlightSelectedRequest, &QAction::triggered, [this]() { RowHighlightSelected(COL::Request); });
+        m_highlightSelectedMenu->addAction(highlightSelectedRequest);
+        // This thread
+        QAction* highlightSelectedThread = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this thread", m_highlightSelectedMenu);
+        connect(highlightSelectedThread, &QAction::triggered, [this]() { RowHighlightSelected(COL::TID); });
+        m_highlightSelectedMenu->addAction(highlightSelectedThread);
+        // This severity
+        QAction* highlightSelectedSeverity = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this severity", m_highlightSelectedMenu);
+        connect(highlightSelectedSeverity, &QAction::triggered, [this]() { RowHighlightSelected(COL::Severity); });
+        m_highlightSelectedMenu->addAction(highlightSelectedSeverity);
+    }
 
     m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as HTML", this);
     m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
@@ -120,6 +147,7 @@ void LogTab::InitTwoRowsMenu()
     m_twoRowsMenu->addAction(m_exportToTabAction);
     m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_highlightSelectedType);
+    m_twoRowsMenu->addMenu(m_highlightSelectedMenu);
     m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
     m_twoRowsMenu->addAction(m_copyItemsTextAction);
@@ -132,6 +160,7 @@ void LogTab::InitMultipleRowsMenu()
     m_multipleRowsMenu->addAction(m_exportToTabAction);
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_highlightSelectedType);
+    m_multipleRowsMenu->addMenu(m_highlightSelectedMenu);
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
     m_multipleRowsMenu->addAction(m_copyItemsTextAction);
@@ -181,6 +210,7 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addAction(findNextSelectedType);
     m_oneRowMenu->addAction(findPrevSelectedType);
     m_oneRowMenu->addAction(m_highlightSelectedType);
+    m_oneRowMenu->addMenu(m_highlightSelectedMenu);
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(m_showGlobalDateTime);
     m_oneRowMenu->addAction(m_showGlobalTime);
@@ -975,22 +1005,22 @@ void LogTab::RowFindImpl(int offset)
     }
 }
 
-void LogTab::RowHighlightSelectedType()
+void LogTab::RowHighlightSelected(COL column)
 {
     // Figure out which ones are already filtered
     QSet<QString> alreadyFiltered;
     for (const auto& filter : m_treeModel->GetHighlightFilters()) {
-       if ((filter.m_keys.size()==1) && (filter.m_keys[0]==COL::Key)) {
+       if ((filter.m_keys.size()==1) && (filter.m_keys[0]==column)) {
           alreadyFiltered.insert(filter.m_value);
        }
     }
     // Highlight all selected types
     auto idxList = ui->treeView->selectionModel()->selectedRows();
     for (const auto& idx : idxList) {
-       QString value = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
+       QString value = idx.model()->index(idx.row(), column, idx.parent()).data().toString();
        if (alreadyFiltered.contains(value)) continue;
        SearchOpt newOpt;
-       newOpt.m_keys.append(COL::Key);
+       newOpt.m_keys.append(column);
        newOpt.m_value = value;
        newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
        m_treeModel->AddHighlightFilter(newOpt);

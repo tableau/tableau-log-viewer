@@ -39,7 +39,7 @@ private:
     void InitTwoRowsMenu();
     void InitMultipleRowsMenu();
     void InitHeaderMenu();
-    void SetColumn(int column, int width, bool isHidden);
+    void SetColumn(COL column, int width, bool isHidden);
     void ShowItemDetails(const QModelIndex&);
     void CopyItemDetails(bool textOnly, bool normalized) const;
     void CopyItemDetailsAsHtml() const;
@@ -68,8 +68,9 @@ private:
     QMenu *m_headerMenu;
     ValueDlg *m_valueDlg;
     std::vector<std::unique_ptr<QTemporaryFile>> m_tempFiles;
-    QAction *m_exportToTabAction;
     QAction *m_highlightSelectedType;
+    QMenu *m_highlightSelectedMenu;
+    QAction *m_exportToTabAction;
     QAction *m_copyItemsHtmlAction;
     QAction *m_copyItemsTextAction;
     QAction *m_copyItemsNormalizedTextAction;
@@ -93,7 +94,7 @@ private slots:
     void RowHideSelectedType();
     void RowFindNextSelectedType();
     void RowFindPrevSelectedType();
-    void RowHighlightSelectedType();
+    void RowHighlightSelected(COL column);
     void RowShowGlobalDateTime();
     void RowShowGlobalTime();
     void RowShowTimeDeltas();
