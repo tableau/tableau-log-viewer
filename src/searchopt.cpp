@@ -8,28 +8,29 @@
 SearchOpt::SearchOpt() :
     m_value(""),
     m_matchCase(false),
-    m_useRegex(false),
+    m_mode(SearchMode::Contains),
     m_backgroundColor(QColor(255, 255, 255))
 {
 }
 
 bool SearchOpt::HasMatch(QString value)
 {
-    if (m_useRegex)
-    {
-        QRegularExpression regex(m_value, m_matchCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
-        if(regex.isValid() && regex.match(value).hasMatch())
-            return true;
+    switch (m_mode) {
+        case SearchMode::Equals:
+             return value.compare(m_value, m_matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive) == 0;
+        case SearchMode::Contains:
+             return value.contains(m_value, m_matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+        case SearchMode::StartsWith:
+             return value.startsWith(m_value, m_matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+        case SearchMode::EndsWith:
+             return value.endsWith(m_value, m_matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+        case SearchMode::Regex:
+            QRegularExpression regex(m_value, m_matchCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+            return regex.isValid() && regex.match(value).hasMatch();
     }
-    else
-    {
-        if (value.contains(m_value, m_matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive))
-            return true;
-    }
-    return false;
 }
 
-QMap<COL, QString> SearchOpt::sm_mapColToString{
+static QMap<COL, QString> mapColToString{
     {COL::ID,       "ID"},
     {COL::File,     "File"},
     {COL::Time,     "Time"},
@@ -43,6 +44,14 @@ QMap<COL, QString> SearchOpt::sm_mapColToString{
     {COL::Value,    "Value"}
 };
 
+static QMap<SearchMode, QString> mapModeToString{
+    {SearchMode::Equals,     "equals"},
+    {SearchMode::Contains,   "contains"},
+    {SearchMode::StartsWith, "startswith"},
+    {SearchMode::EndsWith,   "endswith"},
+    {SearchMode::Regex,      "regex"},
+};
+
 QJsonObject SearchOpt::ToJson()
 {
     QJsonObject json;
@@ -50,11 +59,11 @@ QJsonObject SearchOpt::ToJson()
     QJsonArray keysArray;
     for (COL columnKey : m_keys)
     {
-        keysArray.append(sm_mapColToString[columnKey]);
+        keysArray.append(mapColToString[columnKey]);
     }
     json["keys"] = keysArray;
     json["matchCase"] = m_matchCase;
-    json["useRegex"] = m_useRegex;
+    json["mode"] = mapModeToString[m_mode];
     json["backgroundColor"] = QJsonArray{
         m_backgroundColor.red(),
         m_backgroundColor.green(),
@@ -63,7 +72,7 @@ QJsonObject SearchOpt::ToJson()
     return json;
 }
 
-QMap<QString, COL> SearchOpt::sm_mapStringToCol{
+static QMap<QString, COL> mapStringToCol{
     {"ID",       COL::ID},
     {"File",     COL::File},
     {"Time",     COL::Time},
@@ -77,6 +86,14 @@ QMap<QString, COL> SearchOpt::sm_mapStringToCol{
     {"Value",    COL::Value}
 };
 
+static QMap<QString, SearchMode> mapStringToMode{
+    {"equals",     SearchMode::Equals},
+    {"contains",   SearchMode::Contains},
+    {"startswith", SearchMode::StartsWith},
+    {"endswith",   SearchMode::EndsWith},
+    {"regex",      SearchMode::Regex},
+};
+
 void SearchOpt::FromJson(const QJsonObject& json)
 {
     m_value = json["value"].toString();
@@ -84,10 +101,15 @@ void SearchOpt::FromJson(const QJsonObject& json)
     m_keys.clear();
     for (auto value : keys)
     {
-        m_keys.append(sm_mapStringToCol[value.toString()]);
+        m_keys.append(mapStringToCol[value.toString()]);
     }
     m_matchCase = json["matchCase"].toBool();
-    m_useRegex = json["useRegex"].toBool();
+    if (json.contains("mode")) {
+        m_mode=mapStringToMode[json["mode"].toString()];
+    } else if (json.contains("useRegex")) {
+        // Logic for parsing legacy format. Remove this code path at some future point in time
+        m_mode=json["mode"].toBool() ? SearchMode::Regex : SearchMode::Contains;
+    }
     QJsonArray backgroundColors = json["backgroundColor"].toArray();
     m_backgroundColor.setRed(backgroundColors[0].toInt());
     m_backgroundColor.setGreen(backgroundColors[1].toInt());

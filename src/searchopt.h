@@ -8,6 +8,14 @@
 #include <QString>
 #include <QVector>
 
+enum SearchMode : short {
+    Equals,
+    Contains,
+    StartsWith,
+    EndsWith,
+    Regex
+};
+
 class SearchOpt
 {
 public:
@@ -19,12 +27,8 @@ public:
     QString m_value;
     QVector<COL> m_keys;
     bool m_matchCase;
-    bool m_useRegex;
+    SearchMode m_mode;
     QColor m_backgroundColor;
-
-private:
-    static QMap<COL, QString> sm_mapColToString;
-    static QMap<QString, COL> sm_mapStringToCol;
 };
 
 #endif // SEARCHOPT_H

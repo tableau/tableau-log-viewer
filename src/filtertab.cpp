@@ -16,6 +16,13 @@ FilterTab::FilterTab(QWidget *parent, QString valueText, QColor backgroundColor)
     SetTitle(valueText);
     SetBackgroundColor(backgroundColor);
 
+    ui->comboBoxMode->addItem("Contains",SearchMode::Contains);
+    ui->comboBoxMode->addItem("Equals",SearchMode::Equals);
+    ui->comboBoxMode->addItem("Starts with",SearchMode::StartsWith);
+    ui->comboBoxMode->addItem("Ends with",SearchMode::EndsWith);
+    ui->comboBoxMode->addItem("Regular expression",SearchMode::Regex);
+    ui->comboBoxMode->setCurrentIndex(ui->comboBoxMode->findData(SearchMode::Contains));
+
     // mapping of COL and checkBox widgets
     m_mapColToBox = std::map<COL, QCheckBox*> {
         {COL::Severity,   ui->checkBoxSeverity},
@@ -60,7 +67,7 @@ void FilterTab::HideColorWidget()
 void FilterTab::SetSearchOptions(const SearchOpt& options)
 {
     ui->filterLineEdit->setText(options.m_value);
-    ui->checkBoxRegEx->setChecked(options.m_useRegex);
+    ui->comboBoxMode->setCurrentIndex(ui->comboBoxMode->findData(options.m_mode));
     ui->checkBoxCase->setChecked(options.m_matchCase);
     for (auto& colToBox : m_mapColToBox)
     {
@@ -72,7 +79,7 @@ SearchOpt FilterTab::GetSearchOptions()
 {
     SearchOpt options;
     options.m_value = ui->filterLineEdit->text();
-    options.m_useRegex = ui->checkBoxRegEx->isChecked();
+    options.m_mode = static_cast<SearchMode>(ui->comboBoxMode->currentData().toInt());
     options.m_matchCase = ui->checkBoxCase->isChecked();
 
     for (const auto& colToBox : m_mapColToBox)

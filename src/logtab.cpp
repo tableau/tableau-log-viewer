@@ -1010,7 +1010,7 @@ void LogTab::RowHighlightSelected(COL column)
     // Figure out which ones are already filtered
     QSet<QString> alreadyFiltered;
     for (const auto& filter : m_treeModel->GetHighlightFilters()) {
-       if ((filter.m_keys.size()==1) && (filter.m_keys[0]==column)) {
+       if ((filter.m_keys.size()==1) && (filter.m_mode==SearchMode::Equals) && (filter.m_keys[0]==column)) {
           alreadyFiltered.insert(filter.m_value);
        }
     }
@@ -1021,6 +1021,7 @@ void LogTab::RowHighlightSelected(COL column)
        if (alreadyFiltered.contains(value)) continue;
        SearchOpt newOpt;
        newOpt.m_keys.append(column);
+       newOpt.m_mode = SearchMode::Equals;
        newOpt.m_value = value;
        newOpt.m_backgroundColor = m_treeModel->m_colorLibrary.GetNextColor();
        m_treeModel->AddHighlightFilter(newOpt);
