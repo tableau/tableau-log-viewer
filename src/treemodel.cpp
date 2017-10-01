@@ -660,7 +660,7 @@ void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector
     }
 }
 
-HighlightOptions TreeModel::GetHighlightFilters() const
+const HighlightOptions& TreeModel::GetHighlightFilters() const
 {
     return m_highlightOpts;
 }

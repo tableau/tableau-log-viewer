@@ -45,9 +45,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBoxRegEx">
-          <property name="text">
-           <string>Use regular e&amp;xpression</string>
+         <widget class="QComboBox" name="comboBoxMode">
+          <property name="editable">
+           <bool>false</bool>
           </property>
          </widget>
         </item>

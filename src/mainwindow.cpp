@@ -1251,9 +1251,10 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
     if (model->rowCount() == 0)
         return;
 
+    QVector<SearchOpt> findFilter{model->m_findOpts};
     const QVector<SearchOpt>& filters = (findHighlight) ?
-        model->GetHighlightFilters() :
-        QVector<SearchOpt> {model->m_findOpts};
+        static_cast<const QVector<SearchOpt>&>(model->GetHighlightFilters()) :
+        findFilter;
 
     int start = tree->currentIndex().row();
     // If nothing is selected, the current index is -1. Force to start at 0 to avoid an infinite loop.

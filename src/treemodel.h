@@ -71,7 +71,7 @@ public:
     QString GetValueFullString(const QModelIndex& idx, bool singleLineFormat = false) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);
-    HighlightOptions GetHighlightFilters() const;
+    const HighlightOptions& GetHighlightFilters() const;
     void SetHighlightFilters(const HighlightOptions& highlightOpts);
     void AddHighlightFilter(const SearchOpt& filter);
     bool HasHighlightFilters() const;
