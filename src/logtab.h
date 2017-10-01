@@ -68,6 +68,8 @@ private:
     QMenu *m_headerMenu;
     ValueDlg *m_valueDlg;
     std::vector<std::unique_ptr<QTemporaryFile>> m_tempFiles;
+    QAction *m_hideSelectedEvent;
+    QAction *m_hideSelectedType;
     QAction *m_highlightSelectedType;
     QMenu *m_highlightSelectedMenu;
     QAction *m_exportToTabAction;
