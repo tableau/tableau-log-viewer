@@ -90,6 +90,12 @@ void LogTab::InitMenus()
 {
     using namespace ThemeUtils;
 
+    m_hideSelectedEvent = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide selected event", this);
+    connect(m_hideSelectedEvent, &QAction::triggered, this, &LogTab::RowHideSelected);
+
+    m_hideSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide all events of this type", this);
+    connect(m_hideSelectedType, &QAction::triggered, this, &LogTab::RowHideSelectedType);
+
     m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
     connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
 
@@ -146,6 +152,9 @@ void LogTab::InitTwoRowsMenu()
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_exportToTabAction);
     m_twoRowsMenu->addSeparator();
+    m_twoRowsMenu->addAction(m_hideSelectedEvent);
+    m_twoRowsMenu->addAction(m_hideSelectedType);
+    m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_highlightSelectedType);
     m_twoRowsMenu->addMenu(m_highlightSelectedMenu);
     m_twoRowsMenu->addSeparator();
@@ -159,6 +168,9 @@ void LogTab::InitMultipleRowsMenu()
     m_multipleRowsMenu = new QMenu(this);
     m_multipleRowsMenu->addAction(m_exportToTabAction);
     m_multipleRowsMenu->addSeparator();
+    m_multipleRowsMenu->addAction(m_hideSelectedEvent);
+    m_multipleRowsMenu->addAction(m_hideSelectedType);
+    m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_highlightSelectedType);
     m_multipleRowsMenu->addMenu(m_highlightSelectedMenu);
     m_multipleRowsMenu->addSeparator();
@@ -170,11 +182,6 @@ void LogTab::InitMultipleRowsMenu()
 void LogTab::InitOneRowMenu()
 {
     using namespace ThemeUtils;
-    QAction *hideSelected = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide selected event", this);
-    connect(hideSelected, &QAction::triggered, this, &LogTab::RowHideSelected);
-
-    QAction *hideSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide all events of this type", this);
-    connect(hideSelectedType, &QAction::triggered, this, &LogTab::RowHideSelectedType);
 
     QAction *findPrevSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-up.png")), "Find previous event of this type", this);
     connect(findPrevSelectedType, &QAction::triggered, this, &LogTab::RowFindPrevSelectedType);
@@ -204,8 +211,8 @@ void LogTab::InitOneRowMenu()
     group->setExclusive(true);
 
     m_oneRowMenu = new QMenu(this);
-    m_oneRowMenu->addAction(hideSelected);
-    m_oneRowMenu->addAction(hideSelectedType);
+    m_oneRowMenu->addAction(m_hideSelectedEvent);
+    m_oneRowMenu->addAction(m_hideSelectedType);
     m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(findNextSelectedType);
     m_oneRowMenu->addAction(findPrevSelectedType);
@@ -239,12 +246,7 @@ void LogTab::keyPressEvent(QKeyEvent *event)
         break;
     case Qt::Key_Backspace:
     case Qt::Key_Delete:
-        for (int i = rowCount; i > 0; i--)
-        {
-            auto idx = idxList.at(i-1);
-            m_treeModel->removeRow(idx.row(), idx.parent());
-        }
-        break;
+        RowHideSelected();
     default:
         // Check keys with modifiers together and ensure regular key events get propagated.
         if ((event->key() == Qt::Key_C) &&
@@ -907,28 +909,43 @@ void LogTab::RowDiffEvents()
 
 void LogTab::RowHideSelected()
 {
-    QModelIndex index = ui->treeView->selectionModel()->currentIndex();
-    m_treeModel->removeRow(index.row(), index.parent());
+    ui->treeView->setUpdatesEnabled(false);
+    auto idxList = ui->treeView->selectionModel()->selectedRows();
+    for (const auto& idx : idxList) {
+       m_treeModel->removeRow(idx.row(), idx.parent());
+    }
+    ui->treeView->setUpdatesEnabled(true);
+    menuUpdateNeeded();
 }
 
 void LogTab::RowHideSelectedType()
 {
-    QModelIndex idx = ui->treeView->currentIndex();
-    auto idx_key = idx.model()->index(idx.row(), COL::Key, idx.parent());
-    auto key = idx_key.data().toString();
-
     ui->treeView->setUpdatesEnabled(false);
-    auto match = m_treeModel->match(m_treeModel->index(0, COL::Key), Qt::DisplayRole, key, -1, Qt::MatchExactly);
+    auto idxList = ui->treeView->selectionModel()->selectedRows();
+    QSet<QString> hiddenKeys;
+    for (const auto& idx : idxList) {
+       QString key = idx.model()->index(idx.row(), COL::Key, idx.parent()).data().toString();
+       hiddenKeys.insert(key);
+    }
     int count = 0;
-    while (match.length() > 0)
-    {
-        m_treeModel->removeRow(match[0].row());
-        match = m_treeModel->match(m_treeModel->index(match[0].row(), COL::Key), Qt::DisplayRole, key, 1, Qt::MatchExactly);
-        count++;
+    for (const auto& key : hiddenKeys) {
+       auto match = m_treeModel->match(m_treeModel->index(0, COL::Key), Qt::DisplayRole, key, 1, Qt::MatchExactly);
+       while (match.length() > 0)
+       {
+           m_treeModel->removeRow(match[0].row());
+           match = m_treeModel->match(m_treeModel->index(match[0].row(), COL::Key), Qt::DisplayRole, key, 1, Qt::MatchExactly);
+           ++count;
+       }
     }
     ui->treeView->setUpdatesEnabled(true);
+    menuUpdateNeeded();
 
-    m_bar->ShowMessage(QString("%1 '%2' event(s) hidden").arg(QString::number(count), key), 3000);
+    if (hiddenKeys.count() == 1) {
+        QString key = hiddenKeys.values()[0];
+        m_bar->ShowMessage(QString("%1 '%2' event(s) hidden").arg(QString::number(count), key), 3000);
+    } else {
+        m_bar->ShowMessage(QString("%1 event(s) of %2 types hidden").arg(QString::number(count), QString::number(hiddenKeys.count())), 3000);
+    }
 }
 
 void LogTab::RowFindNextSelectedType()
