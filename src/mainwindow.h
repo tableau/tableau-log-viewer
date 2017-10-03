@@ -86,12 +86,11 @@ private:
 
     EventListPtr GetEventsFromFile(QString path, int & skippedCount);
 
-    void RefilterTreeView();
-
     TreeModel * GetTreeModel(QTreeView* treeView);
     TreeModel * GetCurrentTreeModel();
     QTreeView * GetCurrentTreeView();
     QTreeView * GetTreeView(int index);
+    LogTab * GetCurrentLogTab();
 
     void UpdateRecentFilesMenu();
     void ClearRecentFileMenu();

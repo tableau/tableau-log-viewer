@@ -675,7 +675,7 @@ void MainWindow::on_actionRefresh_triggered()
 
     if (model->m_highlightOnlyMode)
     {
-        RefilterTreeView();
+        GetCurrentLogTab()->RefilterTreeView();
     }
 
     UpdateMenuAndStatusBar();
@@ -734,7 +734,7 @@ void MainWindow::on_menuLoad_filters_triggered(QAction * action)
     QJsonDocument filtersDoc(QJsonDocument::fromJson(filterData));
     model->SetHighlightFilters(HighlightOptions(filtersDoc.array()));
 
-    RefilterTreeView();
+    GetCurrentLogTab()->RefilterTreeView();
     UpdateMenuAndStatusBar();
 }
 
@@ -791,7 +791,7 @@ void MainWindow::on_actionHighlight_triggered()
             model->m_highlightOnlyMode = false;
         }
 
-        RefilterTreeView();
+        GetCurrentLogTab()->RefilterTreeView();
         UpdateMenuAndStatusBar();
     }
 }
@@ -816,7 +816,7 @@ void MainWindow::on_actionHighlight_only_mode_triggered()
         return;
     model->m_highlightOnlyMode = !model->m_highlightOnlyMode;
 
-    RefilterTreeView();
+    GetCurrentLogTab()->RefilterTreeView();
     UpdateMenuAndStatusBar();
 }
 
@@ -1323,29 +1323,9 @@ QTreeView * MainWindow::GetCurrentTreeView()
     return tabWidget->currentWidget()->findChild <QTreeView *>();
 }
 
-void MainWindow::RefilterTreeView()
+LogTab * MainWindow::GetCurrentLogTab()
 {
-    auto view = GetCurrentTreeView();
-    if (!view)
-        return;
-
-    QModelIndex previousIdx = view->currentIndex();
-
-    view->setUpdatesEnabled(false);
-
-    TreeModel* model = GetTreeModel(view);
-    const int count = model->rowCount();
-    const QModelIndex idx;
-
-    for (int i = 0; i < count; i++)
-    {
-        bool hidden = model->m_highlightOnlyMode && !model->IsHighlightedRow(i);
-        view->setRowHidden(i, idx, hidden);
-    }
-
-    view->setUpdatesEnabled(true);
-    model->layoutChanged();
-    view->scrollTo(previousIdx, QAbstractItemView::PositionAtCenter);
+    return dynamic_cast<LogTab*>(tabWidget->currentWidget());
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event)

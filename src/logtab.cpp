@@ -1081,6 +1081,10 @@ void LogTab::RowHighlightSelected(COL column)
        m_treeModel->AddHighlightFilter(newOpt);
        alreadyFiltered.insert(value);
     }
+    // Update filtered events & menu bar
+    if (m_treeModel->m_highlightOnlyMode) {
+       RefilterTreeView();
+    }
     menuUpdateNeeded();
 }
 
@@ -1211,6 +1215,27 @@ QString LogTab::GetDebugInfo() const
     }
 
     return QString("Type: %1\nPath: %2\n\n%3").arg(tabType).arg(m_tabPath).arg(extra);
+}
+
+void LogTab::RefilterTreeView()
+{
+    QModelIndex previousIdx = ui->treeView->currentIndex();
+
+    ui->treeView->setUpdatesEnabled(false);
+
+    const int count = m_treeModel->rowCount();
+    const QModelIndex idx;
+
+    for (int i = 0; i < count; i++)
+    {
+        bool hidden = m_treeModel->m_highlightOnlyMode && !m_treeModel->IsHighlightedRow(i);
+        ui->treeView->setRowHidden(i, idx, hidden);
+    }
+
+    ui->treeView->setUpdatesEnabled(true);
+    m_treeModel->layoutChanged();
+    //TODO: what if not visible?
+    ui->treeView->scrollTo(previousIdx, QAbstractItemView::PositionAtCenter);
 }
 
 void LogTab::CopyFullPath()

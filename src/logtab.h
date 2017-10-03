@@ -29,6 +29,7 @@ public:
     void UpdateStatusBar();
     void CopyFullPath();
     void ShowInFolder();
+    void RefilterTreeView();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;
