@@ -9,6 +9,7 @@
 #include "valuedlg.h"
 
 #include <memory>
+#include <initializer_list>
 #include <QSet>
 #include <QFontDatabase>
 #include <QMenu>
@@ -96,8 +97,28 @@ void LogTab::InitMenus()
     m_hideSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-hide.png")), "Hide all events of this type", this);
     connect(m_hideSelectedType, &QAction::triggered, this, &LogTab::RowHideSelectedType);
 
+    // The columns available in the `Highlight` and `Export` submenus
+    std::initializer_list<std::pair<const char*,COL>> availableFilterColumns{
+        {"This type",COL::Key},
+        {"This session",COL::Session},
+        {"This request",COL::Request},
+        {"This thread",COL::TID},
+        {"This severity",COL::Severity}
+    };
+
+    // Top-level `Export events`
     m_exportToTabAction = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), "Export event(s) to new tab", this);
-    connect(m_exportToTabAction, &QAction::triggered, this, &LogTab::ExportToNewTab);
+    connect(m_exportToTabAction, &QAction::triggered, [this]() { ExportToNewTab(); });
+    // Populate `Export to tab` menu
+    m_exportToTabMenu = new QMenu("Export to new tab",this);
+    m_exportToTabMenu->setIcon(QIcon(GetThemedIcon(":/ctx-newtab.png")));
+    for (auto& e : availableFilterColumns){
+        auto label = e.first;
+        auto column = e.second;
+        QAction* exportSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-newtab.png")), label, m_exportToTabMenu);
+        connect(exportSelectedType, &QAction::triggered, [this,column](){ ExportToNewTab(column); });
+        m_exportToTabMenu->addAction(exportSelectedType);
+    }
 
     // Top-level `Highlight all events ofselected types`
     m_highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "Highlight all events of this type", this);
@@ -105,27 +126,12 @@ void LogTab::InitMenus()
     // Populate the `Highlight all events of` submenu
     m_highlightSelectedMenu = new QMenu("Highlight all events of",this);
     m_highlightSelectedMenu->setIcon(QIcon(GetThemedIcon(":/ctx-highlight.png")));
-    {
-        // This thread
-        QAction* highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this type", m_highlightSelectedMenu);
-        connect(highlightSelectedType, &QAction::triggered, [this]() { RowHighlightSelected(COL::Key); });
+    for (auto& e : availableFilterColumns){
+        auto label = e.first;
+        auto column = e.second;
+        QAction* highlightSelectedType = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), label, m_highlightSelectedMenu);
+        connect(highlightSelectedType, &QAction::triggered, [this,column](){ RowHighlightSelected(column); });
         m_highlightSelectedMenu->addAction(highlightSelectedType);
-        // This session
-        QAction* highlightSelectedSession = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this session", m_highlightSelectedMenu);
-        connect(highlightSelectedSession, &QAction::triggered, [this]() { RowHighlightSelected(COL::Session); });
-        m_highlightSelectedMenu->addAction(highlightSelectedSession);
-        // This request
-        QAction* highlightSelectedRequest = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this request", m_highlightSelectedMenu);
-        connect(highlightSelectedRequest, &QAction::triggered, [this]() { RowHighlightSelected(COL::Request); });
-        m_highlightSelectedMenu->addAction(highlightSelectedRequest);
-        // This thread
-        QAction* highlightSelectedThread = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this thread", m_highlightSelectedMenu);
-        connect(highlightSelectedThread, &QAction::triggered, [this]() { RowHighlightSelected(COL::TID); });
-        m_highlightSelectedMenu->addAction(highlightSelectedThread);
-        // This severity
-        QAction* highlightSelectedSeverity = new QAction(QIcon(GetThemedIcon(":/ctx-highlight.png")), "this severity", m_highlightSelectedMenu);
-        connect(highlightSelectedSeverity, &QAction::triggered, [this]() { RowHighlightSelected(COL::Severity); });
-        m_highlightSelectedMenu->addAction(highlightSelectedSeverity);
     }
 
     m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as HTML", this);
@@ -150,13 +156,14 @@ void LogTab::InitTwoRowsMenu()
     m_twoRowsMenu = new QMenu(this);
     m_twoRowsMenu->addAction(QIcon(GetThemedIcon(":/ctx-book.png")), "Diff selected events",
                           this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
-    m_twoRowsMenu->addAction(m_exportToTabAction);
-    m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_hideSelectedEvent);
     m_twoRowsMenu->addAction(m_hideSelectedType);
     m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_highlightSelectedType);
     m_twoRowsMenu->addMenu(m_highlightSelectedMenu);
+    m_twoRowsMenu->addSeparator();
+    m_twoRowsMenu->addAction(m_exportToTabAction);
+    m_twoRowsMenu->addMenu(m_exportToTabMenu);
     m_twoRowsMenu->addSeparator();
     m_twoRowsMenu->addAction(m_copyItemsHtmlAction);
     m_twoRowsMenu->addAction(m_copyItemsTextAction);
@@ -166,13 +173,14 @@ void LogTab::InitTwoRowsMenu()
 void LogTab::InitMultipleRowsMenu()
 {
     m_multipleRowsMenu = new QMenu(this);
-    m_multipleRowsMenu->addAction(m_exportToTabAction);
-    m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_hideSelectedEvent);
     m_multipleRowsMenu->addAction(m_hideSelectedType);
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_highlightSelectedType);
     m_multipleRowsMenu->addMenu(m_highlightSelectedMenu);
+    m_multipleRowsMenu->addSeparator();
+    m_multipleRowsMenu->addAction(m_exportToTabAction);
+    m_multipleRowsMenu->addMenu(m_exportToTabMenu);
     m_multipleRowsMenu->addSeparator();
     m_multipleRowsMenu->addAction(m_copyItemsHtmlAction);
     m_multipleRowsMenu->addAction(m_copyItemsTextAction);
@@ -219,11 +227,13 @@ void LogTab::InitOneRowMenu()
     m_oneRowMenu->addAction(m_highlightSelectedType);
     m_oneRowMenu->addMenu(m_highlightSelectedMenu);
     m_oneRowMenu->addSeparator();
+    m_oneRowMenu->addAction(m_exportToTabAction);
+    m_oneRowMenu->addMenu(m_exportToTabMenu);
+    m_oneRowMenu->addSeparator();
     m_oneRowMenu->addAction(m_showGlobalDateTime);
     m_oneRowMenu->addAction(m_showGlobalTime);
     m_oneRowMenu->addAction(m_showTimeDeltas);
     m_oneRowMenu->addSeparator();
-    m_oneRowMenu->addAction(m_exportToTabAction);
     m_oneRowMenu->addAction(actionOpenFile);
     m_openFileMenuIdx = m_oneRowMenu->actions().size() - 1;
     m_oneRowMenu->addSeparator();
@@ -805,6 +815,30 @@ void LogTab::ExportToNewTab()
         return a.row() < b.row();
     });
     emit exportToTab(idxList);
+}
+
+void LogTab::ExportToNewTab(COL column)
+{
+    auto selectionList = ui->treeView->selectionModel()->selectedRows();
+    QSet<QString> exportedValues;
+    for (const auto& selected : selectionList) {
+       QString value = selected.model()->index(selected.row(), column, selected.parent()).data().toString();
+       exportedValues.insert(value);
+    }
+
+    const int count = m_treeModel->rowCount();
+    const QModelIndex root;
+    QModelIndexList exportedIdxList;
+    for (int i = 0; i < count; ++i)
+    {
+        auto idx = m_treeModel->index(i, column, root);
+        auto value = idx.data().toString();
+        if (exportedValues.contains(value)) {
+            exportedIdxList.append(idx);
+        }
+    }
+
+    emit exportToTab(exportedIdxList);
 }
 
 void LogTab::OpenSelectedFile()

@@ -72,6 +72,7 @@ private:
     QAction *m_hideSelectedType;
     QAction *m_highlightSelectedType;
     QMenu *m_highlightSelectedMenu;
+    QMenu *m_exportToTabMenu;
     QAction *m_exportToTabAction;
     QAction *m_copyItemsHtmlAction;
     QAction *m_copyItemsTextAction;
@@ -105,6 +106,7 @@ private slots:
     void ChangeNextIndex();
     void ChangePrevIndex();
     void ExportToNewTab();
+    void ExportToNewTab(COL column);
     void OpenSelectedFile();
 
 signals:
