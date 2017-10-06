@@ -1,4 +1,5 @@
 # Tableau Log Viewer
+[![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 
 **Master branch** | [![Travis-CI](https://img.shields.io/travis/tableau/tableau-log-viewer/master.svg?label=Linux%20build)](https://travis-ci.org/tableau/tableau-log-viewer) | [![AppVeyor](https://img.shields.io/appveyor/ci/tableau/tableau-log-viewer/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/tableau/tableau-log-viewer/branch/master)
 :--|---|---
@@ -29,7 +30,7 @@ See [INSTALL.md](INSTALL.md)
 
 Is Tableau Log Viewer supported?
 ---------------
-Tableau Log Viewer is made available AS-IS with no support. This is intended to be a self service tool and includes a user guide. Any requests or issues discovered should be filed in the [Issue Tracker](https://github.com/tableau/tableau-log-viewer/issues).
+Tableau Log Viewer is supported by the community. This is intended to be a self service tool and includes a user guide. Any requests or issues discovered should be filed in the [Issue Tracker](https://github.com/tableau/tableau-log-viewer/issues).
 
 How can I contribute to Tableau Log Viewer?
 ---------------
