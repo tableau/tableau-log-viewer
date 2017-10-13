@@ -30,6 +30,8 @@ public:
     void CopyFullPath();
     void ShowInFolder();
     void RefilterTreeView();
+    TreeModel* GetTreeModel();
+    QTreeView* GetTreeView();
 
 private:
     void keyPressEvent(QKeyEvent *event) override;

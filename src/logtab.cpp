@@ -1238,6 +1238,16 @@ void LogTab::RefilterTreeView()
     ui->treeView->scrollTo(previousIdx, QAbstractItemView::PositionAtCenter);
 }
 
+TreeModel* LogTab::GetTreeModel()
+{
+   return m_treeModel;
+}
+
+QTreeView* LogTab::GetTreeView()
+{
+   return ui->treeView;
+}
+
 void LogTab::CopyFullPath()
 {
     QString path = QDir::toNativeSeparators(GetTabPath());

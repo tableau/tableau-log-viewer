@@ -123,22 +123,23 @@ void MainWindow::UpdateTheme()
 
 void MainWindow::UpdateMenuAndStatusBar()
 {
-    TreeModel * model = GetCurrentTreeModel();
+    LogTab * logTab = GetCurrentLogTab();
+    TreeModel * model = logTab ? logTab->GetTreeModel() : nullptr;
     bool hasFilters = model && model->HasHighlightFilters();
     bool hasFindOpts = model && model->ValidFindOpts();
 
     // Menu items
-    menuHighlight->setEnabled(model);
-    menuFind->setEnabled(model);
+    menuHighlight->setEnabled(logTab);
+    menuFind->setEnabled(logTab);
     // QActions
     // File
-    actionMerge_into_tab->setEnabled(model);
-    actionClear_all_events->setEnabled(model);
-    actionRefresh->setEnabled(model);
-    actionShow_summary->setEnabled(model);
-    actionCreate_info_viz->setEnabled(model);
-    actionClose_tab->setEnabled(model);
-    actionClose_all_tabs->setEnabled(model);
+    actionMerge_into_tab->setEnabled(logTab);
+    actionClear_all_events->setEnabled(logTab);
+    actionRefresh->setEnabled(logTab);
+    actionShow_summary->setEnabled(logTab);
+    actionCreate_info_viz->setEnabled(logTab);
+    actionClose_tab->setEnabled(logTab);
+    actionClose_all_tabs->setEnabled(logTab);
     //Recent Files
     UpdateRecentFilesMenu();
     //Highlight
@@ -146,7 +147,7 @@ void MainWindow::UpdateMenuAndStatusBar()
     actionFind_previous_highlighted->setEnabled(hasFilters);
     actionHighlight_only_mode->setEnabled(hasFilters);
     actionHighlight_only_mode->setChecked(model && model->m_highlightOnlyMode);
-    menuLoad_filters->setEnabled(model);
+    menuLoad_filters->setEnabled(logTab);
     actionSave_filters->setEnabled(hasFilters);
     //Find
     actionFind->setEnabled(model);
@@ -157,16 +158,15 @@ void MainWindow::UpdateMenuAndStatusBar()
     actionTail_current_tab->setChecked(model && model->m_liveMode);
 
     // Status bar
-    if (model == nullptr)
+    if (logTab == nullptr)
     {
         m_statusBar->SetRightLabelText("¯\\_(ツ)_/¯");
         return;
     }
 
-    LogTab* currentTab = m_logTabs[model];
-    if (currentTab)
+    if (logTab)
     {
-        currentTab->UpdateStatusBar();
+        logTab->UpdateStatusBar();
     }
 }
 
@@ -275,7 +275,6 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     TreeModel * exportedModel = GetCurrentTreeModel();
     exportedModel->SetTabType(TABTYPE::ExportedEvents);
     actionTail_current_tab->setEnabled(false);
-    m_logTabs[exportedModel] = logTab;
     int exportCount = 0;
     for (QModelIndex event : list)
     {
@@ -347,25 +346,23 @@ void MainWindow::MergeLogFile(QString path)
     model->m_paths.append(filePath);
 
     // Update status
-    QTreeView * treeView = GetCurrentTreeView();
-    statusBar()->showMessage(QString("%1 events loaded; %2 events skipped").arg(QString::number(treeView->model()->rowCount()), QString::number(skippedCount)), 3000);
+    LogTab * logTab = GetCurrentLogTab();
+    statusBar()->showMessage(QString("%1 events loaded; %2 events skipped").arg(QString::number(logTab->GetTreeModel()->rowCount()), QString::number(skippedCount)), 3000);
     UpdateMenuAndStatusBar();
 }
 
 void MainWindow::on_actionTail_current_tab_triggered()
 {
-    QTreeView * view = GetCurrentTreeView();
-    TreeModel * model = GetTreeModel(view);
-    LogTab * currentTab = m_logTabs[model];
+    LogTab * currentTab = GetCurrentLogTab();
 
-    if (m_logTabs.size() <= 0)
+    if (!currentTab)
         return;
 
     if (actionTail_current_tab->isChecked())
     {
         if (currentTab->StartLiveCapture())
         {
-            view->scrollToBottom();
+            currentTab->GetTreeView()->scrollToBottom();
             tabWidget->setTabIcon(tabWidget->currentIndex(), QIcon(ThemeUtils::GetThemedIcon(":/tab-sync-thin.png")));
         }
         else
@@ -422,7 +419,7 @@ bool MainWindow::LoadLogFile(QString path)
     }
     else
     {
-        CheckFileOpened(path);
+        FocusOpenedFile(path);
     }
     return true;
 }
@@ -442,7 +439,7 @@ void MainWindow::StartDirectoryLiveCapture(QString directoryPath, QString label)
     }
     else
     {
-        CheckFileOpened(directoryPath);
+        FocusOpenedFile(directoryPath);
     }
 }
 
@@ -455,9 +452,7 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     int idx = tabWidget->addTab(logTab, label);
     m_allFiles.append(SystemCase(path));
 
-    auto tree = tabWidget->widget(idx)->findChild<QTreeView *>();
-    TreeModel* model = GetTreeModel(tree);
-    m_logTabs.insert(model, logTab);
+    TreeModel* model = logTab->GetTreeModel();
 
     if (!isDirectory)
     {
@@ -486,18 +481,17 @@ LogTab* MainWindow::SetUpTab(EventListPtr events, bool isDirectory, QString path
     return logTab;
 }
 
-void MainWindow::CheckFileOpened(QString path)
+void MainWindow::FocusOpenedFile(QString path)
 {
     path.replace("\\", "/");
-    for (int i = 0; i < m_logTabs.size(); i++)
+    for (int i = 0; i < tabWidget->count(); i++)
     {
-        QTreeView * view = GetTreeView(i);
-        TreeModel * model = GetTreeModel(view);
-        LogTab * currentTab = m_logTabs[model];
+        LogTab * currentTab = GetLogTab(i);
         if (currentTab && currentTab->GetTabPath().compare(path) == 0)
         {
             tabWidget->setCurrentIndex(i);
             currentTab->setFocus();
+            break;
         }
     }
 }
@@ -577,26 +571,18 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     UpdateMenuAndStatusBar();
 }
 
-QTreeView* MainWindow::GetTreeView(int index)
-{
-    return tabWidget->widget(index)->findChild<QTreeView*>();
-}
-
 void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     if (index == -1)
         return;
-    QTreeView * view = GetTreeView(index);
-    TreeModel * model = GetTreeModel(view);
-    LogTab * currentTab = m_logTabs[model];
-    m_allFiles.removeAll(SystemCase(currentTab->GetTabPath()));
-    currentTab->EndLiveCapture();
-    m_logTabs.remove(model);
+
+    LogTab * logTab = GetLogTab(index);
+    m_allFiles.removeAll(SystemCase(logTab->GetTabPath()));
+    logTab->EndLiveCapture();
 
     QWidget* tabItem = tabWidget->widget(index);
     tabWidget->removeTab(index);
-    delete(tabItem);
-    tabItem = nullptr;
+    delete tabItem;
     UpdateMenuAndStatusBar();
 }
 
@@ -745,15 +731,12 @@ void MainWindow::on_actionClose_tab_triggered()
 
 void MainWindow::on_actionClose_all_tabs_triggered()
 {
-    for (int i = 0; i < m_logTabs.size(); i++)
+    for (int i = 0; i < tabWidget->count(); i++)
     {
-        QTreeView * view = GetTreeView(i);
-        TreeModel * model = GetTreeModel(view);
-        LogTab * currentTab = m_logTabs[model];
-        currentTab->EndLiveCapture();
+        LogTab * logTab = GetLogTab(i);
+        logTab->EndLiveCapture();
     }
     tabWidget->clear();
-    m_logTabs.clear();
     m_allFiles.clear();
     UpdateMenuAndStatusBar();
 }
@@ -1245,8 +1228,8 @@ void MainWindow::FindNextH()
 
 void MainWindow::FindImpl(int offset, bool findHighlight)
 {
-    QTreeView * tree = GetCurrentTreeView();;
-    TreeModel * model = GetTreeModel(tree);
+    QTreeView * tree = GetCurrentTreeView();
+    TreeModel * model = GetCurrentTreeModel();
 
     if (model->rowCount() == 0)
         return;
@@ -1303,24 +1286,21 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
     }
 }
 
-TreeModel* MainWindow::GetTreeModel(QTreeView* treeView)
-{
-    if (!treeView)
-    {
-        return nullptr;
-    }
-    return static_cast<TreeModel*>(treeView->model());
-}
-
 TreeModel * MainWindow::GetCurrentTreeModel()
 {
-    QTreeView * tree = GetCurrentTreeView();
-    return GetTreeModel(tree);
+    LogTab * logTab = GetCurrentLogTab();
+    return logTab ? logTab->GetTreeModel() : nullptr;
 }
 
 QTreeView * MainWindow::GetCurrentTreeView()
 {
-    return tabWidget->currentWidget()->findChild <QTreeView *>();
+    LogTab * logTab = GetCurrentLogTab();
+    return logTab ? logTab->GetTreeView() : nullptr;
+}
+
+LogTab * MainWindow::GetLogTab(int index)
+{
+    return dynamic_cast<LogTab*>(tabWidget->widget(index));
 }
 
 LogTab * MainWindow::GetCurrentLogTab()
@@ -1343,11 +1323,9 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
         }
         else if (mouseEvent->button() == Qt::RightButton)
         {
-            TreeModel* model = GetTreeModel(GetTreeView(idx));
-            if (!model || model->TabType() == TABTYPE::ExportedEvents)
+            LogTab * logTab = GetLogTab(idx);
+            if (!logTab || logTab->GetTreeModel()->TabType() == TABTYPE::ExportedEvents)
                 return true;
-
-            LogTab* logTab = m_logTabs[model];
 
             QAction actionCopyFullPath("Copy full path", this);
             connect(&actionCopyFullPath, &QAction::triggered, logTab, &LogTab::CopyFullPath);

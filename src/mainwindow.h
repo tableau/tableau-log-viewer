@@ -86,11 +86,10 @@ private:
 
     EventListPtr GetEventsFromFile(QString path, int & skippedCount);
 
-    TreeModel * GetTreeModel(QTreeView* treeView);
     TreeModel * GetCurrentTreeModel();
     QTreeView * GetCurrentTreeView();
-    QTreeView * GetTreeView(int index);
     LogTab * GetCurrentLogTab();
+    LogTab * GetLogTab(int index);
 
     void UpdateRecentFilesMenu();
     void ClearRecentFileMenu();
@@ -105,18 +104,13 @@ private:
     void FindImpl(int offset, bool findHighlight);
 
     void StartDirectoryLiveCapture(QString directoryPath, QString label);
-    void CheckFileOpened(QString path);
+    void FocusOpenedFile(QString path);
     LogTab* SetUpTab(EventListPtr events, bool isDirectory, QString path, QString label);
 
     Options& m_options = Options::GetInstance();
     StatusBar * m_statusBar;
     QStringList m_recentFiles;
     QString m_lastOpenFolder;
-
-    // m_logTabs is used to store all the log tabs that MainWindow has open, by their TreeModels.
-    // That way, a user can close or start live capture on any tab at any time, instead of only
-    // when the tab is opened, since all open tabs were not stored previously.
-    QHash<TreeModel*, LogTab*> m_logTabs;
 
     // m_liveFiles is used to store all the files that have been opened/are open in the MainWindow.
     // If a user opens a new tab, this structure is used to check the file path of the file being loaded
