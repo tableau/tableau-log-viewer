@@ -328,7 +328,7 @@ void MainWindow::MergeLogFile(QString path)
     QFileInfo fi(path);
     if (!fi.exists() || !fi.isFile())
     {
-        statusBar()->showMessage(QString("Unable to locate '%1'").arg(path), 3000);
+        QMessageBox::warning(this, tr("Unable to open file"), tr("Unable to open file \"%1\"").arg(path));
         return;
     }
     events = GetEventsFromFile(path, skippedCount);
@@ -405,7 +405,7 @@ bool MainWindow::LoadLogFile(QString path)
     QFileInfo fi(path);
     if (!fi.exists() || !fi.isFile())
     {
-        statusBar()->showMessage(QString("Unable to locate '%1'").arg(path), 10000);
+        QMessageBox::warning(this, tr("Unable to open file"), tr("Unable to open file \"%1\"").arg(path));
         return false;
     }
     events = GetEventsFromFile(path, skippedCount);
