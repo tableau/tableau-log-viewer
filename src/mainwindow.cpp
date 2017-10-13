@@ -264,16 +264,11 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     }
 
     LogTab * logTab = new LogTab(tabWidget, m_statusBar, events);
+    QTreeView * exportedView = logTab->GetTreeView();
+    TreeModel * exportedModel = logTab->GetTreeModel();
 
-    connect(logTab, &LogTab::menuUpdateNeeded, this, &MainWindow::UpdateMenuAndStatusBar);
-    connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
-    int idx = tabWidget->addTab(logTab, "exported data");
-    tabWidget->setCurrentIndex(idx);
-    logTab->setFocus();
-
-    QTreeView * exportedView = GetCurrentTreeView();
-    TreeModel * exportedModel = GetCurrentTreeModel();
     exportedModel->SetTabType(TABTYPE::ExportedEvents);
+    exportedModel->SetHighlightFilters(model->GetHighlightFilters());
     actionTail_current_tab->setEnabled(false);
     int exportCount = 0;
     for (QModelIndex event : list)
@@ -286,7 +281,14 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
                 exportedView->expand(exportIndex);
             }
         }
-   }
+    }
+
+    connect(logTab, &LogTab::menuUpdateNeeded, this, &MainWindow::UpdateMenuAndStatusBar);
+    connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
+    int idx = tabWidget->addTab(logTab, "exported data");
+    tabWidget->setCurrentIndex(idx);
+    logTab->setFocus();
+
 }
 
 void MainWindow::AddRecentFile(const QString& path)
