@@ -616,13 +616,16 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
             valueDlg.SetQuery(queryText);
         }
     }
-    else if (valueDlg.m_key == "query-plan")
+    else if (valueDlg.m_key == "query-plan" || valueDlg.m_key == "optimizer-step")
     {
         auto event = m_treeModel->GetEvent(idx);
         auto valObject = event["v"].toObject();
-        QJsonDocument doc(valObject);
-        QString jsonString(doc.toJson(QJsonDocument::Compact));
-        valueDlg.SetQuery(jsonString);
+        if (valObject.contains("plan")) {
+           auto planObject = valObject["plan"].toObject();
+           QJsonDocument doc(planObject);
+           QString jsonString(doc.toJson(QJsonDocument::Compact));
+           valueDlg.SetQuery(jsonString);
+        }
     }
 }
 
