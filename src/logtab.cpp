@@ -209,7 +209,7 @@ void LogTab::InitOneRowMenu()
     m_showTimeDeltas->setCheckable(true);
     connect(m_showTimeDeltas, &QAction::triggered, this, &LogTab::RowShowTimeDeltas);
 
-    QAction *actionOpenFile = new QAction(QIcon(GetThemedIcon(":/ctx-open-file.png")), "Open log file in new tab", this);
+    QAction *actionOpenFile = new QAction(QIcon(GetThemedIcon(":/ctx-open-file-tab.png")), "Open log file in new tab", this);
     connect(actionOpenFile, &QAction::triggered, this, &LogTab::OpenSelectedFile);
 
     QActionGroup * group = new QActionGroup(this);

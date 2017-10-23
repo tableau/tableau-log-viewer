@@ -190,6 +190,7 @@ QTabWidget::tab-bar {
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen_in_new_tab"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionClear_all_events"/>
    <addaction name="actionHighlight_only_mode"/>
@@ -198,8 +199,15 @@ QTabWidget::tab-bar {
    <addaction name="actionShow_summary"/>
   </widget>
   <action name="actionOpen_in_new_tab">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-open.png</normaloff>:/ctx-open.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open in new tab...</string>
+   </property>
+   <property name="iconText">
+    <string>Open</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -208,6 +216,10 @@ QTabWidget::tab-bar {
   <action name="actionMerge_into_tab">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/ctx-open-merge.png</normaloff>:/ctx-open-merge.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Merge into tab...</string>
@@ -385,6 +397,9 @@ QTabWidget::tab-bar {
    </property>
    <property name="text">
     <string>Clear all &amp;events</string>
+   </property>
+   <property name="iconText">
+    <string>Clear events</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
