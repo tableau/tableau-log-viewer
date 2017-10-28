@@ -12,12 +12,12 @@ namespace PathHelper
 
     QString GetFiltersConfigPath()
     {
-        return GetConfigPath() + QDir::separator() + QStringLiteral("filters");
+        return GetConfigPath() + "/" + QStringLiteral("filters");
     }
 
     QString GetConfigIniPath()
     {
-        return GetConfigPath() + QDir::separator() + QStringLiteral("tlv.ini");
+        return GetConfigPath() + "/" + QStringLiteral("tlv.ini");
     }
 
     QString GetDocumentsPath()
@@ -27,17 +27,17 @@ namespace PathHelper
 
     QString GetTableauRepositoryPath(bool isBeta)
     {
-        return GetDocumentsPath() + QDir::separator() +
-            (isBeta ? QStringLiteral("My Tableau Repository (beta)") : QStringLiteral("My Tableau Repository"));
+        return GetDocumentsPath() + "/" +
+            (isBeta ? QStringLiteral("My Tableau Repository (Beta)") : QStringLiteral("My Tableau Repository"));
     }
 
     QString GetTableauLogFolderPath(bool isBeta)
     {
-        return GetTableauRepositoryPath(isBeta) + QDir::separator() + QStringLiteral("Logs");
+        return GetTableauRepositoryPath(isBeta) + "/" + QStringLiteral("Logs");
     }
 
     QString GetTableauLogFilePath(bool isBeta)
     {
-        return GetTableauLogFolderPath(isBeta) + QDir::separator() + QStringLiteral("log.txt");
+        return GetTableauLogFolderPath(isBeta) + "/" + QStringLiteral("log.txt");
     }
 }
