@@ -1,3 +1,8 @@
+# Using a pre-built version of Tableau Log Viewer
+
+We provide [pre-built releases](https://github.com/tableau/tableau-log-viewer/releases) of Tableau Log Viewer.
+No need to setup a dev-environment if all you really want to do is inspecting your lovely log files.
+
 # Building Tableau Log Viewer
 
 TLV is built using C++ and Qt libraries and can be build in different platforms.
