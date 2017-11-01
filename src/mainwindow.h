@@ -39,7 +39,7 @@ private slots:
     void Recent_files_triggered(QAction * action);
     void UpdateTheme();
     void UpdateMenuAndStatusBar();
-    void ExportEventsToTab(QModelIndexList list);
+    void ExportEventsToTab(QModelIndexList list, QString name);
     bool LoadLogFile(QString);
 
     //Slots use underscores as per QT's automatic connection syntax
