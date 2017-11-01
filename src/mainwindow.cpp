@@ -119,6 +119,8 @@ void MainWindow::UpdateTheme()
     this->actionShow_summary->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-summary.png")));
     this->actionRefresh->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-refresh.png")));
     this->actionFind->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-find.png")));
+    this->actionOpen_in_new_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-open.png")));
+    this->actionMerge_into_tab->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-open-merge.png")));
 }
 
 void MainWindow::UpdateMenuAndStatusBar()

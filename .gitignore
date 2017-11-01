@@ -36,7 +36,10 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+# Vim
+*.swp
+
 # Misc OS
 [Tt]humbs.db
-*.DS_Store
+.DS_Store
 Desktop.ini

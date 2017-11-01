@@ -10,6 +10,8 @@
         <file alias="tab-close.png">../resources/images/tab-close.png</file>
         <file alias="tab-sync.png">../resources/images/tab-sync.png</file>
         <file alias="tab-sync-thin.png">../resources/images/tab-sync-thin.png</file>
+        <file alias="ctx-open.png">../resources/images/ctx-open.png</file>
+        <file alias="ctx-open-merge.png">../resources/images/ctx-open-merge.png</file>
         <file alias="ctx-down.png">../resources/images/ctx-down.png</file>
         <file alias="ctx-highlight.png">../resources/images/ctx-highlight.png</file>
         <file alias="ctx-newtab.png">../resources/images/ctx-newtab.png</file>
@@ -20,7 +22,7 @@
         <file alias="ctx-diff.png">../resources/images/ctx-diff.png</file>
         <file alias="ctx-book.png">../resources/images/ctx-book.png</file>
         <file alias="ctx-copy.png">../resources/images/ctx-copy.png</file>
-        <file alias="ctx-open-file.png">../resources/images/ctx-open-file.png</file>
+        <file alias="ctx-open-file-tab.png">../resources/images/ctx-open-file-tab.png</file>
         <file alias="ctx-clear.png">../resources/images/ctx-clear.png</file>
         <file alias="ctx-refresh.png">../resources/images/ctx-refresh.png</file>
         <file alias="ctx-find.png">../resources/images/ctx-find.png</file>
@@ -37,6 +39,8 @@
     <qresource prefix="/+darktheme">
         <file alias="tab-sync.png">../resources/images/darktheme/tab-sync.png</file>
         <file alias="tab-sync-thin.png">../resources/images/darktheme/tab-sync-thin.png</file>
+        <file alias="ctx-open.png">../resources/images/darktheme/ctx-open.png</file>
+        <file alias="ctx-open-merge.png">../resources/images/darktheme/ctx-open-merge.png</file>
         <file alias="ctx-down.png">../resources/images/darktheme/ctx-down.png</file>
         <file alias="ctx-highlight.png">../resources/images/darktheme/ctx-highlight.png</file>
         <file alias="ctx-newtab.png">../resources/images/darktheme/ctx-newtab.png</file>
@@ -47,7 +51,7 @@
         <file alias="ctx-diff.png">../resources/images/darktheme/ctx-diff.png</file>
         <file alias="ctx-book.png">../resources/images/darktheme/ctx-book.png</file>
         <file alias="ctx-copy.png">../resources/images/darktheme/ctx-copy.png</file>
-        <file alias="ctx-open-file.png">../resources/images/darktheme/ctx-open-file.png</file>
+        <file alias="ctx-open-file-tab.png">../resources/images/darktheme/ctx-open-file-tab.png</file>
         <file alias="ctx-clear.png">../resources/images/darktheme/ctx-clear.png</file>
         <file alias="ctx-refresh.png">../resources/images/darktheme/ctx-refresh.png</file>
         <file alias="ctx-find.png">../resources/images/darktheme/ctx-find.png</file>
