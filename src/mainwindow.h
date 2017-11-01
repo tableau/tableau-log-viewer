@@ -91,6 +91,8 @@ private:
     LogTab * GetCurrentLogTab();
     LogTab * GetLogTab(int index);
 
+    QString GetOpenDefaultFolder();
+    QStringList PickLogFilesToOpen(QString caption);
     void UpdateRecentFilesMenu();
     void ClearRecentFileMenu();
     void AddRecentFile(const QString& path);

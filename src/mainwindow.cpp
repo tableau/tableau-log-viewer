@@ -82,6 +82,46 @@ void MainWindow::Recent_files_triggered(QAction * action)
     }
 }
 
+QString MainWindow::GetOpenDefaultFolder()
+{
+    // Prefer the directory of the current tab (if valid)
+    LogTab * currentTab = GetCurrentLogTab();
+    if (currentTab && currentTab->GetTreeModel()->TabType() == TABTYPE::SingleFile) {
+       auto tabPath=currentTab->GetTabPath();
+       auto dir=QFileInfo(tabPath).dir();
+       if (dir.exists()) {
+          return dir.absolutePath();
+       }
+    }
+    // Use the directory used last time (if still valid)
+    if (!m_lastOpenFolder.isEmpty() && QDir(m_lastOpenFolder).exists()) {
+       return m_lastOpenFolder;
+    }
+    // Use the Beta log directory
+    if (QDir(PathHelper::GetTableauLogFolderPath(true)).exists()) {
+       return PathHelper::GetTableauLogFolderPath(true);
+    }
+    // Use the normal log directory
+    if (QDir(PathHelper::GetTableauLogFolderPath(false)).exists()) {
+       return PathHelper::GetTableauLogFolderPath(false);
+    }
+    // Use the documents folder
+    if (QDir(PathHelper::GetDocumentsPath()).exists()) {
+       return PathHelper::GetDocumentsPath();
+    }
+    // Last resort: use the current working directory
+    return QDir::currentPath();
+}
+
+QStringList MainWindow::PickLogFilesToOpen(QString caption)
+{
+    QFileDialog fileDlg(this, caption, GetOpenDefaultFolder(), "Log Files (*.txt *.log);;All Files (*)");
+    fileDlg.setFileMode(QFileDialog::ExistingFiles);
+    fileDlg.exec();
+    m_lastOpenFolder = fileDlg.directory().absolutePath();
+    return fileDlg.selectedFiles();
+}
+
 void MainWindow::UpdateRecentFilesMenu()
 {
     ClearRecentFileMenu();
@@ -512,7 +552,7 @@ void MainWindow::on_actionBeta_log_directory_triggered()
 
 void MainWindow::on_actionChoose_directory_triggered()
 {
-    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", m_lastOpenFolder);
+    QString directoryPath = QFileDialog::getExistingDirectory(this, "Select directory to monitor", GetOpenDefaultFolder());
     if (!directoryPath.isEmpty())
     {
         StartDirectoryLiveCapture(directoryPath, "");
@@ -590,7 +630,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionOpen_in_new_tab_triggered()
 {
-    QStringList files = QFileDialog::getOpenFileNames(this, "Select one or more log files to open", "", "Log Files (*.txt *.log);;All Files (*)");
+    QStringList files = PickLogFilesToOpen("Select one or more log files to open");
     foreach(auto file, files)
         LoadLogFile(file);
 }
@@ -625,7 +665,7 @@ void MainWindow::on_actionOpen_beta_log_txt_triggered()
 
 void MainWindow::on_actionMerge_into_tab_triggered()
 {
-    QStringList files = QFileDialog::getOpenFileNames(this, "Select one or more log files to merge into current tab", "", "Log Files (*.txt *.log);;All Files (*)");
+    QStringList files = PickLogFilesToOpen("Select one or more log files to merge into current tab");
     TreeModel * model = GetCurrentTreeModel();
     bool merged = false;
     foreach(auto file, files)
