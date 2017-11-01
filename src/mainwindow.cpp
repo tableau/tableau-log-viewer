@@ -270,8 +270,14 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     TreeModel * exportedModel = logTab->GetTreeModel();
 
     exportedModel->SetTabType(TABTYPE::ExportedEvents);
+    // Inherit highlight filters
     exportedModel->SetHighlightFilters(model->GetHighlightFilters());
-    actionTail_current_tab->setEnabled(false);
+    // Inherit the column layout
+    for (int column=0; column<exportedModel->columnCount(); ++column) {
+       exportedView->setColumnWidth(column, view->columnWidth(column));
+       exportedView->setColumnHidden(column, view->isColumnHidden(column));
+    }
+    // Expand same items in exported view as in original view
     int exportCount = 0;
     for (QModelIndex event : list)
     {
@@ -285,12 +291,12 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
         }
     }
 
+    actionTail_current_tab->setEnabled(false);
     connect(logTab, &LogTab::menuUpdateNeeded, this, &MainWindow::UpdateMenuAndStatusBar);
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
     int idx = tabWidget->addTab(logTab, "exported data");
     tabWidget->setCurrentIndex(idx);
     logTab->setFocus();
-
 }
 
 void MainWindow::AddRecentFile(const QString& path)
