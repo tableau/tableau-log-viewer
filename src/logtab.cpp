@@ -257,6 +257,7 @@ void LogTab::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Backspace:
     case Qt::Key_Delete:
         RowHideSelected();
+        break;
     default:
         // Check keys with modifiers together and ensure regular key events get propagated.
         if ((event->key() == Qt::Key_C) &&
@@ -948,6 +949,11 @@ void LogTab::RowHideSelected()
 {
     ui->treeView->setUpdatesEnabled(false);
     auto idxList = ui->treeView->selectionModel()->selectedRows();
+
+    // Sort the indices in reverse order. Remove the items from the
+    // end first to make sure indices stay valid after each removal
+    std::sort(idxList.rbegin(), idxList.rend());
+
     for (const auto& idx : idxList) {
        m_treeModel->removeRow(idx.row(), idx.parent());
     }
