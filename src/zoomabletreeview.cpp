@@ -13,7 +13,9 @@ ZoomableTreeView::ZoomableTreeView(QWidget *parent)
     :QTreeView(parent)
 {
     QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    fixedFont.setPointSizeF(sm_savedFontPointSize);
+    if (sm_savedFontPointSize > 0) {
+       fixedFont.setPointSizeF(sm_savedFontPointSize);
+    }
     this->setFont(fixedFont);
 }
 
