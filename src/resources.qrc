@@ -44,8 +44,8 @@
         <file alias="ctx-down.png">../resources/images/darktheme/ctx-down.png</file>
         <file alias="ctx-highlight.png">../resources/images/darktheme/ctx-highlight.png</file>
         <file alias="ctx-newtab.png">../resources/images/darktheme/ctx-newtab.png</file>
-        <file alias="ctx-timedelta.png">../resources/images/darktheme/ctx-timedelta.png</file>
-        <file alias="ctx-timestamp.png">../resources/images/darktheme/ctx-timestamp.png</file>
+        <file alias="ctx-time.png">../resources/images/darktheme/ctx-time.png</file>
+        <file alias="ctx-datetime.png">../resources/images/darktheme/ctx-datetime.png</file>
         <file alias="ctx-up.png">../resources/images/darktheme/ctx-up.png</file>
         <file alias="ctx-hide.png">../resources/images/darktheme/ctx-hide.png</file>
         <file alias="ctx-diff.png">../resources/images/darktheme/ctx-diff.png</file>
