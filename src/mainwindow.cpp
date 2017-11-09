@@ -35,7 +35,7 @@
 #include <QTime>
 #include <QTreeView>
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(const QStringList& args)
 {
     setupUi(this);
 
@@ -61,6 +61,20 @@ MainWindow::MainWindow()
     connect(Ui_MainWindow::menuRecent_files, SIGNAL(triggered(QAction*)), this, SLOT(Recent_files_triggered(QAction*)));
 
     tabWidget->tabBar()->installEventFilter(this);
+
+    // Parse command line live captures
+    for(int i=1; i<args.size(); i++)
+    {
+        QString livecap = args[i];
+        if(livecap == "LiveLog" || livecap == "-LiveLog")
+            on_actionOpen_log_txt_triggered();
+        else if(livecap == "LiveBetaLog" || livecap == "-LiveBetaLog")
+            on_actionOpen_beta_log_txt_triggered();
+        else if(livecap == "LiveDir" || livecap == "-LiveDir")
+            on_actionLog_directory_triggered();
+        else if(livecap == "LiveBetaDir" || livecap == "-LiveBetaDir")
+            on_actionBeta_log_directory_triggered();
+    }
 }
 
 MainWindow::~MainWindow()

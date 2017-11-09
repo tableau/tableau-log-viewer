@@ -25,7 +25,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     Q_OBJECT
 
 public:
-    MainWindow();
+    MainWindow(const QStringList& args);
     ~MainWindow();
 
 protected:
