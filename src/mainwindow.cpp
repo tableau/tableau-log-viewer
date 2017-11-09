@@ -1258,29 +1258,43 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
     int i = start;
     while (true)
     {
-        i += offset;
+        i += offset;    
 
         if (i >= model->rowCount())
             i = 0;
         else if (i < 0)
             i = model->rowCount() - 1;
 
-        for (SearchOpt searchOpt : filters)
+        // If highlight only mode is on, don't search hidden rows
+        bool searchRow = true;
+        if (model->m_highlightOnlyMode)
         {
-            for (COL col : searchOpt.m_keys)
+            QModelIndex idx;
+            if(tree->isRowHidden(i, idx))
             {
-                QModelIndex idx = model->index(i, col);
-                QString data = (col == COL::Value) ?
-                    model->GetValueFullString(idx, true) :
-                    model->data(idx, Qt::DisplayRole).toString();
-                if (searchOpt.HasMatch(data))
+                searchRow = false;
+            }
+        }
+
+        if (searchRow)
+        {
+            for (SearchOpt searchOpt : filters)
+            {
+                for (COL col : searchOpt.m_keys)
                 {
-                    tree->setCurrentIndex(idx);
-                    QString msg = (filters.size() == 1) ?
-                        QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
-                        QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
-                    statusBar()->showMessage(msg, 3000);
-                    return;
+                    QModelIndex idx = model->index(i, col);
+                    QString data = (col == COL::Value) ?
+                        model->GetValueFullString(idx, true) :
+                        model->data(idx, Qt::DisplayRole).toString();
+                    if (searchOpt.HasMatch(data))
+                    {
+                        tree->setCurrentIndex(idx);
+                        QString msg = (filters.size() == 1) ?
+                            QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
+                            QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
+                        statusBar()->showMessage(msg, 3000);
+                        return;
+                    }
                 }
             }
         }
