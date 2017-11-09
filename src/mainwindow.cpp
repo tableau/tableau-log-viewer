@@ -996,10 +996,29 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
     {
         i += offset;
 
+        if (i == start)
+        {
+            QString msg = (filters.size() == 1) ?
+                QString("Not found: '%1'").arg(filters[0].m_value) :
+                QString("No matching item.");
+            statusBar()->showMessage(msg, 3000);
+            return;
+        }
+
         if (i >= model->rowCount())
             i = 0;
         else if (i < 0)
             i = model->rowCount() - 1;
+
+        // If highlight only mode is on, don't search hidden rows
+        if (model->m_highlightOnlyMode)
+        {
+            QModelIndex idx;
+            if(tree->isRowHidden(i, idx))
+            {
+                continue;
+            }
+        }
 
         for (SearchOpt searchOpt : filters)
         {
@@ -1019,15 +1038,6 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
                     return;
                 }
             }
-        }
-
-        if (i == start)
-        {
-            QString msg = (filters.size() == 1) ?
-                QString("Not found: '%1'").arg(filters[0].m_value) :
-                QString("No matching item.");
-            statusBar()->showMessage(msg, 3000);
-            return;
         }
     }
 }
