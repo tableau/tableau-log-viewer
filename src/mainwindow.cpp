@@ -1256,6 +1256,10 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
         start = 0;
     }
     int i = start;
+
+    // Used for isRowHidden()
+    QModelIndex idx;
+
     while (true)
     {
         i += offset;
@@ -1265,18 +1269,7 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
         else if (i < 0)
             i = model->rowCount() - 1;
 
-        // If highlight only mode is on, don't search hidden rows
-        bool searchRow = true;
-        if (model->m_highlightOnlyMode)
-        {
-            QModelIndex idx;
-            if(tree->isRowHidden(i, idx))
-            {
-                searchRow = false;
-            }
-        }
-
-        if (searchRow)
+        if (!tree->isRowHidden(i, idx))
         {
             for (SearchOpt searchOpt : filters)
             {
