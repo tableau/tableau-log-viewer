@@ -1256,6 +1256,10 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
         start = 0;
     }
     int i = start;
+
+    // Used for isRowHidden()
+    QModelIndex idx;
+
     while (true)
     {
         i += offset;
@@ -1265,22 +1269,25 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
         else if (i < 0)
             i = model->rowCount() - 1;
 
-        for (SearchOpt searchOpt : filters)
+        if (!tree->isRowHidden(i, idx))
         {
-            for (COL col : searchOpt.m_keys)
+            for (SearchOpt searchOpt : filters)
             {
-                QModelIndex idx = model->index(i, col);
-                QString data = (col == COL::Value) ?
-                    model->GetValueFullString(idx, true) :
-                    model->data(idx, Qt::DisplayRole).toString();
-                if (searchOpt.HasMatch(data))
+                for (COL col : searchOpt.m_keys)
                 {
-                    tree->setCurrentIndex(idx);
-                    QString msg = (filters.size() == 1) ?
-                        QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
-                        QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
-                    statusBar()->showMessage(msg, 3000);
-                    return;
+                    QModelIndex idx = model->index(i, col);
+                    QString data = (col == COL::Value) ?
+                        model->GetValueFullString(idx, true) :
+                        model->data(idx, Qt::DisplayRole).toString();
+                    if (searchOpt.HasMatch(data))
+                    {
+                        tree->setCurrentIndex(idx);
+                        QString msg = (filters.size() == 1) ?
+                            QString("Found '%1' on line %2").arg(searchOpt.m_value, model->data(model->index(i, 0), Qt::DisplayRole).toString()) :
+                            QString("Found a match on line %1").arg(model->data(model->index(i, 0), Qt::DisplayRole).toString());
+                        statusBar()->showMessage(msg, 3000);
+                        return;
+                    }
                 }
             }
         }
