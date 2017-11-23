@@ -818,11 +818,12 @@ void LogTab::ExportToNewTab()
     std::sort(idxList.begin(), idxList.end(), [](QModelIndex a, QModelIndex b) {
         return a.row() < b.row();
     });
-    emit exportToTab(idxList);
+    emit exportToTab(idxList,"exported data");
 }
 
 void LogTab::ExportToNewTab(COL column)
 {
+    // Generate the list of selected values
     auto selectionList = ui->treeView->selectionModel()->selectedRows();
     QSet<QString> exportedValues;
     for (const auto& selected : selectionList) {
@@ -830,6 +831,12 @@ void LogTab::ExportToNewTab(COL column)
        exportedValues.insert(value);
     }
 
+    // Build the name for the new tab
+    QStringList sortedValues=QStringList::fromSet(exportedValues);
+    sortedValues.sort();
+    QString name = QString(GetColumnName(column)) + " " + sortedValues.join(",");
+
+    // Generate the index list
     const int count = m_treeModel->rowCount();
     const QModelIndex root;
     QModelIndexList exportedIdxList;
@@ -842,7 +849,7 @@ void LogTab::ExportToNewTab(COL column)
         }
     }
 
-    emit exportToTab(exportedIdxList);
+    emit exportToTab(exportedIdxList, name);
 }
 
 void LogTab::OpenSelectedFile()

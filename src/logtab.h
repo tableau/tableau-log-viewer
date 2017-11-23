@@ -114,7 +114,7 @@ private slots:
 
 signals:
     void menuUpdateNeeded();
-    void exportToTab(QModelIndexList list);
+    void exportToTab(QModelIndexList list, QString name);
     void openFile(QString);
 };
 

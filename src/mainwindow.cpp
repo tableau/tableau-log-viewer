@@ -291,7 +291,7 @@ EventListPtr MainWindow::GetEventsFromFile(QString path, int & skippedCount)
     return events;
 }
 
-void MainWindow::ExportEventsToTab(QModelIndexList list)
+void MainWindow::ExportEventsToTab(QModelIndexList list, QString name)
 {
     auto events = std::make_shared<EventList>();
     TreeModel * model = GetCurrentTreeModel();
@@ -334,7 +334,9 @@ void MainWindow::ExportEventsToTab(QModelIndexList list)
     actionTail_current_tab->setEnabled(false);
     connect(logTab, &LogTab::menuUpdateNeeded, this, &MainWindow::UpdateMenuAndStatusBar);
     connect(logTab, &LogTab::exportToTab, this, &MainWindow::ExportEventsToTab);
-    int idx = tabWidget->addTab(logTab, "exported data");
+    QString shortName = name.size() < 30 ? name : (name.left(27) + "...");
+    int idx = tabWidget->addTab(logTab, shortName);
+    tabWidget->setTabToolTip(idx, name);
     tabWidget->setCurrentIndex(idx);
     logTab->setFocus();
 }
