@@ -1114,7 +1114,7 @@ void LogTab::RowShowGlobalTime()
 void LogTab::RowShowTimeDeltas()
 {
     QModelIndex idx = ui->treeView->currentIndex();
-    auto datetime = idx.model()->index(idx.row(), COL::Time, idx.parent()).data(Qt::UserRole).toLongLong();
+    auto datetime = idx.model()->index(idx.row(), COL::Time, idx.parent()).data(Qt::UserRole).toDateTime().toMSecsSinceEpoch();
     m_treeModel->ShowDeltas(datetime);
 }
 

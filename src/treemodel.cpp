@@ -74,11 +74,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         case Qt::UserRole:
         {
             TreeItem* item = GetItem(index);
-            if (col == COL::Time)
-            {
-                QDateTime dateTime = item->Data(col).toDateTime();
-                return dateTime.toMSecsSinceEpoch();
-            }
             return item->Data(col);
             break;
         }
