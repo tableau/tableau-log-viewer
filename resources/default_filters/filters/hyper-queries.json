@@ -1,0 +1,67 @@
+[
+    {
+        "backgroundColor": [
+            191,
+            228,
+            243
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "mode": "equals",
+        "value": "startup-info"
+    },
+    {
+        "backgroundColor": [
+            242,
+            236,
+            153
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "mode": "equals",
+        "value": "connection-startup"
+    },
+    {
+        "backgroundColor": [
+            198,
+            202,
+            248
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "mode": "contains",
+        "value": "query-begin"
+    },
+    {
+        "backgroundColor": [
+            153,
+            148,
+            241
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "mode": "contains",
+        "value": "query-end"
+    },
+    {
+        "backgroundColor": [
+            191,
+            233,
+            104
+        ],
+        "keys": [
+            "Key"
+        ],
+        "matchCase": false,
+        "mode": "equals",
+        "value": "query-plan"
+    }
+]
