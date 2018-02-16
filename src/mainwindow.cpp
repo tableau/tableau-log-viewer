@@ -31,7 +31,6 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QSignalMapper>
-#include <QTextStream>
 #include <QTime>
 #include <QTreeView>
 
@@ -268,10 +267,9 @@ EventListPtr MainWindow::GetEventsFromFile(QString path, int & skippedCount)
 
     if (logfile.open(QIODevice::ReadOnly))
     {
-        QTextStream in(&logfile);
-        while (!in.atEnd())
+        while (!logfile.atEnd())
         {
-            auto line = in.readLine().trimmed();
+            auto line = logfile.readLine().trimmed();
             if (line.isEmpty())
             {
                 continue;
