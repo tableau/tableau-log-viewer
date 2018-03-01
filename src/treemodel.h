@@ -88,10 +88,7 @@ private:
     void AddChildren(QJsonObject &obj, TreeItem *parent);
     void AddChild(const QString& key, const QJsonValue& value, TreeItem* parent);
     void InsertChild(int position, const QJsonObject & event);
-    const QString KeyValueString(const QString& key, const QString& value) const;
-    QString JsonToString(const QJsonObject& json, const QString& lineBreak = "; ") const;
-    void GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const;
-    void GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const;
+    QString JsonToString(const QJsonObject& json, const bool isSingleLine = true) const;
     QColor ItemHighlightColor(const QModelIndex& idx) const;
     QString GetDeltaMSecs(QDateTime dateTime) const;
     TreeItem *GetItem(const QModelIndex &index) const;
