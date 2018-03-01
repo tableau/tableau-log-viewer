@@ -8,7 +8,8 @@ namespace QJsonUtils
     enum class Notation : unsigned int
     {
         Flat,
-        JSON
+        JSON,
+        YAML
     };
 
     enum class LineFormat : unsigned int

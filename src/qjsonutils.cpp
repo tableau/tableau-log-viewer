@@ -14,6 +14,10 @@ namespace
     void GetJson(const QJsonValue& value, QString& string, unsigned int level = 0);
     void GetJsonSingleLine(const QJsonValue& value, QString& string);
     bool GetJsonLiteral(const QJsonValue& value, QString& string);
+
+    void GetYaml(const QJsonValue& value, QString& string, const unsigned int level = 0);
+    void GetYamlSingleLine(const QJsonValue& value, QString& string);
+    bool GetYamlTrivial(const QJsonValue& value, QString& string);
 }
 
 QString QJsonUtils::Format(const QJsonValue& jsonValue, Notation format, LineFormat lineFormat)
@@ -41,10 +45,14 @@ QString QJsonUtils::Format(const QJsonValue& jsonValue, Notation format, LineFor
         switch (format)
         {
         case Notation::JSON:
-            if (isSingleLine)
-                GetJsonSingleLine(jsonValue, builder);
-            else
+            isSingleLine ?
+                GetJsonSingleLine(jsonValue, builder) :
                 GetJson(jsonValue, builder);
+            break;
+        case Notation::YAML:
+            isSingleLine ?
+                GetYamlSingleLine(jsonValue, builder) :
+                GetYaml(jsonValue, builder);
             break;
         default:
             return "NOT IMPLEMENTED";
@@ -220,6 +228,144 @@ namespace
             string.append("\"");
             string.append(value.toString().replace('\n', "\\n").replace('"', "\\\""));
             string.append("\"");
+        }
+        else
+        {
+            return false;
+        }
+        return true;
+    }
+
+    void GetYaml(const QJsonValue& value, QString& string, const unsigned int level)
+    {
+        if (GetYamlTrivial(value, string))
+            return;
+
+        QString indentation = "  ";
+        indentation = indentation.repeated(level);
+
+        if (value.isObject())
+        {
+            // Objects go into a new line EXCEPT if it happens to be the first one
+            if (!string.isEmpty())
+                string.append("\n");
+            QJsonObject obj = value.toObject();
+            int pendingKeys = obj.length();
+            for (QJsonObject::ConstIterator iter = obj.constBegin(); iter != obj.constEnd(); ++iter)
+            {
+                string.append(indentation);
+                string.append(iter.key());
+                string.append(": ");
+                GetYaml(iter.value(), string, level + 1);
+                if (pendingKeys > 1)
+                    string.append("\n");
+                pendingKeys--;
+            }
+        }
+        else if (value.isArray())
+        {
+            int pendingElements = value.toArray().count();
+            if (pendingElements == 0)
+            {
+                string.append("[]");
+            }
+            else
+            {
+                string.append("\n");
+                for (const QJsonValue& itemValue : value.toArray())
+                {
+                    string.append(indentation);
+                    string.append("- ");
+                    GetYaml(itemValue, string, level + 1);
+                    if (pendingElements > 1)
+                        string.append("\n");
+                    pendingElements--;
+                }
+            }
+        }
+        else
+        {
+            QString stringValue = value.toString().trimmed();
+            // If this is a multi-line string, indent each of the lines
+            if (stringValue.indexOf('\n') >= 0)
+            {
+                string.append("|-");
+                QString newlineAndIndentation = "\n" % indentation;
+                string.append(newlineAndIndentation);
+                string.append(stringValue.replace('\n', newlineAndIndentation));
+            }
+            else
+                string.append(stringValue);
+        }
+    }
+
+    void GetYamlSingleLine(const QJsonValue& value, QString& string)
+    {
+        if (GetYamlTrivial(value, string))
+            return;
+
+        if (value.isObject())
+        {
+            bool isRoot = string.isEmpty();
+            // Objects are nested in curly braces EXCEPT if it happens to be the first one
+            if (!isRoot)
+                string.append("{ ");
+            QJsonObject obj = value.toObject();
+            int pendingKeys = obj.length();
+            for (QJsonObject::ConstIterator iter = obj.constBegin(); iter != obj.constEnd(); ++iter)
+            {
+                string.append(iter.key());
+                string.append(": ");
+                GetYamlSingleLine(iter.value(), string);
+                if (pendingKeys > 1)
+                    string.append(", ");
+                pendingKeys--;
+            }
+            if (!isRoot)
+                string.append(" }");
+        }
+        else if (value.isArray())
+        {
+            int pendingElements = value.toArray().count();
+            string.append("[ ");
+            for (const QJsonValue& itemValue : value.toArray())
+            {
+                GetYamlSingleLine(itemValue, string);
+                if (pendingElements > 1)
+                    string.append(", ");
+                pendingElements--;
+            }
+            string.append(" ]");
+        }
+        else
+        {
+            // Replace newline with spaces in multiline strings
+            QString stringValue = value.toString().replace('\n', ' ').trimmed();
+            string.append(stringValue);
+        }
+    }
+
+    bool GetYamlTrivial(const QJsonValue& value, QString& string)
+    {
+        if (value.isDouble())
+        {
+            // Check if the double value is just an integer and format accordingly
+            double intpart;
+            const int decimals = (modf(value.toDouble(), &intpart) == 0) ? 0 : 3;
+
+            string.append(QString::number(value.toDouble(), 'f', decimals));
+        }
+        else if (value.isBool())
+        {
+            string.append(QString(value.toBool() ? "true" : "false"));
+        }
+        else if (value.isNull())
+        {
+            string.append(QString("null"));
+        }
+        else if (value.isUndefined())
+        {
+            string.append(QString("undefined"));
         }
         else
         {
