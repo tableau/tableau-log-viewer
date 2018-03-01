@@ -161,10 +161,7 @@ QString TreeModel::GetChildValueString(const QModelIndex &index, QString key) co
         return QString();
 
     QJsonValueRef child = valueObj[key];
-    if (child.isObject())
-        return JsonToString(child.toObject());
-    else
-        return child.toString();
+    return JsonToString(child);
 }
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
@@ -332,16 +329,7 @@ QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFor
 {
     QJsonObject eventObj = GetEvent(idx);
     QJsonValueRef valueObj = eventObj["v"];
-    if (valueObj.isObject())
-    {
-        return JsonToString(valueObj.toObject(), singleLineFormat);
-    }
-    else
-    {
-        return (singleLineFormat) ?
-            valueObj.toString().replace("\n", " ") :
-            valueObj.toString();
-    }
+    return JsonToString(valueObj, singleLineFormat);
 }
 
 TABTYPE TreeModel::TabType() const
@@ -445,15 +433,10 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::Key, event["k"].toString());
 
     auto v = event["v"];
-    if (!v.isObject())
+    SetValueDisplayString(child, JsonToString(v));
+    if (v.isObject())
     {
-        SetValueDisplayString(child, v.toString());
-    }
-    else
-    {
-        QJsonObject obj = v.toObject();
-        SetValueDisplayString(child, JsonToString(obj));
-        AddChildren(obj, child);
+        AddChildren(v.toObject(), child);
     }
 
     // calculate "Elapsed"
@@ -581,7 +564,7 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
     return Qt::transparent;
 }
 
-QString TreeModel::JsonToString(const QJsonObject& json, const bool isSingleLine) const
+QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine) const
 {
     using namespace QJsonUtils;
 
