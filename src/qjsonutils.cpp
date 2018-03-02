@@ -1,10 +1,12 @@
 #include "qjsonutils.h"
 
+#include <QMap>
 #include <QString>
 #include <QStringBuilder>
 #include <QVector>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QtDebug>
 
 namespace
 {
@@ -58,6 +60,29 @@ QString QJsonUtils::Format(const QJsonValue& jsonValue, Notation format, LineFor
             return "NOT IMPLEMENTED";
         }
         return builder;
+    }
+}
+
+static QMap<QString, QJsonUtils::Notation> notationNamesMap = {
+    {"Flat", QJsonUtils::Notation::Flat},
+    {"JSON", QJsonUtils::Notation::JSON},
+    {"YAML", QJsonUtils::Notation::YAML},
+};
+QStringList QJsonUtils::GetNotationNames()
+{
+    return notationNamesMap.keys();
+}
+
+QJsonUtils::Notation QJsonUtils::GetNotationFromName(const QString& notationName)
+{
+    if (notationNamesMap.contains(notationName))
+    {
+        return notationNamesMap[notationName];
+    }
+    else
+    {
+        qWarning() << "Invalid notation requested, defaulting to YAML";
+        return QJsonUtils::Notation::YAML;
     }
 }
 

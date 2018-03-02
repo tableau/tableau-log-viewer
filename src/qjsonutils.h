@@ -1,6 +1,7 @@
 #pragma once
 
 class QString;
+class QStringList;
 class QJsonValue;
 
 namespace QJsonUtils
@@ -19,4 +20,8 @@ namespace QJsonUtils
     };
 
     QString Format(const QJsonValue& value, Notation format, LineFormat lineFormat = LineFormat::Free);
+
+    QStringList GetNotationNames();
+
+    Notation GetNotationFromName(const QString& notationName);
 }

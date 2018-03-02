@@ -571,7 +571,9 @@ QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine)
     LineFormat lineFormat = isSingleLine ?
         LineFormat::SingleLine :
         LineFormat::Free;
-    return QJsonUtils::Format(json, Notation::YAML, lineFormat);
+    QString notationName = Options::GetInstance().getNotation();
+    Notation notation = QJsonUtils::GetNotationFromName(notationName);
+    return QJsonUtils::Format(json, notation, lineFormat);
 }
 
 const HighlightOptions& TreeModel::GetHighlightFilters() const
