@@ -436,7 +436,8 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     SetValueDisplayString(child, JsonToString(v));
     if (v.isObject())
     {
-        AddChildren(v.toObject(), child);
+        QJsonObject obj = v.toObject();
+        AddChildren(obj, child);
     }
 
     // calculate "Elapsed"
