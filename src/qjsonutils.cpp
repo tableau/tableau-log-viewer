@@ -1,5 +1,6 @@
 #include "qjsonutils.h"
 
+#include <math.h>
 #include <QMap>
 #include <QString>
 #include <QStringBuilder>
