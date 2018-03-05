@@ -3,6 +3,7 @@
 
 #include "options.h"
 #include "pathhelper.h"
+#include "qjsonutils.h"
 #include "themeutils.h"
 
 #include <QBitArray>
@@ -44,6 +45,7 @@ void OptionsDlg::WriteSettings()
     auto currFilter = ui->defaultHighlightComboBox->currentText();
     int syntaxHighlightLimit = ui->syntaxHighlightLimitSpinBox->value();
     auto themeName = ui->themeComboBox->currentText();
+    auto notationName = ui->notationComboBox->currentText();
 
     QString iniPath = PathHelper::GetConfigIniPath();
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -58,6 +60,7 @@ void OptionsDlg::WriteSettings()
     settings.setValue("defaultHighlightFilter", currFilter);
     settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
     settings.setValue("theme", themeName);
+    settings.setValue("notation", notationName);
     settings.endGroup();
 
     Options::GetInstance().ReadSettings();
@@ -76,6 +79,7 @@ void OptionsDlg::ReadSettings()
     auto defaultHighlightFilter = options.getDefaultFilterName();
     int syntaxHighlightLimit = options.getSyntaxHighlightLimit();
     auto themeName = options.getTheme();
+    auto notationName = options.getNotation();
 
     for (int i = 0; i < skippedText.length(); i++)
     {
@@ -99,6 +103,14 @@ void OptionsDlg::ReadSettings()
         themeName = "Native";
     }
     ui->themeComboBox->setCurrentText(themeName);
+
+    const auto& notationNames = QJsonUtils::GetNotationNames();
+    ui->notationComboBox->addItems(notationNames);
+    if (!notationNames.contains(notationName))
+    {
+        notationName = "YAML";
+    }
+    ui->notationComboBox->setCurrentText(notationName);
 
     // load all saved filters for default filters
     ui->defaultHighlightComboBox->addItem(QString("None"));

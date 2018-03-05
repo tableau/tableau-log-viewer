@@ -22,6 +22,7 @@ private:
     HighlightOptions m_defaultHighlightOpts;
     int m_syntaxHighlightLimit;
     QString m_theme;
+    QString m_notation;
 
 public:
     static Options& GetInstance()
@@ -43,4 +44,5 @@ public:
     HighlightOptions getDefaultHighlightOpts();
     int getSyntaxHighlightLimit() const;
     QString getTheme();
+    QString getNotation();
 };

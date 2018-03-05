@@ -39,7 +39,8 @@ HEADERS     = \
     valuedlg.h \
     zoomabletreeview.h \
     themeutils.h \
-    theme.h
+    theme.h \
+    qjsonutils.h
 
 SOURCES     = \
     colorlibrary.cpp \
@@ -63,7 +64,8 @@ SOURCES     = \
     valuedlg.cpp \
     zoomabletreeview.cpp \
     themeutils.cpp \
-    theme.cpp
+    theme.cpp \
+    qjsonutils.cpp
 
 RESOURCES   = resources.qrc
 

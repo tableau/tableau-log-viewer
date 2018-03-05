@@ -1,6 +1,7 @@
 #include "treemodel.h"
 
 #include "options.h"
+#include "qjsonutils.h"
 #include "themeutils.h"
 #include "treeitem.h"
 
@@ -160,10 +161,7 @@ QString TreeModel::GetChildValueString(const QModelIndex &index, QString key) co
         return QString();
 
     QJsonValueRef child = valueObj[key];
-    if (child.isObject())
-        return JsonToString(child.toObject());
-    else
-        return child.toString();
+    return JsonToString(child);
 }
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
@@ -331,18 +329,7 @@ QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFor
 {
     QJsonObject eventObj = GetEvent(idx);
     QJsonValueRef valueObj = eventObj["v"];
-    if (valueObj.isObject())
-    {
-        return (singleLineFormat) ?
-            JsonToString(valueObj.toObject(), "; ").replace("\n", " ") :
-            JsonToString(valueObj.toObject(), "\n");
-    }
-    else
-    {
-        return (singleLineFormat) ?
-            valueObj.toString().replace("\n", " ") :
-            valueObj.toString();
-    }
+    return JsonToString(valueObj, singleLineFormat);
 }
 
 TABTYPE TreeModel::TabType() const
@@ -446,14 +433,10 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::Key, event["k"].toString());
 
     auto v = event["v"];
-    if (!v.isObject())
-    {
-        SetValueDisplayString(child, v.toString());
-    }
-    else
+    SetValueDisplayString(child, JsonToString(v));
+    if (v.isObject())
     {
         QJsonObject obj = v.toObject();
-        SetValueDisplayString(child, JsonToString(obj));
         AddChildren(obj, child);
     }
 
@@ -582,77 +565,16 @@ QColor TreeModel::ItemHighlightColor(const QModelIndex& idx) const
     return Qt::transparent;
 }
 
-const QString TreeModel::KeyValueString(const QString& key, const QString& value) const
+QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine) const
 {
-    return key % ": " % value;
-}
+    using namespace QJsonUtils;
 
-QString TreeModel::JsonToString(const QJsonObject& json, const QString& lineBreak) const
-{
-    QVector<QString> stringList;
-    GetFlatJson(json, stringList);
-
-    if (stringList.size() == 0)
-        return "";
-
-    QString result;
-    for (const QString& str : stringList)
-    {
-        result = result % lineBreak % str;
-    }
-    return result.remove(0, lineBreak.size());
-}
-
-void TreeModel::GetFlatJson(const QJsonObject& json, QVector<QString>& stringList) const
-{
-    for (QJsonObject::ConstIterator iter = json.constBegin(); iter != json.constEnd(); ++iter)
-    {
-        GetFlatJson(iter.key(), iter.value(), stringList);
-    }
-}
-
-void TreeModel::GetFlatJson(const QString& key, const QJsonValue& value, QVector<QString>& stringList) const
-{
-    if (value.isDouble())
-    {
-        // There are no ints in JSON, only doubles
-        // Check if the double value is just an integer and format accordingly
-        double intpart;
-        const int decimals = (modf(value.toDouble(), &intpart) == 0) ? 0 : 3;
-        stringList.append(KeyValueString(key, QString::number(value.toDouble(), 'f', decimals)));
-    }
-    else if (value.isObject())
-    {
-        QJsonObject childObj = value.toObject();
-        GetFlatJson(childObj, stringList);
-    }
-    else if (value.isArray())
-    {
-        QJsonArray array = value.toArray();
-        int itemIndex = 1;
-        stringList.append(KeyValueString(key, ""));
-        for (const QJsonValue& itemValue : array)
-        {
-            auto itemKey = QString("%1-%2").arg(key).arg(itemIndex++);
-            GetFlatJson(itemKey, itemValue, stringList);
-        }
-    }
-    else if (value.isBool())
-    {
-        stringList.append(KeyValueString(key, QString(value.toBool() ? "true" : "false")));
-    }
-    else if (value.isNull())
-    {
-        stringList.append(KeyValueString(key, QString("null")));
-    }
-    else if (value.isUndefined())
-    {
-        stringList.append(KeyValueString(key, QString("undefined")));
-    }
-    else
-    {
-        stringList.append(KeyValueString(key, value.toString()));
-    }
+    LineFormat lineFormat = isSingleLine ?
+        LineFormat::SingleLine :
+        LineFormat::Free;
+    QString notationName = Options::GetInstance().getNotation();
+    Notation notation = QJsonUtils::GetNotationFromName(notationName);
+    return QJsonUtils::Format(json, notation, lineFormat);
 }
 
 const HighlightOptions& TreeModel::GetHighlightFilters() const

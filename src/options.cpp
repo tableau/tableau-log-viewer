@@ -27,6 +27,7 @@ void Options::ReadSettings()
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
     m_theme = settings.value("theme", "Native").toString();
+    m_notation = settings.value("notation", "YAML").toString();
 
     settings.endGroup();
 
@@ -108,4 +109,9 @@ int Options::getSyntaxHighlightLimit() const
 QString Options::getTheme()
 {
     return m_theme;
+}
+
+QString Options::getNotation()
+{
+    return m_notation;
 }
