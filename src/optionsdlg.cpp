@@ -11,7 +11,6 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QPalette>
-#include <QSettings>
 
 OptionsDlg::OptionsDlg(QWidget *parent) :
     QDialog(parent),
@@ -30,6 +29,8 @@ OptionsDlg::~OptionsDlg()
 
 void OptionsDlg::WriteSettings()
 {
+    Options& options = Options::GetInstance();
+
     QStringList skippedText;
     QBitArray skippedState(ui->listWidget->count());
     for (int i = 0; i < ui->listWidget->count(); i++)
@@ -37,67 +38,50 @@ void OptionsDlg::WriteSettings()
         skippedText.append(ui->listWidget->item(i)->text());
         skippedState[i] = ui->listWidget->item(i)->checkState() == Qt::Checked ? true : false;
     }
-    auto serviceEnable = ui->serviceEnable->isChecked();
-    auto serviceURL = ui->serviceURLEdit->text();
-    auto diffToolPath = ui->diffToolPath->text();
-    auto liveEnable = ui->startFutureLiveCapture->isChecked();
-    bool captureAllTextFiles = ui->captureAllTextFiles->isChecked();
-    auto currFilter = ui->defaultHighlightComboBox->currentText();
-    int syntaxHighlightLimit = ui->syntaxHighlightLimitSpinBox->value();
-    auto themeName = ui->themeComboBox->currentText();
-    auto notationName = ui->notationComboBox->currentText();
+    options.setSkippedText(skippedText);
+    options.setSkippedState(skippedState);
 
-    QString iniPath = PathHelper::GetConfigIniPath();
-    QSettings settings(iniPath, QSettings::IniFormat);
-    settings.beginGroup("Options");
-    settings.setValue("skippedText", skippedText);
-    settings.setValue("skippedState", skippedState);
-    settings.setValue("visualizationServiceEnable", serviceEnable);
-    settings.setValue("visualizationServiceURL", serviceURL);
-    settings.setValue("diffToolPath", diffToolPath);
-    settings.setValue("enableLiveCapture", liveEnable);
-    settings.setValue("liveCaptureAllTextFiles", captureAllTextFiles);
-    settings.setValue("defaultHighlightFilter", currFilter);
-    settings.setValue("syntaxHighlightLimit", syntaxHighlightLimit);
-    settings.setValue("theme", themeName);
-    settings.setValue("notation", notationName);
-    settings.endGroup();
+    options.setVisualizationServiceEnable(ui->serviceEnable->isChecked());
+    options.setVisualizationServiceURL(ui->serviceURLEdit->text());
+    options.setDiffToolPath(ui->diffToolPath->text());
+    options.setFutureTabsUnderLive(ui->startFutureLiveCapture->isChecked());
+    options.setCaptureAllTextFiles(ui->captureAllTextFiles->isChecked());
+    options.setDefaultFilterName(ui->defaultHighlightComboBox->currentText());
+    options.setSyntaxHighlightLimit(ui->syntaxHighlightLimitSpinBox->value());
+    options.setTheme(ui->themeComboBox->currentText());
+    options.setNotation(ui->notationComboBox->currentText());
 
-    Options::GetInstance().ReadSettings();
+    // Persist the options
+    options.WriteSettings();
 }
 
 void OptionsDlg::ReadSettings()
 {
     Options& options = Options::GetInstance();
-    auto skippedText = options.getSkippedText();
-    auto skippedState = options.getSkippedState();
-    auto serviceEnable = options.getVisualizationServiceEnable();
-    auto serviceURL = options.getVisualizationServiceURL();
-    auto diffPath =options.getDiffToolPath();
-    auto liveEnable = options.getFutureTabsUnderLive();
-    bool captureAllTextFiles = options.getCaptureAllTextFiles();
-    auto defaultHighlightFilter = options.getDefaultFilterName();
-    int syntaxHighlightLimit = options.getSyntaxHighlightLimit();
-    auto themeName = options.getTheme();
-    auto notationName = options.getNotation();
 
+    QStringList skippedText = options.getSkippedText();
+    QBitArray skippedState = options.getSkippedState();
     for (int i = 0; i < skippedText.length(); i++)
     {
         QListWidgetItem *newItem = new QListWidgetItem(skippedText[i], ui->listWidget);
         newItem->setFlags(newItem->flags() | Qt::ItemIsUserCheckable);
         newItem->setCheckState(skippedState[i] ? Qt::Checked : Qt::Unchecked);
     }
-    ui->useEmbedded->setChecked(!serviceEnable ? true : false);
-    ui->serviceEnable->setChecked(serviceEnable ? true : false);
-    ui->serviceURLEdit->setText(serviceURL);
+
+    bool serviceEnable = options.getVisualizationServiceEnable();
+    ui->useEmbedded->setChecked(!serviceEnable);
+    ui->serviceEnable->setChecked(serviceEnable);
     ui->serviceURLEdit->setEnabled(serviceEnable);
-    ui->diffToolPath->setText(diffPath);
-    ui->startFutureLiveCapture->setChecked(liveEnable);
-    ui->captureAllTextFiles->setChecked(captureAllTextFiles);
-    ui->syntaxHighlightLimitSpinBox->setValue(syntaxHighlightLimit);
+
+    ui->serviceURLEdit->setText(options.getVisualizationServiceURL());
+    ui->diffToolPath->setText(options.getDiffToolPath());
+    ui->startFutureLiveCapture->setChecked(options.getFutureTabsUnderLive());
+    ui->captureAllTextFiles->setChecked(options.getCaptureAllTextFiles());
+    ui->syntaxHighlightLimitSpinBox->setValue(options.getSyntaxHighlightLimit());
 
     const auto& themeNames = ThemeUtils::GetThemeNames();
     ui->themeComboBox->addItems(themeNames);
+    QString themeName = options.getTheme();
     if (!themeNames.contains(themeName))
     {
         themeName = "Native";
@@ -106,6 +90,7 @@ void OptionsDlg::ReadSettings()
 
     const auto& notationNames = QJsonUtils::GetNotationNames();
     ui->notationComboBox->addItems(notationNames);
+    QString notationName = options.getNotation();
     if (!notationNames.contains(notationName))
     {
         notationName = "YAML";
@@ -126,7 +111,7 @@ void OptionsDlg::ReadSettings()
         }
         ui->defaultHighlightComboBox->addItems(filters);
     }
-    int filterIdx = ui->defaultHighlightComboBox->findText(defaultHighlightFilter);
+    int filterIdx = ui->defaultHighlightComboBox->findText(options.getDefaultFilterName());
     ui->defaultHighlightComboBox->setCurrentIndex(filterIdx);
 }
 
