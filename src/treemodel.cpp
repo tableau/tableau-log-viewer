@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QtWidgets>
 
+
 TreeModel::TreeModel(const QStringList &headers, const EventListPtr events, QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -119,10 +120,27 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                 }
                 return tip;
             }
+            else if (col == COL::ART)
+            {
+                QJsonObject eventObj = GetEvent(index);
+                if (eventObj.contains("a"))
+                {
+                    return JsonToString(eventObj["a"], false);
+                }
+                return "ART data not available";
+            }
             else
             {
                 TreeItem* item = GetItem(index);
                 return item->Data(col);
+            }
+            break;
+        }
+        case Qt::TextAlignmentRole:
+        {
+            if (col == COL::ART)
+            {
+                return Qt::AlignCenter;
             }
             break;
         }
@@ -328,7 +346,7 @@ QJsonObject TreeModel::GetEvent(QModelIndex idx) const
 QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFormat) const
 {
     QJsonObject eventObj = GetEvent(idx);
-    QJsonValueRef valueObj = eventObj["v"];
+    QJsonValue valueObj = ConsolidateValueAndActivity(eventObj);
     return JsonToString(valueObj, singleLineFormat);
 }
 
@@ -431,8 +449,13 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::Site, event["site"].toString());
     child->SetData(COL::User, event["user"].toString());
     child->SetData(COL::Key, event["k"].toString());
+    if (event.contains("a"))
+    {
+        // u25CF = BLACK CIRCLE
+        child->SetData(COL::ART, QStringLiteral("\u25CF"));
+    }
 
-    auto v = event["v"];
+    QJsonValue v = ConsolidateValueAndActivity(event);
     SetValueDisplayString(child, JsonToString(v));
     if (v.isObject())
     {
@@ -575,6 +598,31 @@ QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine)
     QString notationName = Options::GetInstance().getNotation();
     Notation notation = QJsonUtils::GetNotationFromName(notationName);
     return QJsonUtils::Format(json, notation, lineFormat);
+}
+
+QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject) const
+{
+    if (eventObject.contains("v") && eventObject.contains("a"))
+    {
+        if (eventObject["v"].isObject())
+        {
+            // "v" is already an object, add whatever is under "a" as a child
+            QJsonObject obj = eventObject["v"].toObject();
+            // Using "~art" key so that it appears at the end, otherwise "a" is likely
+            // to be the first (alphabetical order) and steals the screen
+            obj["~art"] = eventObject["a"];
+            return std::move(obj);
+        }
+        else
+        {
+            // "v" is not an object, create a new object and put "v" and "a" as children
+            QJsonObject obj;
+            obj["v"]=eventObject["v"];
+            obj["~art"]=eventObject["a"];
+            return std::move(obj);
+        }
+    }
+    return eventObject["v"];
 }
 
 const HighlightOptions& TreeModel::GetHighlightFilters() const
