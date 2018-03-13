@@ -21,6 +21,7 @@
 
 QByteArray ValueDlg::sm_savedGeometry { QByteArray() };
 qreal ValueDlg::sm_savedFontPointSize { 0 };
+bool ValueDlg::sm_savedWrapText { true };
 
 ValueDlg::ValueDlg(QWidget *parent) :
     QDialog(parent),
@@ -58,6 +59,8 @@ ValueDlg::ValueDlg(QWidget *parent) :
 
     ui->prevButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-previous.png")));
     ui->nextButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-next.png")));
+    ui->wrapTextCheck->setChecked(sm_savedWrapText);
+    SetWrapping(sm_savedWrapText);
 
     QFile sqlsyntaxcss(":/sqlsyntax.css");
     sqlsyntaxcss.open(QIODevice::ReadOnly);
@@ -165,7 +168,13 @@ void ValueDlg::on_prevButton_clicked()
 
 void ValueDlg::on_wrapTextCheck_clicked()
 {
-    if (ui->wrapTextCheck->isChecked())
+    SetWrapping(ui->wrapTextCheck->isChecked());
+}
+
+void ValueDlg::SetWrapping(const bool wrapText)
+{
+    sm_savedWrapText = wrapText;
+    if (sm_savedWrapText)
     {
         ui->textEdit->setLineWrapMode(QTextEdit::WidgetWidth);
     }
@@ -319,6 +328,7 @@ void ValueDlg::WriteSettings(QSettings& settings)
     settings.beginGroup("ValueDialog");
     settings.setValue("geometry", sm_savedGeometry);
     settings.setValue("fontPointSize", sm_savedFontPointSize);
+    settings.setValue("wrapText", sm_savedWrapText);
     settings.endGroup();
 }
 
@@ -327,5 +337,6 @@ void ValueDlg::ReadSettings(QSettings& settings)
     settings.beginGroup("ValueDialog");
     sm_savedGeometry = settings.value("geometry").toByteArray();
     sm_savedFontPointSize = settings.value("fontPointSize").toReal();
+    sm_savedWrapText = settings.value("wrapText").toBool();
     settings.endGroup();
 }
