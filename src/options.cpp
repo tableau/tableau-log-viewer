@@ -41,44 +41,104 @@ void Options::ReadSettings()
     }
 }
 
-QStringList Options::getSkippedText()
+void Options::WriteSettings()
+{
+    QString iniPath = PathHelper::GetConfigIniPath();
+    QSettings settings(iniPath, QSettings::IniFormat);
+
+    settings.beginGroup("Options");
+    settings.setValue("skippedText", m_skippedText);
+    settings.setValue("skippedState", m_skippedState);
+    settings.setValue("visualizationServiceEnable", m_visualizationServiceEnable);
+    settings.setValue("visualizationServiceURL", m_visualizationServiceURL);
+    settings.setValue("diffToolPath", m_diffToolPath);
+    settings.setValue("enableLiveCapture", m_futureTabsUnderLive);
+    settings.setValue("liveCaptureAllTextFiles", m_captureAllTextFiles);
+    settings.setValue("defaultHighlightFilter", m_defaultFilterName);
+    settings.setValue("syntaxHighlightLimit", m_syntaxHighlightLimit);
+    settings.setValue("theme", m_theme);
+    settings.setValue("notation", m_notation);
+    settings.endGroup();
+}
+
+QStringList Options::getSkippedText() const
 {
     return m_skippedText;
 }
 
-QBitArray Options::getSkippedState()
+void Options::setSkippedText(const QStringList &skippedText)
+{
+    m_skippedText = skippedText;
+}
+
+QBitArray Options::getSkippedState() const
 {
     return m_skippedState;
 }
 
-bool Options::getVisualizationServiceEnable()
+void Options::setSkippedState(const QBitArray &skippedState)
+{
+    m_skippedState = skippedState;
+}
+
+bool Options::getVisualizationServiceEnable() const
 {
     return m_visualizationServiceEnable;
 }
 
-QString Options::getVisualizationServiceURL()
+void Options::setVisualizationServiceEnable(const bool visualizationServiceEnable)
+{
+    m_visualizationServiceEnable = visualizationServiceEnable;
+}
+
+QString Options::getVisualizationServiceURL() const
 {
     return m_visualizationServiceURL;
 }
 
-QString Options::getDiffToolPath()
+void Options::setVisualizationServiceURL(const QString &visualizationServiceURL)
+{
+    m_visualizationServiceURL = visualizationServiceURL;
+}
+
+QString Options::getDiffToolPath() const
 {
     return m_diffToolPath;
 }
 
-bool Options::getFutureTabsUnderLive()
+void Options::setDiffToolPath(const QString &diffToolPath)
+{
+    m_diffToolPath = diffToolPath;
+}
+
+bool Options::getFutureTabsUnderLive() const
 {
     return m_futureTabsUnderLive;
 }
 
-bool Options::getCaptureAllTextFiles()
+void Options::setFutureTabsUnderLive(const bool futureTabsUnderLive)
+{
+    m_futureTabsUnderLive = futureTabsUnderLive;
+}
+
+bool Options::getCaptureAllTextFiles() const
 {
     return m_captureAllTextFiles;
 }
 
-QString Options::getDefaultFilterName()
+void Options::setCaptureAllTextFiles(const bool captureAllTextFiles)
+{
+    m_captureAllTextFiles = captureAllTextFiles;
+}
+
+QString Options::getDefaultFilterName() const
 {
     return m_defaultFilterName;
+}
+
+void Options::setDefaultFilterName(const QString &defaultFilterName)
+{
+    m_defaultFilterName = defaultFilterName;
 }
 
 HighlightOptions Options::getDefaultHighlightOpts()
@@ -106,12 +166,27 @@ int Options::getSyntaxHighlightLimit() const
     return m_syntaxHighlightLimit;
 }
 
-QString Options::getTheme()
+void Options::setSyntaxHighlightLimit(const int syntaxHighlightLimit)
+{
+    m_syntaxHighlightLimit = syntaxHighlightLimit;
+}
+
+QString Options::getTheme() const
 {
     return m_theme;
 }
 
-QString Options::getNotation()
+void Options::setTheme(const QString &theme)
+{
+    m_theme = theme;
+}
+
+QString Options::getNotation() const
 {
     return m_notation;
+}
+
+void Options::setNotation(const QString &notation)
+{
+    m_notation = notation;
 }

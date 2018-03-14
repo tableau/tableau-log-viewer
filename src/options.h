@@ -31,18 +31,41 @@ public:
         return options;
     }
     void ReadSettings();
+    void WriteSettings();
     void LoadHighlightFilter(const QString& filterName);
 
-    QStringList getSkippedText();
-    QBitArray getSkippedState();
-    bool getVisualizationServiceEnable();
-    QString getVisualizationServiceURL();
-    QString getDiffToolPath();
-    bool getFutureTabsUnderLive();
-    bool getCaptureAllTextFiles();
-    QString getDefaultFilterName();
+    QStringList getSkippedText() const;
+    void setSkippedText(const QStringList& skippedText);
+
+    QBitArray getSkippedState() const;
+    void setSkippedState(const QBitArray& skippedState);
+
+    bool getVisualizationServiceEnable() const;
+    void setVisualizationServiceEnable(const bool visualizationServiceEnable);
+
+    QString getVisualizationServiceURL() const;
+    void setVisualizationServiceURL(const QString& visualizationServiceURL);
+
+    QString getDiffToolPath() const;
+    void setDiffToolPath(const QString& diffToolPath);
+
+    bool getFutureTabsUnderLive() const;
+    void setFutureTabsUnderLive(const bool futureTabsUnderLive);
+
+    bool getCaptureAllTextFiles() const;
+    void setCaptureAllTextFiles(const bool captureAllTextFiles);
+
+    QString getDefaultFilterName() const;
+    void setDefaultFilterName(const QString& defaultFilterName);
+
     HighlightOptions getDefaultHighlightOpts();
+
     int getSyntaxHighlightLimit() const;
-    QString getTheme();
-    QString getNotation();
+    void setSyntaxHighlightLimit(const int syntaxHighlightLimit);
+
+    QString getTheme() const;
+    void setTheme(const QString& theme);
+
+    QString getNotation() const;
+    void setNotation(const QString& notation);
 };

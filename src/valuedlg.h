@@ -48,6 +48,7 @@ private:
     QUrl GetVisualizeURL(QNetworkReply * const reply);
     void UploadQuery();
     void VisualizeQuery();
+    void SetWrapping(const bool wrapText);
 
     Ui::ValueDlg *ui;
     QString m_queryXML;
@@ -58,4 +59,5 @@ private:
 
     static QByteArray sm_savedGeometry;
     static qreal sm_savedFontPointSize;
+    static bool sm_savedWrapText;
 };
