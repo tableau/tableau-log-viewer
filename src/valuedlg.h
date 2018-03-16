@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QDialog>
+#include <QJsonValue>
+#include "qjsonutils.h"
 class QNetworkReply;
 class QSettings;
 class QWebEngineView;
@@ -16,22 +18,20 @@ class ValueDlg : public QDialog
 public:
     explicit ValueDlg(QWidget *parent = 0);
     ~ValueDlg();
-    void SetText(QString value, bool sqlHighlight);
-    void SetQuery(QString queryXML);
+    void SetContent(QString id, QString key, QJsonValue value);
 
     static void WriteSettings(QSettings& settings);
     static void ReadSettings(QSettings& settings);
 
-    QString m_id;
-    QString m_key;
-
 protected:
+    void UpdateValueBox();
     void reject() override;
 
 private slots:
     void on_visualizeButton_clicked();
     void on_wrapTextCheck_clicked();
     void on_prevButton_clicked();
+    void on_notationComboBox_currentIndexChanged(const QString& newValue);
     void on_nextButton_clicked();
     void on_uploadFinished(QNetworkReply*);
     void on_loadFinished(bool);
@@ -43,7 +43,6 @@ signals:
     void prev();
 
 private:
-    QString Process(QString in);
     QUrl GetUploadURL();
     QUrl GetVisualizeURL(QNetworkReply * const reply);
     void UploadQuery();
@@ -51,7 +50,10 @@ private:
     void SetWrapping(const bool wrapText);
 
     Ui::ValueDlg *ui;
-    QString m_queryXML;
+    QString m_id;
+    QString m_key;
+    QString m_queryPlan;
+    QJsonValue m_value;
     bool m_visualizationServiceEnable;
     QString m_visualizationServiceURL;
     QWebEngineView *m_view;
@@ -60,4 +62,5 @@ private:
     static QByteArray sm_savedGeometry;
     static qreal sm_savedFontPointSize;
     static bool sm_savedWrapText;
+    static QJsonUtils::Notation sm_notation;
 };

@@ -22,6 +22,7 @@
 QByteArray ValueDlg::sm_savedGeometry { QByteArray() };
 qreal ValueDlg::sm_savedFontPointSize { 0 };
 bool ValueDlg::sm_savedWrapText { true };
+QJsonUtils::Notation ValueDlg::sm_notation { QJsonUtils::Notation::YAML };
 
 ValueDlg::ValueDlg(QWidget *parent) :
     QDialog(parent),
@@ -50,17 +51,23 @@ ValueDlg::ValueDlg(QWidget *parent) :
     QShortcut *shortcutMinus = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
     connect(shortcutMinus, &QShortcut::activated, this, &ValueDlg::on_zoomOut);
 
-    m_queryXML = QString("");
+    m_id = QString("");
+    m_key = QString("");
+    m_queryPlan = QString("");
     Options& options = Options::GetInstance();
     m_visualizationServiceEnable = options.getVisualizationServiceEnable();
     m_visualizationServiceURL = options.getVisualizationServiceURL();
-    m_id = QString("");
-    m_key = QString("");
 
     ui->prevButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-previous.png")));
     ui->nextButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-next.png")));
     ui->wrapTextCheck->setChecked(sm_savedWrapText);
     SetWrapping(sm_savedWrapText);
+
+    {
+        const QSignalBlocker blocker(ui->notationComboBox);
+        ui->notationComboBox->addItems(QJsonUtils::GetNotationNames());
+        ui->notationComboBox->setCurrentText(QJsonUtils::GetNameForNotation(sm_notation));
+    }
 
     QFile sqlsyntaxcss(":/sqlsyntax.css");
     sqlsyntaxcss.open(QIODevice::ReadOnly);
@@ -89,7 +96,7 @@ void ValueDlg::on_zoomOut()
     ui->textEdit->zoomOut(1);
 }
 
-QString ValueDlg::Process(QString in)
+static QString HighlightSyntax(QString in)
 {
     in = in.replace("; ", "\n");
     Tokenizer sqlLexer;
@@ -137,20 +144,71 @@ QString ValueDlg::Process(QString in)
     return out;
 }
 
-void ValueDlg::SetText(QString value, bool sqlHighlight)
+void ValueDlg::SetContent(QString id, QString key, QJsonValue value)
 {
-    ///TODO: If we add multiple highlighters in the future, consider changing the sqlHighlight bool to an enum, that way we still only have 1 param for multiple syntax highlighters.
-    QTextCursor * cursor = new QTextCursor(ui->textEdit->document());
-    ui->textEdit->clear();
+    m_id = id;
+    m_key = key;
+    m_value = value;
 
-    if (sqlHighlight)
+    setWindowTitle(QString("ID: %1 - Key: %2").arg(m_id, m_key));
+
+    UpdateValueBox();
+
+    // Recognize query plans
+    m_queryPlan = "";
+    if (value.isObject()) {
+        if (m_key.startsWith("logical-query") ||
+            m_key == "federate-query" ||
+            m_key == "remote-query-planning" ||
+            m_key == "begin-query" ||
+            m_key == "end-query")
+        {
+            // Assume that queries starting with < have query function trees or logical-query.
+            // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
+            auto queryText = value.toObject()["query"].toString();
+            if (queryText.startsWith("<"))
+            {
+                m_queryPlan = queryText;
+            }
+        }
+        else if (m_key == "query-plan" || m_key == "optimizer-step")
+        {
+            auto plan = value.toObject()["plan"];
+            if (plan.isObject()) {
+                QJsonDocument doc(plan.toObject());
+                m_queryPlan = doc.toJson(QJsonDocument::Compact);
+            }
+        }
+    }
+    // Setup UI for query plan
+    if (!m_queryPlan.isEmpty())
     {
-        QString htmlText(QString("<body>") + Process(value) + QString("</body>"));
-        cursor->insertHtml(htmlText);
+        ui->visualizeButton->setEnabled(true);
+        ui->visualizeLabel->setText("");
     }
     else
     {
-        cursor->insertText(value);
+        ui->visualizeButton->setEnabled(false);
+        ui->visualizeLabel->setText("Nothing to visualize");
+    }
+}
+
+void ValueDlg::UpdateValueBox() {
+    QString value = QJsonUtils::Format(m_value, sm_notation);
+
+    int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
+    bool syntaxHighlight = (m_key != "msg" &&
+                            !m_key.isEmpty() &&
+                            syntaxHighlightLimit &&
+                            value.size() <= syntaxHighlightLimit);
+    if (syntaxHighlight)
+    {
+        QString htmlText(QString("<body>") + HighlightSyntax(value) + QString("</body>"));
+        ui->textEdit->setHtml(htmlText);
+    }
+    else
+    {
+        ui->textEdit->setPlainText(value);
     }
     ui->textEdit->moveCursor(QTextCursor::Start);
     ui->textEdit->ensureCursorVisible();
@@ -171,6 +229,12 @@ void ValueDlg::on_wrapTextCheck_clicked()
     SetWrapping(ui->wrapTextCheck->isChecked());
 }
 
+void ValueDlg::on_notationComboBox_currentIndexChanged(const QString& newValue)
+{
+    sm_notation = QJsonUtils::GetNotationFromName(newValue);
+    UpdateValueBox();
+}
+
 void ValueDlg::SetWrapping(const bool wrapText)
 {
     sm_savedWrapText = wrapText;
@@ -181,21 +245,6 @@ void ValueDlg::SetWrapping(const bool wrapText)
     else
     {
         ui->textEdit->setLineWrapMode(QTextEdit::NoWrap);
-    }
-}
-
-void ValueDlg::SetQuery(QString queryXML)
-{
-    m_queryXML = queryXML;
-    if (!m_queryXML.isEmpty())
-    {
-        ui->visualizeButton->setEnabled(true);
-        ui->visualizeLabel->setText("");
-    }
-    else
-    {
-        ui->visualizeButton->setEnabled(false);
-        ui->visualizeLabel->setText("Nothing to visualize");
     }
 }
 
@@ -222,7 +271,7 @@ void ValueDlg::UploadQuery()
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"queryfile\"; filename=\"yeah.xml\""));
     filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
 
-    filePart.setBody(m_queryXML.toUtf8());
+    filePart.setBody(m_queryPlan.toUtf8());
 
     multipart->append(filePart);
 
@@ -293,7 +342,7 @@ void ValueDlg::VisualizeQuery()
     // Reload the view one time to work around a Qt bug causing left justified alignment
     m_reload = true;
     connect(m_view, &QWebEngineView::loadFinished, this, &ValueDlg::on_loadFinished);
-    m_view->load(QUrl("qrc:///query-graphs/query-graphs.tlv.html?inline=" + QUrl::toPercentEncoding(m_queryXML)));
+    m_view->load(QUrl("qrc:///query-graphs/query-graphs.tlv.html?inline=" + QUrl::toPercentEncoding(m_queryPlan)));
 }
 
 void ValueDlg::on_loadFinished(bool loaded)
@@ -329,6 +378,7 @@ void ValueDlg::WriteSettings(QSettings& settings)
     settings.setValue("geometry", sm_savedGeometry);
     settings.setValue("fontPointSize", sm_savedFontPointSize);
     settings.setValue("wrapText", sm_savedWrapText);
+    settings.setValue("notation", QJsonUtils::GetNameForNotation(sm_notation));
     settings.endGroup();
 }
 
@@ -338,5 +388,6 @@ void ValueDlg::ReadSettings(QSettings& settings)
     sm_savedGeometry = settings.value("geometry").toByteArray();
     sm_savedFontPointSize = settings.value("fontPointSize").toReal();
     sm_savedWrapText = settings.value("wrapText").toBool();
+    sm_notation = QJsonUtils::GetNotationFromName(settings.value("notation").toString());
     settings.endGroup();
 }

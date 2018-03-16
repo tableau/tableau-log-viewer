@@ -343,11 +343,16 @@ QJsonObject TreeModel::GetEvent(QModelIndex idx) const
     }
 }
 
-QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFormat) const
+
+QJsonValue TreeModel::GetConsolidatedEventContent(QModelIndex idx) const
 {
     QJsonObject eventObj = GetEvent(idx);
-    QJsonValue valueObj = ConsolidateValueAndActivity(eventObj);
-    return JsonToString(valueObj, singleLineFormat);
+    return ConsolidateValueAndActivity(eventObj);
+}
+
+QString TreeModel::GetValueFullString(const QModelIndex& idx, bool singleLineFormat) const
+{
+    return JsonToString(GetConsolidatedEventContent(idx), singleLineFormat);
 }
 
 TABTYPE TreeModel::TabType() const
