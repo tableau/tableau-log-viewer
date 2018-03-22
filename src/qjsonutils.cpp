@@ -82,9 +82,20 @@ QJsonUtils::Notation QJsonUtils::GetNotationFromName(const QString& notationName
     }
     else
     {
-        qWarning() << "Invalid notation requested, defaulting to YAML";
+        qWarning() << "Invalid notation" << notationName << "requested, defaulting to YAML";
         return QJsonUtils::Notation::YAML;
     }
+}
+
+QString QJsonUtils::GetNameForNotation(Notation notation)
+{
+    for (auto it = notationNamesMap.begin(); it != notationNamesMap.end(); ++it) {
+        if (it.value() == notation) {
+            return it.key();
+        }
+    }
+    qWarning() << "Unhandled notation in GetNameForNotation";
+    return "";
 }
 
 namespace

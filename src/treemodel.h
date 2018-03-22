@@ -68,6 +68,7 @@ public:
     void ShowDeltas(qint64 delta);
     bool IsHighlightedRow(int row) const;
     QJsonObject GetEvent(QModelIndex idx) const;
+    QJsonValue GetConsolidatedEventContent(QModelIndex idx) const;
     QString GetValueFullString(const QModelIndex& idx, bool singleLineFormat = false) const;
     TABTYPE TabType() const;
     void SetTabType(TABTYPE type);

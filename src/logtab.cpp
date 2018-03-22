@@ -589,46 +589,11 @@ void LogTab::ShowDetails(const QModelIndex& idx, ValueDlg& valueDlg)
 {
     auto item_model = idx.model();
     auto idx_key = item_model->index(idx.row(), COL::Key, idx.parent());
-    QString value = m_treeModel->GetValueFullString(idx);
-
     auto idx_id = item_model->index(idx.row(), COL::ID, idx.parent());
-    valueDlg.m_id = idx_id.data().toString();
-    valueDlg.m_key = idx_key.data().toString();
-
-    valueDlg.setWindowTitle(QString("ID: %1 - Key: %2").arg(valueDlg.m_id, valueDlg.m_key));
-    int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
-    bool syntaxHighlight = (valueDlg.m_key != "msg" &&
-                            !valueDlg.m_key.isEmpty() &&
-                            syntaxHighlightLimit &&
-                            value.size() <= syntaxHighlightLimit);
-    valueDlg.SetText(value, syntaxHighlight);
-    valueDlg.SetQuery(QString(""));
-
-    if (valueDlg.m_key.startsWith("logical-query") ||
-        valueDlg.m_key == "federate-query" ||
-        valueDlg.m_key == "remote-query-planning" ||
-        valueDlg.m_key == "begin-query" ||
-        valueDlg.m_key == "end-query")
-    {
-        // Assume that queries starting with < have query function trees or logical-query.
-        // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
-        auto queryText = m_treeModel->GetChildValueString(idx, QString("query"));
-        if (queryText.startsWith("<"))
-        {
-            valueDlg.SetQuery(queryText);
-        }
-    }
-    else if (valueDlg.m_key == "query-plan" || valueDlg.m_key == "optimizer-step")
-    {
-        auto event = m_treeModel->GetEvent(idx);
-        auto valObject = event["v"].toObject();
-        if (valObject.contains("plan")) {
-           auto planObject = valObject["plan"].toObject();
-           QJsonDocument doc(planObject);
-           QString jsonString(doc.toJson(QJsonDocument::Compact));
-           valueDlg.SetQuery(jsonString);
-        }
-    }
+    auto id = idx_id.data().toString();
+    auto key = idx_key.data().toString();
+    auto eventContent = m_treeModel->GetConsolidatedEventContent(idx);
+    valueDlg.SetContent(id,key,eventContent);
 }
 
 void LogTab::ShowItemDetails(const QModelIndex& idx)
