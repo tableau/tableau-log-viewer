@@ -171,7 +171,7 @@ void ValueDlg::SetContent(QString id, QString key, QJsonValue value)
                 m_queryPlan = queryText;
             }
         }
-        else if (m_key == "query-plan" || m_key == "optimizer-step")
+        else if (m_key.startsWith("query-plan") || m_key == "optimizer-step")
         {
             auto plan = value.toObject()["plan"];
             if (plan.isObject()) {
