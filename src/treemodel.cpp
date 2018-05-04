@@ -454,10 +454,12 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::Site, event["site"].toString());
     child->SetData(COL::User, event["user"].toString());
     child->SetData(COL::Key, event["k"].toString());
+    bool hasArtData = false;
     if (event.contains("a"))
     {
         // u25CF = BLACK CIRCLE
         child->SetData(COL::ART, QStringLiteral("\u25CF"));
+        hasArtData = true;
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
@@ -471,6 +473,15 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     // calculate "Elapsed"
     if (child->Parent() == m_rootItem)
     {
+        if (hasArtData)
+        {
+            QJsonObject artObject = event["a"].toObject();
+            if (artObject.contains("elapsed"))
+            {
+                child->SetData(COL::Elapsed, artObject["elapsed"].toDouble());
+                return;
+            }
+        }
         for (int i = 0; i < child->ChildCount(); i++)
         {
             auto c = child->Child(i);
@@ -478,13 +489,13 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
             {
                 auto val = c->Data(COL::Value);
                 child->SetData(COL::Elapsed, val.toDouble());
-                break;
+                return;
             }
             else if (c->Data(COL::Key) == "elapsedMs" || c->Data(COL::Key) == "elapsed-ms")
             {
                 auto val = c->Data(COL::Value);
                 child->SetData(COL::Elapsed, val.toDouble() / 1000);
-                break;
+                return;
             }
         }
     }
