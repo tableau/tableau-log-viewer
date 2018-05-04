@@ -454,12 +454,11 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::Site, event["site"].toString());
     child->SetData(COL::User, event["user"].toString());
     child->SetData(COL::Key, event["k"].toString());
-    bool hasArtData = false;
-    if (event.contains("a"))
+    bool hasArtData = event.contains("a");
+    if (hasArtData)
     {
         // u25CF = BLACK CIRCLE
         child->SetData(COL::ART, QStringLiteral("\u25CF"));
-        hasArtData = true;
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
