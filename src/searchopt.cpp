@@ -28,6 +28,7 @@ bool SearchOpt::HasMatch(QString value)
             QRegularExpression regex(m_value, m_matchCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
             return regex.isValid() && regex.match(value).hasMatch();
     }
+    return false;
 }
 
 static QMap<COL, QString> mapColToString{
