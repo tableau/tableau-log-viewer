@@ -703,7 +703,7 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
     int seconds = (msecs-(minutes*1000*60)-(hours*1000*60*60))/1000;
     int milliseconds = msecs-(seconds*1000)-(minutes*1000*60)-(hours*1000*60*60);
 
-    return QString("%1%2:%3:%4:%5")
+    return QString("%1%2:%3:%4.%5")
         .arg(isNegative ? "-" : "")
         .arg(hours, 2, 10, QLatin1Char('0'))
         .arg(minutes, 2, 10, QLatin1Char('0'))
