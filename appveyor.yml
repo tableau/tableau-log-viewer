@@ -1,13 +1,13 @@
 install:
-- set QTHOME=C:\Qt\latest\msvc2013_64
+- set QTHOME=C:\Qt\latest\msvc2015_64
 - set BUILDDIR=build-release
 - set PATH=%QTHOME%\bin;%PATH%
 build_script:
-- '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64'
-- dir C:\Qt\latest
+- dir /b "C:\Program Files (x86)\Microsoft Visual Studio*"
 - dir %QTHOME%
 - dir %QTHOME%\bin\qm*
+- '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64'
 - mkdir %BUILDDIR%
 - cd /d %BUILDDIR%
-- qmake.exe -spec win32-msvc2013 CONFIG+=x86_64 -Wall ..\src\tableau-log-viewer.pro
+- qmake.exe -spec win32-msvc2015 CONFIG+=x86_64 -Wall ..\src\tableau-log-viewer.pro
 - nmake
