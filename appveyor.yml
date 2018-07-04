@@ -3,9 +3,7 @@ install:
 - set BUILDDIR=build-release
 - set PATH=%QTHOME%\bin;%PATH%
 build_script:
-- dir /b "C:\Program Files (x86)\Microsoft Visual Studio*"
-- dir %QTHOME%
-- dir %QTHOME%\bin\qm*
+- dir %QTHOME%\mkspecs
 - '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64'
 - mkdir %BUILDDIR%
 - cd /d %BUILDDIR%
