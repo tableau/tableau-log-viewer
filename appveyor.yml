@@ -1,11 +1,10 @@
 install:
-- set QTHOME=C:\Qt\5.7\msvc2013_64
+- set QTHOME=C:\Qt\latest\msvc2013_64
 - set BUILDDIR=build-release
 - set PATH=%QTHOME%\bin;%PATH%
 build_script:
 - '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64'
-- dir C:\Qt
-- dir C:\Qt\5.7
+- dir C:\Qt\latest
 - dir %QTHOME%
 - dir %QTHOME%\bin\qm*
 - mkdir %BUILDDIR%
