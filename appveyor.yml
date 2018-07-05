@@ -5,10 +5,10 @@ install:
 build_script:
 - dir C:\Qt
 - dir C:\Qt\5.11
-- dir %QTHOME%
-- dir %QTHOME%\mkspecs\
 - dir "C:\Program Files (x86)\Microsoft Visual Studio*"
 - dir "C:\Program Files (x86)\Microsoft Visual Studio\2017"
+- dir %QTHOME%
+- dir %QTHOME%\mkspecs\
 - '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64'
 - mkdir %BUILDDIR%
 - cd /d %BUILDDIR%
