@@ -1,3 +1,4 @@
+image: Visual Studio 2017
 install:
 - set QTHOME=C:\Qt\5.11\msvc2017_64
 - set BUILDDIR=build-release
