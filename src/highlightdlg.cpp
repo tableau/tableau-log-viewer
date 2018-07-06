@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QString>
 #include <QKeyEvent>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QWidget>
 #include <QGroupBox>

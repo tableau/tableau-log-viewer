@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
 SaveFilterDialog::SaveFilterDialog(QWidget *parent, const HighlightOptions& filters) :
