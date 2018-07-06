@@ -457,8 +457,12 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     bool hasArtData = event.contains("a");
     if (hasArtData)
     {
-        // u25CF = BLACK CIRCLE
+        // u25CF = BLACK CIRCLE; Use QString with MSVC to avoid locale dependent C4566 warning.
+#ifdef Q_CC_MSVC
+        child->SetData(COL::ART, QString::fromUtf16(u"\u25CF"));
+#else
         child->SetData(COL::ART, QStringLiteral("\u25CF"));
+#endif
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
@@ -699,7 +703,7 @@ QString TreeModel::GetDeltaMSecs(QDateTime dateTime) const
     int seconds = (msecs-(minutes*1000*60)-(hours*1000*60*60))/1000;
     int milliseconds = msecs-(seconds*1000)-(minutes*1000*60)-(hours*1000*60*60);
 
-    return QString("%1%2:%3:%4:%5")
+    return QString("%1%2:%3:%4.%5")
         .arg(isNegative ? "-" : "")
         .arg(hours, 2, 10, QLatin1Char('0'))
         .arg(minutes, 2, 10, QLatin1Char('0'))

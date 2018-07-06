@@ -1167,7 +1167,7 @@ void GeQueryInfoViz(TreeModel* model)
             auto strId = model->index(i, COL::ID).data().toString();
             auto strTime = event["ts"].toString();
             auto strElapsed = QString::number(elapsed, 'f', 3);
-            auto beginTime = model->index(i, COL::Time).data(Qt::UserRole).toLongLong() - (elapsed * 1000);
+            auto beginTime = model->index(i, COL::Time).data(Qt::UserRole).toDateTime().toMSecsSinceEpoch() - (elapsed * 1000);
             auto strFile = model->index(i, COL::File).data().toString();
             auto strPid = model->index(i, COL::PID).data().toString();
             auto strValue = model->GetValueFullString(valIndex);
