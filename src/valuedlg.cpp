@@ -212,6 +212,7 @@ void ValueDlg::UpdateValueBox() {
     }
     ui->textEdit->moveCursor(QTextCursor::Start);
     ui->textEdit->ensureCursorVisible();
+    ui->textEdit->repaint();
 }
 
 void ValueDlg::on_nextButton_clicked()
