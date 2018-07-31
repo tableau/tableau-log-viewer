@@ -25,4 +25,6 @@ namespace QJsonUtils
 
     Notation GetNotationFromName(const QString& notationName);
     QString GetNameForNotation(Notation notation);
+
+    bool IsStructured(const QJsonValue& value);
 }

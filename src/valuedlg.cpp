@@ -191,6 +191,9 @@ void ValueDlg::SetContent(QString id, QString key, QJsonValue value)
         ui->visualizeButton->setEnabled(false);
         ui->visualizeLabel->setText("Nothing to visualize");
     }
+
+    ui->notationComboBox->setEnabled(QJsonUtils::IsStructured(value));
+    ui->notationComboBox->repaint();
 }
 
 void ValueDlg::UpdateValueBox() {
@@ -199,6 +202,7 @@ void ValueDlg::UpdateValueBox() {
     int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
     bool syntaxHighlight = (m_key != "msg" &&
                             !m_key.isEmpty() &&
+                            QJsonUtils::IsStructured(m_value) &&
                             syntaxHighlightLimit &&
                             value.size() <= syntaxHighlightLimit);
     if (syntaxHighlight)
@@ -208,7 +212,13 @@ void ValueDlg::UpdateValueBox() {
     }
     else
     {
-        ui->textEdit->setPlainText(value);
+        // Toggling between "setHtml" and "setPlainText" still winds up formatting
+        // the "plain text" based on the previous HTML contents. The simplest way
+        // to keep it "plain" appears to be to just keep it HTML and omit the styling.
+        // (alternatively, we could explicitly use setTextColor to make it black..
+        //  but that might not play well with themes?)
+        QString htmlText(QString("<body><span>%1</span></body>").arg(value));
+        ui->textEdit->setHtml(htmlText);
     }
     ui->textEdit->moveCursor(QTextCursor::Start);
     ui->textEdit->ensureCursorVisible();
