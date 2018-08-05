@@ -26,7 +26,21 @@ namespace
 QString QJsonUtils::Format(const QJsonValue& jsonValue, Notation format, LineFormat lineFormat)
 {
     bool isSingleLine = (lineFormat == LineFormat::SingleLine);
-    if (format == Notation::Flat)
+
+    if (jsonValue.isString())
+    {
+        QString result = jsonValue.toString().trimmed();
+        if (isSingleLine)
+            result = result.replace("\n", " ");
+        return result;
+    }
+    else if (!IsStructured(jsonValue))
+    {
+        QString result;
+        GetJsonLiteral(jsonValue, result);
+        return result;
+    }
+    else if (format == Notation::Flat)
     {
         QVector<QString> stringList;
         GetFlatNotation("", jsonValue, stringList);
@@ -410,4 +424,9 @@ namespace
         }
         return true;
     }
+}
+
+bool QJsonUtils::IsStructured(const QJsonValue &value)
+{
+    return value.isObject() || value.isArray();
 }
