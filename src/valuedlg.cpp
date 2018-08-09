@@ -96,6 +96,17 @@ void ValueDlg::on_zoomOut()
     ui->textEdit->zoomOut(1);
 }
 
+static QString MakeHTMLSafe(QString input)
+{
+    auto output = input.toHtmlEscaped();
+    // Use HTML safe spacing
+    output.replace(" ", "&nbsp;");
+    output.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+    output.replace("\n", "<br>");
+
+    return output;
+}
+
 static QString HighlightSyntax(QString in)
 {
     in = in.replace("; ", "\n");
@@ -128,11 +139,7 @@ static QString HighlightSyntax(QString in)
     for (Tokenizer::Token token : tokens)
     {
         QString word = in.mid(token.start, token.length);
-        word = word.toHtmlEscaped();
-        // Use HTML safe spacing
-        word.replace(" ", "&nbsp;");
-        word.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-        word.replace("\n", "<br>");
+        word = MakeHTMLSafe(word);
         if(token.type != prevType)
         {
             out += "</span><span class=\"" + TokenTypeToCSSClass[token.type] + "\">";
@@ -217,7 +224,7 @@ void ValueDlg::UpdateValueBox() {
         // to keep it "plain" appears to be to just keep it HTML and omit the styling.
         // (alternatively, we could explicitly use setTextColor to make it black..
         //  but that might not play well with themes?)
-        QString htmlText(QString("<body><span>%1</span></body>").arg(value));
+        QString htmlText(QString("<body><span>%1</span></body>").arg(MakeHTMLSafe(value)));
         ui->textEdit->setHtml(htmlText);
     }
     ui->textEdit->moveCursor(QTextCursor::Start);
