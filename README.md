@@ -7,7 +7,7 @@
 
 Tableau Log Viewer is cross-platform tool with a simple interface that has a single purpose of making it easy to quickly glance over Tableau log files.
 
-![TLV Screenshot](https://cloud.githubusercontent.com/assets/1087437/19377630/b1ca0d56-919c-11e6-9c01-200697c37194.png "TLV running on Windows 10")
+![TLV Screenshot](https://user-images.githubusercontent.com/1087437/45051694-a6a11880-b039-11e8-8028-969eb68e7c2b.png "TLV running on Windows 10")
 
 Overview
 ---------------
