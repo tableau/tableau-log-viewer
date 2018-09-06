@@ -457,12 +457,8 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     bool hasArtData = event.contains("a");
     if (hasArtData)
     {
-        // u25CF = BLACK CIRCLE; Use QString with MSVC to avoid locale dependent C4566 warning.
-#ifdef Q_CC_MSVC
-        child->SetData(COL::ART, QString::fromUtf16(u"\u25CF"));
-#else
-        child->SetData(COL::ART, QStringLiteral("\u25CF"));
-#endif
+        // 0xE2978F = BLACK CIRCLE
+        child->SetData(COL::ART, QString::fromUtf8("\xE2\x97\x8F"));
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
