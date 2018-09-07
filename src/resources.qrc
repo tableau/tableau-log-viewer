@@ -28,6 +28,7 @@
         <file alias="ctx-find.png">../resources/images/ctx-find.png</file>
         <file alias="ctx-summary.png">../resources/images/ctx-summary.png</file>
         <file alias="ctx-livecapture.png">../resources/images/ctx-livecapture.png</file>
+        <file alias="ctx-add.png">../resources/images/ctx-add.png</file>
         <file alias="value-next.png">../resources/images/value-next.png</file>
         <file alias="value-previous.png">../resources/images/value-previous.png</file>
         <file alias="query-graphs/query-graphs.tlv.html">../resources/query-graphs/query-graphs.tlv.html</file>
@@ -57,6 +58,7 @@
         <file alias="ctx-find.png">../resources/images/darktheme/ctx-find.png</file>
         <file alias="ctx-summary.png">../resources/images/darktheme/ctx-summary.png</file>
         <file alias="ctx-livecapture.png">../resources/images/darktheme/ctx-livecapture.png</file>
+        <file alias="ctx-add.png">../resources/images/darktheme/ctx-add.png</file>
         <file alias="value-next.png">../resources/images/darktheme/value-next.png</file>
         <file alias="value-previous.png">../resources/images/darktheme/value-previous.png</file>
     </qresource>
