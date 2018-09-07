@@ -1,12 +1,14 @@
 #include "highlightdlg.h"
 #include "ui_highlightdlg.h"
 #include "column.h"
+#include "themeutils.h"
 
 #include <QDebug>
 #include <QString>
 #include <QKeyEvent>
 #include <QTabBar>
 #include <QTabWidget>
+#include <QToolButton>
 #include <QWidget>
 #include <QGroupBox>
 #include <QCheckBox>
@@ -23,6 +25,13 @@ HighlightDlg::HighlightDlg(QWidget *parent, HighlightOptions highlightOpts, cons
 
     // Remove close button of the Help tab.
     ui->tabWidget->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
+
+    // Create a button to Add new highlight filters
+    QToolButton* newTabButton = new QToolButton(this);
+    ui->tabWidget->setCornerWidget(newTabButton);
+    newTabButton->setToolTip("Add filter");
+    newTabButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/ctx-add.png")));
+    connect(newTabButton, &QToolButton::clicked, this, &HighlightDlg::AddNewTab);
 
     connect(this, &QDialog::accepted, this, &HighlightDlg::accepted);
     BuildTabs(highlightOpts);
