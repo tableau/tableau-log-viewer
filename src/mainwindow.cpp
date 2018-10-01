@@ -922,19 +922,18 @@ void ShowSummary(TreeModel* model, QWidget* parent)
     };
 
     QString beginQueryEventKey = "begin-query";
-    bool foundAQuery = false;
-    for (int i = 0; i < model->rowCount() && !foundAQuery; i++)
+    for (int i = 0; i < model->rowCount(); i++)
     {
         QModelIndex valIndex = model->index(i, COL::Value);
         QString keyString = model->GetEvent(valIndex)["k"].toString();
         if (keyString == "begin-query")
         {
-            foundAQuery = true;
+            break;
         }
         else if (keyString == "begin-protocol.query")
         {
-            foundAQuery = true;
             beginQueryEventKey = "begin-protocol.query";
+            break;
         }
     }
 
