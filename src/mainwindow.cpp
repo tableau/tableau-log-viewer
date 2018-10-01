@@ -921,11 +921,28 @@ void ShowSummary(TreeModel* model, QWidget* parent)
         std::unique_ptr<CounterMap> SubCounters;
     };
 
+    QString beginQueryEventKey = "begin-query";
+    bool foundAQuery = false;
+    for (int i = 0; i < model->rowCount() && !foundAQuery; i++)
+    {
+        QModelIndex valIndex = model->index(i, COL::Value);
+        QString keyString = model->GetEvent(valIndex)["k"].toString();
+        if (keyString == "begin-query")
+        {
+            foundAQuery = true;
+        }
+        else if (keyString == "begin-protocol.query")
+        {
+            foundAQuery = true;
+            beginQueryEventKey = "begin-protocol.query";
+        }
+    }
+
     SummaryCounter counters[] {
         { "Workbook opened", "command-post", "tabui:open-workbook", 0, nullptr },
         { "Query batch", "qp-batch-summary", nullptr, 0, nullptr },
-        { "Query", "begin-query", nullptr, 0, nullptr },
-        { "Query category", "begin-query", "query-category", 0, std::make_unique<CounterMap>() },
+        { "Query", beginQueryEventKey, nullptr, 0, nullptr },
+        { "Query category", beginQueryEventKey, "query-category", 0, std::make_unique<CounterMap>() },
     };
 
     const int rowCount = model->rowCount();

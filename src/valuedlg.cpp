@@ -168,7 +168,9 @@ void ValueDlg::SetContent(QString id, QString key, QJsonValue value)
             m_key == "federate-query" ||
             m_key == "remote-query-planning" ||
             m_key == "begin-query" ||
-            m_key == "end-query")
+            m_key == "begin-protocol.query" ||
+            m_key == "end-query" ||
+            m_key == "end-protocol.query")
         {
             // Assume that queries starting with < have query function trees or logical-query.
             // They normally start with "<?xml ...>", "<sqlproxy>" or "<query-function ...>"
