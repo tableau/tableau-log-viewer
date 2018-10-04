@@ -20,7 +20,7 @@ html, body {
   font-size: 13px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.85);
   padding: 12px;
   border: thin solid #eee;
   border-radius: 5px;
@@ -150,7 +150,7 @@ html, body {
   font-size: 13px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.85);
   padding: 12px;
   border: thin solid #eee;
   border-radius: 5px;
@@ -173,6 +173,19 @@ html, body {
   fill: none;
   stroke: #ccc;
   stroke-width: 1;
+}
+
+.crosslink {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 0.5;
+  stroke-dasharray: 4 4;
+}
+
+.crosslink-highlighted {
+  fill: none;
+  stroke: hsl(309, 84%, 36%);
+  stroke-width: 1.0;
 }
 
 .link-and-arrow {
@@ -233,6 +246,8 @@ rect.table-border {
 }
 text.table-text {
   text-anchor: middle;
+  font-size: 7px;
+  font-weight: bold;
   font-family: Monaco, Consolas, monospace;
   stroke: none;
   fill: hsl(0, 0%, 40%);
