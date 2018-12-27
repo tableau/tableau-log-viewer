@@ -15,6 +15,7 @@ enum COL : short {
     User,
     Key,
     ART,
+    ErrorCode,
     Value
 };
 
@@ -33,6 +34,7 @@ inline const char* GetColumnName(COL column) {
        case User: return "User";
        case Key: return "Key";
        case ART: return "ART";
+       case ErrorCode: return "Error Code";
        case Value: return "Value";
     }
     return "unknown column";
