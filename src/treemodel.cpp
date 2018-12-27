@@ -644,8 +644,6 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
 
         if (eventObject.contains("v") && eventObject["v"].type() == QJsonValue::Object)
             obj = eventObject["v"].toObject();
-        else if (eventObject.contains("v") && eventObject["v"].type() == QJsonValue::String)
-            obj["v"]=eventObject["v"];
         else
             obj["v"]=eventObject["v"]; // Create new object with "v"
 
