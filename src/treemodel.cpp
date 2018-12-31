@@ -647,13 +647,13 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
         else
             obj["v"]=eventObject["v"]; // Create new object with "v"
 
-        if (eventObject.contains("a")) {
+        if (hasART) {
             // Using "~art" key so that it appears at the end, otherwise "a" is likely
             // to be the first (alphabetical order) and steals the screen
             obj["~art"] = eventObject["a"];
         }
 
-        if (eventObject.contains("e")) {
+        if (hasErrorCode) {
             obj["~errorcode"] = eventObject["e"];
         }
 
