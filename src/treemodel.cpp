@@ -476,8 +476,8 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     }
     if (hasErrorCode)
     {
-        // 0xE2978F = BLACK CIRCLE
-        child->SetData(COL::ErrorCode, QString::fromUtf8("\xE2\x97\x8F"));
+        // 0xE296A0 = BLACK SQUARE
+        child->SetData(COL::ErrorCode, QString::fromUtf8("\xE2\x96\xA0"));
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
