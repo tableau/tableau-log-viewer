@@ -35,7 +35,7 @@ void LogTab::InitTreeView(const EventListPtr events)
 {
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
-    QStringList headers = QString("ID;File;Time;Elapsed;PID;TID;Severity;Request;Session;Site;User;Key;ART;Value").split(";");
+    QStringList headers = QString("ID;File;Time;Elapsed;PID;TID;Severity;Request;Session;Site;User;Key;ART;Error Code;Value").split(";");
 
     // The parent of the model is this widget. The model will get destroyed when the widget is destroyed
     m_treeModel = new TreeModel(headers, events, this);
@@ -68,6 +68,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     SetColumn(COL::User, 30, true);
     SetColumn(COL::Key, 120, hasNoKey);
     SetColumn(COL::ART, 30, hasNoKey);
+    SetColumn(COL::ErrorCode, 30, hasNoKey);
     ui->treeView->SetAutoResizeColumns({COL::Time, COL::Elapsed});
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);

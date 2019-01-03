@@ -129,6 +129,15 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                 }
                 return "ART data not available";
             }
+            else if (col == COL::ErrorCode)
+            {
+                QJsonObject eventObj = GetEvent(index);
+                if (eventObj.contains("e"))
+                {
+                    return JsonToString(eventObj["e"], false);
+                }
+                return "Error code not available";
+            }
             else
             {
                 TreeItem* item = GetItem(index);
@@ -139,6 +148,10 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         case Qt::TextAlignmentRole:
         {
             if (col == COL::ART)
+            {
+                return Qt::AlignCenter;
+            }
+            if (col == COL::ErrorCode)
             {
                 return Qt::AlignCenter;
             }
@@ -455,10 +468,16 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     child->SetData(COL::User, event["user"].toString());
     child->SetData(COL::Key, event["k"].toString());
     bool hasArtData = event.contains("a");
+    bool hasErrorCode = event.contains("e");
     if (hasArtData)
     {
         // 0xE2978F = BLACK CIRCLE
         child->SetData(COL::ART, QString::fromUtf8("\xE2\x97\x8F"));
+    }
+    if (hasErrorCode)
+    {
+        // 0xE296A0 = BLACK SQUARE
+        child->SetData(COL::ErrorCode, QString::fromUtf8("\xE2\x96\xA0"));
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
@@ -617,26 +636,30 @@ QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine)
 
 QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject) const
 {
-    if (eventObject.contains("v") && eventObject.contains("a"))
-    {
-        if (eventObject["v"].isObject())
-        {
-            // "v" is already an object, add whatever is under "a" as a child
-            QJsonObject obj = eventObject["v"].toObject();
+    bool hasART = eventObject.contains("a");
+    bool hasErrorCode = eventObject.contains("e");
+    
+    if (hasART || hasErrorCode) {
+        QJsonObject obj;
+
+        if (eventObject.contains("v") && eventObject["v"].type() == QJsonValue::Object)
+            obj = eventObject["v"].toObject();
+        else
+            obj["v"]=eventObject["v"]; // Create new object with "v"
+
+        if (hasART) {
             // Using "~art" key so that it appears at the end, otherwise "a" is likely
             // to be the first (alphabetical order) and steals the screen
             obj["~art"] = eventObject["a"];
-            return std::move(obj);
         }
-        else
-        {
-            // "v" is not an object, create a new object and put "v" and "a" as children
-            QJsonObject obj;
-            obj["v"]=eventObject["v"];
-            obj["~art"]=eventObject["a"];
-            return std::move(obj);
+
+        if (hasErrorCode) {
+            obj["~errorcode"] = eventObject["e"];
         }
+
+        return std::move(obj);
     }
+
     return eventObject["v"];
 }
 
