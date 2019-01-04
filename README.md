@@ -5,7 +5,7 @@
 :--|---|---
 **Dev branch** | [![Travis-CI](https://img.shields.io/travis/tableau/tableau-log-viewer/dev.svg?label=Linux%20build)](https://travis-ci.org/tableau/tableau-log-viewer) | [![AppVeyor](https://img.shields.io/appveyor/ci/tableau/tableau-log-viewer/dev.svg?label=Windows%20build)](https://ci.appveyor.com/project/tableau/tableau-log-viewer/branch/dev)
 
-Tableau Log Viewer is cross-platform tool with a simple interface that has a single purpose of making it easy to quickly glance over Tableau log files.
+Tableau Log Viewer is a cross-platform tool with a simple interface that has a single purpose of making it easy to quickly glance over Tableau log files.
 
 ![TLV Screenshot](https://user-images.githubusercontent.com/1087437/45051694-a6a11880-b039-11e8-8028-969eb68e7c2b.png "TLV running on Windows 10")
 
