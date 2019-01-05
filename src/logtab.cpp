@@ -44,7 +44,7 @@ void LogTab::InitTreeView(const EventListPtr events)
     m_bar->ShowMessage(QString("%1 events loaded").arg(QString::number(m_treeModel->rowCount())), 3000);
 
     // Display only time if all events occured on the same day
-    bool multipleDays = true;
+    bool multipleDays = false;
     if (events->size() >= 2) {
        QModelIndex idx = ui->treeView->currentIndex();
        auto firstDatetime = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
