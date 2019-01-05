@@ -652,9 +652,9 @@ void LogTab::ChangePrevIndex()
 
 void NormalizeLogText(QString& logText)
 {
-    std::map<QString, QString> replacements
+    std::vector<std::pair<QString, QString>> replacements
     {
-        {"id: (-)?[\\w+/],", "id: ID"},
+        {"id: (-)?[\\w+/]+,", "id: ID,"},
         {"root: (-)?[\\w+/]+,", "root: ID,"},
         {"sponsor: (-)?[\\w+/]+,", "sponsor: ID,"},
         {"{ e: \\d+, i: \\d+", "{ e: N, i: N"},
@@ -679,13 +679,13 @@ void NormalizeLogText(QString& logText)
         {"federation_\\w{28}", "federation_ID"},
         {"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}", "GUID"},
         {"#Tableau_[\\w_]+_Connect", "#Tableau_ID_Connect"},
-        {"#Tableau_\\d+_GUID_\\d+", "#Tableau_N_GUID_N"},
         {"#Tableau_\\d+_\\d+", "#Tableau_N_N"},
         {"#Tableau_\\d+_[\\d\\w-]+_", "#Tableau_N_ID_"},
+        {"Tableau_\\d+_GUID_\\d+", "Tableau_N_GUID_N"},
+        {"FQ_Temp_\\d+", "FQ_Temp_N"},
         {"[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [AP]M", "TIMESTAMP"},
         {"(\")?tab.domain:\\S+(\")?", "\"tab.endpoint\""},
         {"\"tab.pipe:\\S+\"", "\"tab.endpoint\""},
-        {"i: \\d+; n: \\d+; test: ", "i: N; n: N; test: "},
         {"protocol: [0-9a-f]{12};", "protocol: N;"},
         {"port='\\d+'", "port='N'"},
     };
