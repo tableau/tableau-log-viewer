@@ -209,8 +209,7 @@ void ValueDlg::UpdateValueBox() {
     QString value = QJsonUtils::Format(m_value, sm_notation);
 
     int syntaxHighlightLimit = Options::GetInstance().getSyntaxHighlightLimit();
-    bool syntaxHighlight = (m_key != "msg" &&
-                            !m_key.isEmpty() &&
+    bool syntaxHighlight = (!m_key.isEmpty() &&
                             QJsonUtils::IsStructured(m_value) &&
                             syntaxHighlightLimit &&
                             value.size() <= syntaxHighlightLimit);
