@@ -170,6 +170,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="checkBoxART">
+          <property name="text">
+           <string>ART</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -204,6 +211,13 @@
          <widget class="QCheckBox" name="checkBoxValue">
           <property name="text">
            <string>&amp;Value</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxErrorCode">
+          <property name="text">
+           <string>Error Code</string>
           </property>
          </widget>
         </item>
