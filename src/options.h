@@ -18,6 +18,8 @@ private:
     QString m_diffToolPath;
     bool m_futureTabsUnderLive;
     bool m_captureAllTextFiles;
+    bool m_showArtDataInValue;
+    bool m_showErrorCodeInValue;
     QString m_defaultFilterName;
     HighlightOptions m_defaultHighlightOpts;
     int m_syntaxHighlightLimit;
@@ -54,6 +56,12 @@ public:
 
     bool getCaptureAllTextFiles() const;
     void setCaptureAllTextFiles(const bool captureAllTextFiles);
+
+    bool getShowArtDataInValue() const;
+    void setShowArtDataInValue(const bool showArtDataInValue);
+
+    bool getShowErrorCodeInValue() const;
+    void setShowErrorCodeInValue(const bool showErrorCodeInValue);
 
     QString getDefaultFilterName() const;
     void setDefaultFilterName(const QString& defaultFilterName);
