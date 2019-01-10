@@ -628,10 +628,10 @@ QString TreeModel::JsonToString(const QJsonValue& json, const bool isSingleLine)
 
 QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject) const
 {
-    bool hasART = eventObject.contains("a");
-    bool hasErrorCode = eventObject.contains("e");
+    bool showART = eventObject.contains("a") && Options::GetInstance().getShowArtDataInValue();
+    bool showErrorCode = eventObject.contains("e") && Options::GetInstance().getShowErrorCodeInValue();
     
-    if (hasART || hasErrorCode) {
+    if (showART || showErrorCode) {
         QJsonObject obj;
 
         if (eventObject.contains("v") && eventObject["v"].type() == QJsonValue::Object)
@@ -639,16 +639,13 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
         else
             obj["v"]=eventObject["v"]; // Create new object with "v"
 
-        bool showART = Options::GetInstance().getShowArtDataInValue();
-        bool showErrorCode = Options::GetInstance().getShowErrorCodeInValue();
-
-        if (hasART && showART) {
+        if (showART) {
             // Using "~art" key so that it appears at the end, otherwise "a" is likely
             // to be the first (alphabetical order) and steals the screen
             obj["~art"] = eventObject["a"];
         }
 
-        if (hasErrorCode && showErrorCode) {
+        if (showErrorCode) {
             obj["~errorcode"] = eventObject["e"];
         }
 
