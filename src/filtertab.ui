@@ -172,7 +172,7 @@
         <item>
          <widget class="QCheckBox" name="checkBoxART">
           <property name="text">
-           <string>ART</string>
+           <string>&amp;ART</string>
           </property>
          </widget>
         </item>
@@ -217,7 +217,7 @@
         <item>
          <widget class="QCheckBox" name="checkBoxErrorCode">
           <property name="text">
-           <string>Error Code</string>
+           <string>Err&amp;or Code</string>
           </property>
          </widget>
         </item>
