@@ -46,6 +46,8 @@ void OptionsDlg::WriteSettings()
     options.setDiffToolPath(ui->diffToolPath->text());
     options.setFutureTabsUnderLive(ui->startFutureLiveCapture->isChecked());
     options.setCaptureAllTextFiles(ui->captureAllTextFiles->isChecked());
+    options.setShowArtDataInValue(ui->showArtDataInValue->isChecked());
+    options.setShowErrorCodeInValue(ui->showErrorCodeInValue->isChecked());
     options.setDefaultFilterName(ui->defaultHighlightComboBox->currentText());
     options.setSyntaxHighlightLimit(ui->syntaxHighlightLimitSpinBox->value());
     options.setTheme(ui->themeComboBox->currentText());
@@ -77,6 +79,8 @@ void OptionsDlg::ReadSettings()
     ui->diffToolPath->setText(options.getDiffToolPath());
     ui->startFutureLiveCapture->setChecked(options.getFutureTabsUnderLive());
     ui->captureAllTextFiles->setChecked(options.getCaptureAllTextFiles());
+    ui->showArtDataInValue->setChecked(options.getShowArtDataInValue());
+    ui->showErrorCodeInValue->setChecked(options.getShowErrorCodeInValue());
     ui->syntaxHighlightLimitSpinBox->setValue(options.getSyntaxHighlightLimit());
 
     const auto& themeNames = ThemeUtils::GetThemeNames();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>502</width>
-    <height>529</height>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,6 +196,26 @@
           </property>
           <property name="text">
            <string>Include all text files in directory live capture</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="showArtDataInValue">
+          <property name="toolTip">
+           <string>If ART data is available in an event, an &quot;~art&quot; attribute is added and displayed in the value</string>
+          </property>
+          <property name="text">
+           <string>Show ART data as part of value</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="showErrorCodeInValue">
+          <property name="toolTip">
+           <string>If Error Code is available in an event, an &quot;~errorcode&quot; attribute is added and displayed in the value</string>
+          </property>
+          <property name="text">
+           <string>Show Error Code as part of value</string>
           </property>
          </widget>
         </item>

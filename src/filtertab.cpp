@@ -34,7 +34,9 @@ FilterTab::FilterTab(QWidget *parent, QString valueText, QColor backgroundColor)
         {COL::User,       ui->checkBoxUser},
         {COL::Key,        ui->checkBoxKey},
         {COL::Value,      ui->checkBoxValue},
-        {COL::File,       ui->checkBoxFile}
+        {COL::File,       ui->checkBoxFile},
+        {COL::ART,        ui->checkBoxART},
+        {COL::ErrorCode,  ui->checkBoxErrorCode}
     };
 }
 

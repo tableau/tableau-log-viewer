@@ -42,7 +42,9 @@ static QMap<COL, QString> mapColToString{
     {COL::Session,  "Session"},
     {COL::Site,     "Site"},
     {COL::Key,      "Key"},
-    {COL::Value,    "Value"}
+    {COL::Value,    "Value"},
+    {COL::ART,      "ART"},
+    {COL::ErrorCode,"ErrorCode"}
 };
 
 static QMap<SearchMode, QString> mapModeToString{
@@ -84,7 +86,9 @@ static QMap<QString, COL> mapStringToCol{
     {"Session",  COL::Session},
     {"Site",     COL::Site},
     {"Key",      COL::Key},
-    {"Value",    COL::Value}
+    {"Value",    COL::Value},
+    {"ART",      COL::ART},
+    {"ErrorCode",COL::ErrorCode}
 };
 
 static QMap<QString, SearchMode> mapStringToMode{

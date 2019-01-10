@@ -25,6 +25,8 @@ void Options::ReadSettings()
     m_futureTabsUnderLive = settings.value("enableLiveCapture").toBool();
     m_defaultFilterName = settings.value("defaultHighlightFilter", "None").toString();
     m_captureAllTextFiles = settings.value("liveCaptureAllTextFiles", true).toBool();
+    m_showArtDataInValue = settings.value("showArtDataInValue", false).toBool();
+    m_showErrorCodeInValue = settings.value("showErrorCodeInValue", false).toBool();
     m_syntaxHighlightLimit = settings.value("syntaxHighlightLimit", 15000).toInt();
     m_theme = settings.value("theme", "Native").toString();
     m_notation = settings.value("notation", "YAML").toString();
@@ -54,6 +56,8 @@ void Options::WriteSettings()
     settings.setValue("diffToolPath", m_diffToolPath);
     settings.setValue("enableLiveCapture", m_futureTabsUnderLive);
     settings.setValue("liveCaptureAllTextFiles", m_captureAllTextFiles);
+    settings.setValue("showArtDataInValue", m_showArtDataInValue);
+    settings.setValue("showErrorCodeInValue", m_showErrorCodeInValue);
     settings.setValue("defaultHighlightFilter", m_defaultFilterName);
     settings.setValue("syntaxHighlightLimit", m_syntaxHighlightLimit);
     settings.setValue("theme", m_theme);
@@ -119,6 +123,26 @@ bool Options::getFutureTabsUnderLive() const
 void Options::setFutureTabsUnderLive(const bool futureTabsUnderLive)
 {
     m_futureTabsUnderLive = futureTabsUnderLive;
+}
+
+bool Options::getShowArtDataInValue() const
+{
+    return m_showArtDataInValue;
+}
+
+void Options::setShowArtDataInValue(const bool showArtDataInValue)
+{
+    m_showArtDataInValue = showArtDataInValue;
+}
+
+bool Options::getShowErrorCodeInValue() const
+{
+    return m_showErrorCodeInValue;
+}
+
+void Options::setShowErrorCodeInValue(const bool showErrorCodeInValue)
+{
+    m_showErrorCodeInValue = showErrorCodeInValue;
 }
 
 bool Options::getCaptureAllTextFiles() const

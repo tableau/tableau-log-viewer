@@ -1332,9 +1332,21 @@ void MainWindow::FindImpl(int offset, bool findHighlight)
                 for (COL col : searchOpt.m_keys)
                 {
                     QModelIndex idx = model->index(i, col);
-                    QString data = (col == COL::Value) ?
-                        model->GetValueFullString(idx, true) :
-                        model->data(idx, Qt::DisplayRole).toString();
+                    QString data;
+                    if (col == COL::Value)
+                    {
+                        data = model->GetValueFullString(idx, true);
+                    }
+                    else if (col == COL::ART || col == COL::ErrorCode)
+                    {
+                        // Some columns only display their data in the tool tip
+                        data = model->data(idx, Qt::ToolTipRole).toString();
+                    }
+                    else
+                    {
+                        // Most columns display their data
+                        data = model->data(idx, Qt::DisplayRole).toString();
+                    }
                     if (searchOpt.HasMatch(data))
                     {
                         tree->setCurrentIndex(idx);

@@ -77,7 +77,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         {
             TreeItem* item = GetItem(index);
             return item->Data(col);
-            break;
         }
         case Qt::DisplayRole:
         {
@@ -98,12 +97,25 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                       return GetDeltaMSecs(dateTime);
                 }
             }
+            else if (col == COL::ART)
+            {
+                // Display a black circle if ART data is present
+                // 0xE2978F = BLACK CIRCLE
+                QString blackCircle = QString::fromUtf8("\xE2\x97\x8F");
+                return (item->Data(col).toString().isEmpty()) ? "" : blackCircle;
+            }
+            else if (col == COL::ErrorCode)
+            {
+                // Display a black square if an error code is present
+                // 0xE296A0 = BLACK SQUARE
+                QString blackSquare = QString::fromUtf8("\xE2\x96\xA0");
+                return (item->Data(col).toString().isEmpty()) ? "" : blackSquare;
+            }
             if (item->Data(col).type() == QVariant::Double)
             {
                 return QString::number(item->Data(col).toDouble(), 'f', 3);
             }
             return item->Data(col);
-            break;
         }
         case Qt::ToolTipRole:
         {
@@ -119,24 +131,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                     tip += "\n...\n" + tail;
                 }
                 return tip;
-            }
-            else if (col == COL::ART)
-            {
-                QJsonObject eventObj = GetEvent(index);
-                if (eventObj.contains("a"))
-                {
-                    return JsonToString(eventObj["a"], false);
-                }
-                return "ART data not available";
-            }
-            else if (col == COL::ErrorCode)
-            {
-                QJsonObject eventObj = GetEvent(index);
-                if (eventObj.contains("e"))
-                {
-                    return JsonToString(eventObj["e"], false);
-                }
-                return "Error code not available";
             }
             else
             {
@@ -471,13 +465,11 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
     bool hasErrorCode = event.contains("e");
     if (hasArtData)
     {
-        // 0xE2978F = BLACK CIRCLE
-        child->SetData(COL::ART, QString::fromUtf8("\xE2\x97\x8F"));
+        child->SetData(COL::ART, JsonToString(event["a"], false));
     }
     if (hasErrorCode)
     {
-        // 0xE296A0 = BLACK SQUARE
-        child->SetData(COL::ErrorCode, QString::fromUtf8("\xE2\x96\xA0"));
+        child->SetData(COL::ErrorCode, JsonToString(event["e"], false));
     }
 
     QJsonValue v = ConsolidateValueAndActivity(event);
@@ -647,13 +639,16 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
         else
             obj["v"]=eventObject["v"]; // Create new object with "v"
 
-        if (hasART) {
+        bool showART = Options::GetInstance().getShowArtDataInValue();
+        bool showErrorCode = Options::GetInstance().getShowErrorCodeInValue();
+
+        if (hasART && showART) {
             // Using "~art" key so that it appears at the end, otherwise "a" is likely
             // to be the first (alphabetical order) and steals the screen
             obj["~art"] = eventObject["a"];
         }
 
-        if (hasErrorCode) {
+        if (hasErrorCode && showErrorCode) {
             obj["~errorcode"] = eventObject["e"];
         }
 
