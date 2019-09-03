@@ -165,6 +165,7 @@ void ValueDlg::SetContent(QString id, QString key, QJsonValue value)
     m_queryPlan = "";
     if (value.isObject()) {
         if (m_key.startsWith("logical-query") ||
+            m_key.startsWith("aql-table") ||
             m_key == "federate-query" ||
             m_key == "remote-query-planning" ||
             m_key == "begin-query" ||
