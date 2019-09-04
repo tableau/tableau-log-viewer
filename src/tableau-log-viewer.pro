@@ -75,5 +75,5 @@ ICON = ../resources/images/tlv.icns
 
 CONFIG += c++14
 
-VERSION = 1.2.0.0
+VERSION = 1.2.1.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
