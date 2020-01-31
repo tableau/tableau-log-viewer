@@ -22,9 +22,16 @@ public:
 
 private slots:
     void accepted();
+    void on_prevButton_clicked();
+    void on_nextButton_clicked();
+
+signals:
+    void next();
+    void prev();
 
 private:
     void ConstructTab(SearchOpt option);
+    void UpdateFindOptions();
 
     Ui::FindDlg *ui;
 };

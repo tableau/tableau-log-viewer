@@ -862,8 +862,19 @@ void MainWindow::on_actionFind_triggered()
 
     // Construct a highlight dialog with our model's current _HighlightOpts.
     FindDlg findDlg(this, model->m_findOpts);
+    // Connect the Find next/previous functions of the dialog to the find functionality in the main window
+    connect(&findDlg, &FindDlg::next,this, [model, &findDlg, this]() {
+        model->m_findOpts = findDlg.m_findOpts;
+        UpdateMenuAndStatusBar();
+        FindNext();
+    });
+    connect(&findDlg, &FindDlg::prev, this, [model, &findDlg, this]() {
+        model->m_findOpts = findDlg.m_findOpts;
+        UpdateMenuAndStatusBar();
+        FindPrev();
+    });
 
-    // Open the dialog and see if ok was pressed. If so we want to update our model's _HighlightOpts member.
+    // Open the dialog and see if ok was pressed
     if (findDlg.exec() == QDialog::Accepted)
     {
         model->m_findOpts = findDlg.m_findOpts;
