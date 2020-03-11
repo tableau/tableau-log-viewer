@@ -19,9 +19,9 @@ Overview
 
 How do I use Tableau Log Viewer?
 ---------------
-You can get the latest release in the [Releases Section](https://github.com/tableau/tableau-log-viewer/releases)
+You can get the latest release in the [Releases Section](https://github.com/tableau/tableau-log-viewer/releases). Download the ZIP file of the latest release for your operating system (Windows and Mac OS available) and extract the ZIP file. Finally, launch the application (tlv.exe for Windows and tlv.app for Mac).
 
-Simply launch the application and drag'n'drop Tableau's log file. Both Tableau Desktop and [most] Tableau Server log files are supported.
+To view logs, drag'n'drop a Tableau log file into the application. Both Tableau Desktop and [most] Tableau Server log files are supported.
 Take a look at our [wiki](https://github.com/tableau/tableau-log-viewer/wiki) to get more details on the features and usage of TLV.
 
 How do I build Tableau Log Viewer?
