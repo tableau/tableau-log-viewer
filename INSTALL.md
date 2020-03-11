@@ -3,6 +3,8 @@
 We provide [pre-built releases](https://github.com/tableau/tableau-log-viewer/releases) of Tableau Log Viewer.
 No need to setup a dev-environment if all you really want to do is inspecting your lovely log files.
 
+Download the ZIP file of the [latest release](https://github.com/tableau/tableau-log-viewer/releases/latest) for your operating system (Windows and Mac OS available) and extract the ZIP file. Finally, launch the application (tlv.exe for Windows and tlv.app for Mac).
+
 # Building Tableau Log Viewer
 
 TLV is built using C++ and Qt libraries and can be build in different platforms.
