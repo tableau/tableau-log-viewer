@@ -1,10 +1,4 @@
-html, body {
-  margin: 0 auto;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-}
-.tree-container {
+.qg-tree-container {
   padding: 0px;
   width: 100%;
   height: 100%;
@@ -12,26 +6,86 @@ html, body {
   margin: 0 auto;
 }
 
-.tree-label {
-  margin: 0 auto;
-  position: fixed;
+.qg-info-card {
+  position: absolute;
   top: 3px;
   right: 3px;
-  font-size: 13px;
-  font-weight: bold;
-  font-family: Monaco, Consolas, monospace;
   background-color: rgba(255, 255, 255, 0.85);
-  padding: 12px;
-  border: thin solid #eee;
+  border: thin solid #ccc;
   border-radius: 5px;
   box-shadow: 2px 2px 2px #888;
 }
 
-.node {
+.qg-tree-label {
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Monaco, Consolas, monospace;
+  padding: 12px 12px 0 12px;
+}
+
+.qg-toolbar {
+  float: right;
+  display: inline-block;
+  padding: 2px;
+}
+
+.qg-toolbar-button {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  border: thin solid hsl(0 0% 60%);
+  border-width: 1px 1px 1px 0;
+  padding: 3px;
+  font-family: Monaco, Consolas, monospace;
+  user-select: none;
+}
+
+.qg-toolbar-button:hover {
+  background: #eee;
   cursor: pointer;
 }
 
-.overlay{
+.qg-toolbar-button:first-child {
+  border-width: 1px;
+}
+
+.qg-toolbar-tooltip {
+  visibility: hidden;
+  text-align: center;
+  border-radius: 5px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  top: 150%;
+  right: 0;
+  width: 125px;
+  background: #ccc;
+  font-size: 11px;
+}
+
+.qg-toolbar-tooltip::after {
+  content: " ";
+  top: -10px;
+  right: 8px;
+  border-color: transparent transparent #ccc transparent;
+  border-width: 5px;
+  position: absolute;
+  border-style: solid;
+}
+
+.qg-toolbar-icon > svg {
+  display: block;
+}
+
+.qg-toolbar-button:hover .qg-toolbar-tooltip {
+  visibility: visible;
+}
+
+.qg-node {
+  cursor: pointer;
+}
+
+.qg-overlay{
   background-color: #fff;
 }
 
@@ -46,16 +100,16 @@ html, body {
  .expanded luminosity increased by (100 - collapsed luminosity) / 1.5
 */
 
-.expanded {
+.qg-expanded {
   stroke: hsl(0, 0%, 40%);
   stroke-width: 0.8;
   color: hsl(0, 0%, 84%);
 }
 
-.collapsed {
+.qg-collapsed {
   stroke: hsl(0, 0%, 40%);
   stroke-width: 0.8;
-  color: hsl(0, 0%, 50%);
+  color: hsl(0, 0%, 60%);
 }
 
 /*
@@ -71,82 +125,78 @@ html, body {
  textscan
 */
 
-.db2 .expanded {
+.qg-db2 .qg-expanded {
   color: hsl(211, 36%, 83%)
 }
 
-.db2 .collapsed {
+.qg-db2 .qg-collapsed {
   color: hsl(211, 36%, 48%)
 }
 
-.excel-direct .expanded {
+.qg-excel-direct .qg-expanded {
   color: hsl(30, 88%, 86%)
 }
 
-.excel-direct .collapsed {
+.qg-excel-direct .qg-collapsed {
   color: hsl(30, 88%, 56%)
 }
 
-.fedeval_dataengine_connection .expanded {
+.qg-fedeval_dataengine_connection .qg-expanded {
   color: hsl(113, 34%, 83%)
 }
 
-.fedeval_dataengine_connection .collapsed {
+.qg-fedeval_dataengine_connection .qg-collapsed {
   color: hsl(113, 34%, 47%)
 }
 
-.mysql .expanded {
+.qg-mysql .qg-expanded {
   color: hsl(47, 82%, 87%)
 }
 
-.mysql .collapsed {
+.qg-mysql .qg-collapsed {
   color: hsl(47, 82%, 61%)
 }
 
-.oracle .expanded {
+.qg-oracle .qg-expanded {
   color: hsl(173, 30%, 88%)
 }
 
-.oracle .collapsed {
+.qg-oracle .qg-collapsed {
   color: hsl(173, 30%, 64%)
 }
 
-.postgres .expanded {
+.qg-postgres .qg-expanded {
   color: hsl(359, 70%, 87%)
 }
 
-.postgres .collapsed {
+.qg-postgres .qg-collapsed {
   color: hsl(359, 70%, 61%)
 }
 
-.sqlserver .expanded {
+.qg-sqlserver .qg-expanded {
   color: hsl(354, 100%, 94%)
 }
 
-.sqlserver .collapsed {
+.qg-sqlserver .qg-collapsed {
   color: hsl(354, 100%, 81%)
 }
 
-.textscan .expanded {
+.qg-textscan .qg-expanded {
   color: hsl(317, 25%, 86%)
 }
 
-.textscan .collapsed {
+.qg-textscan .qg-collapsed {
   color: hsl(317, 25%, 58%)
 }
 
-.nodeCircle {
-  fill: currentColor;
-}
-
-.node text {
+.qg-node text {
   font-size: 9px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
   fill: #2b2a2a;
 }
 
-.d3-tip {
+.qg-tooltip {
   font-size: 13px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
@@ -157,43 +207,43 @@ html, body {
   box-shadow: 2px 2px 2px #888;
 }
 
-.prop-name {
+.qg-prop-name {
   color: hsl(309, 84%, 36%);
 }
 
-.prop-name2 {
+.qg-prop-name2 {
   color: hsl(0, 0%, 50%);
 }
 
-.prop-value {
+.qg-prop-value {
   color: black;
 }
 
-.link {
+.qg-link {
   fill: none;
   stroke: #ccc;
   stroke-width: 1;
 }
 
-.crosslink {
+.qg-crosslink {
   fill: none;
   stroke: #ccc;
   stroke-width: 0.5;
   stroke-dasharray: 4 4;
 }
 
-.crosslink-highlighted {
+.qg-crosslink-highlighted {
   fill: none;
   stroke: hsl(309, 84%, 36%);
   stroke-width: 1.0;
 }
 
-.link-and-arrow {
+.qg-link-and-arrow {
   marker-start: url(#arrow);
   stroke-dasharray: 5 3;
 }
 
-.dotted-link {
+.qg-dotted-link {
   stroke-width: 1.5;
   stroke-dasharray: 1.5 2;
 }
@@ -202,53 +252,74 @@ marker#arrow {
   fill: #ccc;
 }
 
-.link-label {
+.qg-link-label {
   font-size: 7px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
   fill: #aaa;
 }
 
+/* Symbols */
+
+.qg-symbol-fill-fg {
+  fill: currentColor;
+}
+
+.qg-symbol-fill-bg {
+  fill: #fff;
+}
+
+.qg-symbol-no-stroke {
+  stroke: none;
+}
+
+.qg-symbol-stroke-only {
+  stroke-width: 1.2;
+  fill: none;
+}
+
 /* Run Query */
-path.run-query {
+path.qg-run-query {
   fill: #fff;
 }
 
 /* Joins */
-circle.fill-join {
+circle.qg-fill-join {
   fill: currentColor;
 }
 
-circle.fill-join.no-stroke {
-  stroke: none;
-}
-
-circle.empty-join {
+circle.qg-empty-join {
   stroke: none;
   fill: #fff;
 }
 
-circle.only-stroke-join {
+circle.qg-only-stroke-join {
   fill: none;
 }
 
 /* Table */
-rect.table-background {
+rect.qg-table-background {
   fill: #fff;
 }
 
-rect.table-header {
+rect.qg-table-header {
   fill: currentColor;
 }
 
-rect.table-border {
+rect.qg-table-border {
   fill: none;
 }
-text.table-text {
+
+text.qg-table-text {
   text-anchor: middle;
   font-size: 7px;
   font-weight: bold;
   font-family: Monaco, Consolas, monospace;
   stroke: none;
   fill: hsl(0, 0%, 40%);
+}
+
+.qg-magnifier-handle {
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
