@@ -372,6 +372,16 @@ void TreeModel::SetTabType(TABTYPE type)
     m_fileType = type;
 }
 
+static QDateTime parseTs(QString value) {
+    QString microsecondFormat = "yyyy-MM-ddTHH:mm:ss.zzzzzz";
+    QString millisecondFormat = "yyyy-MM-ddTHH:mm:ss.zzz";
+    if (value.size() == microsecondFormat.size()) {
+       // Hyper prints higher precision times that QT can't parse, so truncating here
+       value = value.left(millisecondFormat.size());
+    }
+    return QDateTime::fromString(value, millisecondFormat);
+}
+
 /// <summary>
 /// Merge a list of new events into m_AllEvents of the model.
 /// With the assumptions of both m_AllEvents and new events are already sorted on timestamps,
@@ -389,7 +399,7 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
-        QDateTime mergeTime = QDateTime::fromString(events[mergeIter]["ts"].toString(), "yyyy-MM-ddTHH:mm:ss.zzz");
+        QDateTime mergeTime = parseTs(events[mergeIter]["ts"].toString());
         for (; origIter >= 0; origIter--)
         {
             QDateTime origTime = m_rootItem->Child(origIter)->Data(COL::Time).toDateTime();
@@ -452,7 +462,7 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
 {
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
-    child->SetData(COL::Time, QDateTime::fromString(QString(event["ts"].toString()), "yyyy-MM-ddTHH:mm:ss.zzz"));
+    child->SetData(COL::Time, parseTs(event["ts"].toString()));
     child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
