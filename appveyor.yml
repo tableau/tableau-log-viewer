@@ -7,5 +7,5 @@ build_script:
 - '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64'
 - mkdir %BUILDDIR%
 - cd /d %BUILDDIR%
-- C:\Qt\6.3.0\msvc2019_64\bin\qmake -spec win32-msvc CONFIG+=x86_64 -Wall ..\src\tableau-log-viewer.pro
+- C:\Qt\6.3.0\msvc2019_64\bin\qmake -spec win32-msvc -Wall ..\src\tableau-log-viewer.pro
 - nmake

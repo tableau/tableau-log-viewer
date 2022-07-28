@@ -37,7 +37,7 @@ export PATH="~/Qt/6.4.0/macos/bin":$PATH
 mkdir build-release && cd build-release
 
 # Build
-qmake -spec macx-clang CONFIG+=x86_64 -Wall ../src/tableau-log-viewer.pro
+qmake -spec macx-clang -Wall ../src/tableau-log-viewer.pro
 make
 
 # Make a self-contained app
@@ -99,7 +99,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 # Make build directory and run QMake
 mkdir build-release
 cd build-release
-C:\Qt\6.4.0\msvc2019_64\bin\qmake -spec win32-msvc CONFIG+=x86_64 -Wall ../src/tableau-log-viewer.pro
+C:\Qt\6.4.0\msvc2019_64\bin\qmake -spec win32-msvc -Wall ../src/tableau-log-viewer.pro
 
 # Build it
 nmake
