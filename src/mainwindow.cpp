@@ -1412,7 +1412,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
         auto mouseEvent = static_cast<QMouseEvent *>(event);
         int idx = tabWidget->tabBar()->tabAt(mouseEvent->pos());
 
-        if (mouseEvent->button() == Qt::MidButton)
+        if (mouseEvent->button() == Qt::MouseButton::MiddleButton)
         {
             on_tabWidget_tabCloseRequested(idx);
             return true;
@@ -1432,7 +1432,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
             QMenu tabBarMenu(this);
             tabBarMenu.addAction(&actionCopyFullPath);
             tabBarMenu.addAction(&actionOpenDirectory);
-            tabBarMenu.exec(mouseEvent->globalPos());
+            tabBarMenu.exec(mouseEvent->globalPosition().toPoint());
             return true;
         }
     }

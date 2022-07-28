@@ -9,12 +9,20 @@ Download the ZIP file of the [latest release](https://github.com/tableau/tableau
 
 TLV is built using C++ and Qt libraries and can be build in different platforms.
 
-You can get the Qt libraries from the [Qt Site](https://www.qt.io/download/). It is fine to use the Open Source version.
+The easiest way to install the Qt libraries is through [aqtinstall](https://github.com/miurahr/aqtinstall):
+
+```
+pip install aqtinstall
+# On OSX
+aqt install-qt mac desktop 6.4.0 clang_64 -m qtwebview qtwebengine qtpositioning qtwebchannel
+# On Windows
+python -m aqt install-qt windows desktop 6.4.0 win64_msvc2019_64
+```
 
 **Note:** When installing Qt make sure you get the following components: `Qt WebView` and `Qt WebEngine`.
 
 ## Building on Mac (using command line)
-The following instructions use Qt 5.7 and the clang compiler to compile a 64-bit binary.
+The following instructions use Qt 6.4 and the clang compiler to compile a 64-bit binary.
 Building TLV with a different Qt version or compiler should be fairly similar.
 
 ```bash
@@ -23,7 +31,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 cd tableau-log-viewer
 
 # Find out where the Qt libraries are stored in your disk drive, and add the directory to the PATH
-export PATH="~/Qt/5.7/clang_64/bin":$PATH
+export PATH="~/Qt/6.4.0/macos/bin":$PATH
 
 # Create a directory to compile
 mkdir build-release && cd build-release
@@ -41,13 +49,7 @@ open tlv.app
 
 ## Building on Linux
 
-### Install a recent GCC with C++14 support
-
-```bash
-sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-sudo apt-get update -y
-sudo apt-get install -y build-essential gcc-5 g++-5
-```
+** This section is outdated. If you successfully built on Linux, please update this section. **
 
 ### Install Qt 5.7 components
 
@@ -76,36 +78,36 @@ make
 ```
 
 ## Building on Windows (using command line)
-The following instructions use Qt 5.6 and the Visual Studio 2013 compiler (mscv2013) to compile a 64-bit binary.
+
+The following instructions use Qt 6.4 and the Visual Studio 2022 compiler to compile a 64-bit binary.
 Building TLV with a different Qt version or compiler should be fairly similar.
 
-The following instructions use two command line windows:
-* The **Git Bash** terminal that you get from a standard Git installation on Windows. Search for "Git Bash" in the start menu.
-* The **Visual Studio Tools Command Prompt** that you get from a Visual Studio installation.
-There's a link from the Start Menu -> Visual Studio 2013 -> Visual Studio Tools.
-It is called "VS2013 x64 Native Tools Command Prompt".
+You can install the MSVC compiler by downloading "Build Tools for Visual Studio 2022" from [https://visualstudio.microsoft.com/downloads/#other] 
+and selecting "Desktop development with C++" from the installer.
+A full-blown Visual Studio installation is not necessary.
 
-**From Git Bash:**
-```bash
+The following instructions use the **Visual Studio Command Prompt** that you get from a Visual Studio installation.
+You can find it from the Windows menu, it is called "x64 Native Tools Command Prompt for VS 2022".
+
+**From the Visual Studio command prompt:**
+```cmd
 # Start by cloning the repository
+cd where\ever\you\store\your\code
 git clone https://github.com/tableau/tableau-log-viewer.git
-cd tableau-log-viewer
 
-# Find out where the Qt libraries are stored in your disk drive, and add the directory to the PATH
-export PATH=$PATH:"/c/Qt/5.6/msvc2013_64/bin"
 
 # Make build directory and run QMake
 mkdir build-release
 cd build-release
-qmake -spec win32-msvc2013 CONFIG+=x86_64 -Wall ../src/tableau-log-viewer.pro
-```
-To compile, the enviroment has to be set up to use the correct tools. The easiest way is to use the Visual Studio prompt.
+C:\Qt\6.4.0\msvc2019_64\bin\qmake -spec win32-msvc CONFIG+=x86_64 -Wall ../src/tableau-log-viewer.pro
 
-**From the Visual Studio command prompt:**
-```cmd
-cd \path\to\tableau-log-viewer\build-release
+# Build it
 nmake
+
+# Run it
+.\release\tlv.exe
 ```
+
 The binary will appear under build-release/release.
 The executable needs the Qt libraries to run. The Git Bash command prompt already had the Qt libraries on the PATH.
 
@@ -117,6 +119,9 @@ cd release
 ```
 
 ## Buiding using Qt Creator
+
+** This section is outdated. If you successfully built on Linux, please update this section. **
+
 Start by cloning the repository
 ```bash
 git clone https://github.com/tableau/tableau-log-viewer.git

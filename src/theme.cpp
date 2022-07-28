@@ -6,6 +6,7 @@
 #include <QPalette>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QRegularExpression>
 #include <QWidget>
 
 namespace
@@ -159,12 +160,13 @@ QString Theme::GetDefaultStyle()
     {
         // Extract the style name from the active style class name
         // Example: QWindowsVistaStyle -> WindowsVista
-        QRegExp regExp(".(.*)\\+?Style");
+        QRegularExpression regExp("^.(.*)\\+?Style$");
         sm_defaultStyle = QApplication::style()->metaObject()->className();
+        auto match = regExp.match(sm_defaultStyle);
 
-        if (regExp.exactMatch(sm_defaultStyle))
+        if (match.hasMatch())
         {
-            sm_defaultStyle = regExp.cap(1);
+            sm_defaultStyle = match.captured(1);
         }
         else
         {

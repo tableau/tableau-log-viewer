@@ -37,18 +37,18 @@ ValueDlg::ValueDlg(QWidget *parent) :
     fixedFont.setPointSizeF(sm_savedFontPointSize);
     ui->textEdit->setFont(fixedFont);
 
-    auto prevKey = QKeySequence(Qt::CTRL + Qt::Key_Up);
+    auto prevKey = QKeySequence(Qt::CTRL | Qt::Key_Up);
     ui->prevButton->setShortcut(prevKey);
     ui->prevButton->setToolTip(QString("Go to previous event (%1)").arg(prevKey.toString(QKeySequence::NativeText)));
-    auto nextKey = QKeySequence(Qt::CTRL + Qt::Key_Down);
+    auto nextKey = QKeySequence(Qt::CTRL | Qt::Key_Down);
     ui->nextButton->setShortcut(nextKey);
     ui->nextButton->setToolTip(QString("Go to next event (%1)").arg(nextKey.toString(QKeySequence::NativeText)));
 
-    QShortcut *shortcutPlus = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this);
+    QShortcut *shortcutPlus = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Plus), this);
     connect(shortcutPlus, &QShortcut::activated, this, &ValueDlg::on_zoomIn);
-    QShortcut *shortcutEqual = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this);
+    QShortcut *shortcutEqual = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Equal), this);
     connect(shortcutEqual, &QShortcut::activated, this, &ValueDlg::on_zoomIn);
-    QShortcut *shortcutMinus = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
+    QShortcut *shortcutMinus = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus), this);
     connect(shortcutMinus, &QShortcut::activated, this, &ValueDlg::on_zoomOut);
 
     m_id = QString("");
@@ -249,7 +249,7 @@ void ValueDlg::on_wrapTextCheck_clicked()
     SetWrapping(ui->wrapTextCheck->isChecked());
 }
 
-void ValueDlg::on_notationComboBox_currentIndexChanged(const QString& newValue)
+void ValueDlg::on_notationComboBox_currentTextChanged(const QString& newValue)
 {
     sm_notation = QJsonUtils::GetNotationFromName(newValue);
     UpdateValueBox();
@@ -345,9 +345,8 @@ void ValueDlg::VisualizeQuery()
     m_view->setWindowFlags(Qt::Dialog | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     m_view->setWindowTitle(QString("Query Visualization - ID: %1 - Key: %2").arg(m_id, m_key));
 
-    QDesktopWidget widget;
-    int screenId = widget.screenNumber(this);
-    QRect screenRect = widget.availableGeometry(screenId);
+    QScreen* screen = this->windowHandle()->screen();
+    QRect screenRect = screen->availableGeometry();
     int width = screenRect.width() - 400;
     int height = screenRect.height() - 200;
     int x = screenRect.left() + 200;

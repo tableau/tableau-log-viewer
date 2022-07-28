@@ -1,8 +1,8 @@
 #pragma once
+#include <qcontainerfwd.h>
 
 class QColor;
 class QString;
-class QStringList;
 
 namespace ThemeUtils {
     QStringList GetThemeNames();

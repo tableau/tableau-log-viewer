@@ -1,11 +1,11 @@
-image: Visual Studio 2017
+image: Visual Studio 2022
 install:
-- set QTHOME=C:\Qt\5.11\msvc2017_64
+- set QTHOME=C:\Qt\6.4.0\msvc2019_64
 - set BUILDDIR=build-release
 - set PATH=%QTHOME%\bin;%PATH%
 build_script:
-- '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64'
+- '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64'
 - mkdir %BUILDDIR%
 - cd /d %BUILDDIR%
-- qmake.exe -spec win32-msvc CONFIG+=x86_64 -Wall ..\src\tableau-log-viewer.pro
+- C:\Qt\6.3.0\msvc2019_64\bin\qmake -spec win32-msvc CONFIG+=x86_64 -Wall ..\src\tableau-log-viewer.pro
 - nmake

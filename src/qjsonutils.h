@@ -1,7 +1,8 @@
 #pragma once
 
+#include <qcontainerfwd.h>
+
 class QString;
-class QStringList;
 class QJsonValue;
 
 namespace QJsonUtils

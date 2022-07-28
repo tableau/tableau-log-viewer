@@ -31,7 +31,7 @@ private slots:
     void on_visualizeButton_clicked();
     void on_wrapTextCheck_clicked();
     void on_prevButton_clicked();
-    void on_notationComboBox_currentIndexChanged(const QString& newValue);
+    void on_notationComboBox_currentTextChanged(const QString& newValue);
     void on_nextButton_clicked();
     void on_uploadFinished(QNetworkReply*);
     void on_loadFinished(bool);

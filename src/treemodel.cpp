@@ -47,7 +47,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-        case Qt::TextColorRole:
+        case Qt::ForegroundRole:
         {
             /*if (col == COL::ID)
             {
@@ -111,7 +111,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                 QString blackSquare = QString::fromUtf8("\xE2\x96\xA0");
                 return (item->Data(col).toString().isEmpty()) ? "" : blackSquare;
             }
-            if (item->Data(col).type() == QVariant::Double)
+            if (item->Data(col).typeId() == QMetaType::Double	)
             {
                 return QString::number(item->Data(col).toDouble(), 'f', 3);
             }
@@ -158,7 +158,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
 
     return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
