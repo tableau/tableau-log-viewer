@@ -63,7 +63,7 @@ void ZoomableTreeView::wheelEvent(QWheelEvent *event)
     if (event->modifiers() & Qt::ControlModifier)
     {
         // Zooom-in or Zoom-out if CTRL key is used (Command key on Mac)
-        int fontChange = (event->delta() > 0) ? 1 : -1;
+        int fontChange = (event->pixelDelta().y() > 0) ? 1 : -1;
         ResizeFont(fontChange);
         event->accept();
     }

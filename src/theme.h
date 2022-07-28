@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <qcontainerfwd.h>
 
 class QPalette;
 class QString;
-class QStringList;
 class QWidget;
 
 class Theme {

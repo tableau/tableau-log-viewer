@@ -137,7 +137,7 @@ void LogTab::InitMenus()
     }
 
     m_copyItemsHtmlAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as HTML", this);
-    m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    m_copyItemsHtmlAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_C));
     connect(m_copyItemsHtmlAction, &QAction::triggered, this, &LogTab::CopyItemDetailsAsHtml);
 
     m_copyItemsTextAction = new QAction(QIcon(GetThemedIcon(":/ctx-copy.png")), "Copy as text", this);
@@ -157,7 +157,7 @@ void LogTab::InitTwoRowsMenu()
     using namespace ThemeUtils;
     m_twoRowsMenu = new QMenu(this);
     m_twoRowsMenu->addAction(QIcon(GetThemedIcon(":/ctx-book.png")), "Diff selected events",
-                          this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
+                          QKeySequence(Qt::CTRL | Qt::Key_D), this, &LogTab::RowDiffEvents);
     m_twoRowsMenu->addAction(m_hideSelectedEvent);
     m_twoRowsMenu->addAction(m_hideSelectedType);
     m_twoRowsMenu->addSeparator();
@@ -810,7 +810,7 @@ void LogTab::ExportToNewTab(COL column)
     }
 
     // Build the name for the new tab
-    QStringList sortedValues=QStringList::fromSet(exportedValues);
+    QStringList sortedValues = QStringList(exportedValues.begin(), exportedValues.end());
     sortedValues.sort();
     QString name = QString(GetColumnName(column)) + " " + sortedValues.join(",");
 

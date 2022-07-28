@@ -1,8 +1,7 @@
 QT       += core gui
 QT       += network
 QT       += webenginewidgets
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += widgets
 
 TARGET = "tlv"
 TEMPLATE = app
@@ -73,7 +72,7 @@ win32:RC_ICONS += ../resources/images/tlv.ico
 
 ICON = ../resources/images/tlv.icns
 
-CONFIG += c++14
+CONFIG += c++17
 
 VERSION = 1.2.2.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"

@@ -31,7 +31,7 @@ FindDlg::FindDlg(QWidget *parent, SearchOpt findOpts) :
     ui->nextButton->setText("");
     ui->prevButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-previous.png")));
     ui->nextButton->setIcon(QIcon(ThemeUtils::GetThemedIcon(":/value-next.png")));
-    ui->prevButton->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_F3));
+    ui->prevButton->setShortcut(QKeySequence(Qt::SHIFT | Qt::Key_F3));
     ui->nextButton->setShortcut(QKeySequence(Qt::Key_F3));
 
     connect(this, &QDialog::accepted, this, &FindDlg::accepted);
