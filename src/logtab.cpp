@@ -157,7 +157,7 @@ void LogTab::InitTwoRowsMenu()
     using namespace ThemeUtils;
     m_twoRowsMenu = new QMenu(this);
     m_twoRowsMenu->addAction(QIcon(GetThemedIcon(":/ctx-book.png")), "Diff selected events",
-                          QKeySequence(Qt::CTRL | Qt::Key_D), this, &LogTab::RowDiffEvents);
+    this, &LogTab::RowDiffEvents, QKeySequence(Qt::CTRL + Qt::Key_D));
     m_twoRowsMenu->addAction(m_hideSelectedEvent);
     m_twoRowsMenu->addAction(m_hideSelectedType);
     m_twoRowsMenu->addSeparator();

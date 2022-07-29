@@ -49,14 +49,12 @@ open tlv.app
 
 ## Building on Linux
 
-** This section is outdated. If you successfully built on Linux, please update this section. **
+Steps for Ubuntu 22.04
 
-### Install Qt 5.7 components
+### Install Qt 6.2 components
 
 ```bash
-sudo add-apt-repository -y ppa:beineri/opt-qt57-trusty
-sudo apt-get update -y
-sudo apt-get install -y qt57base qt57declarative qt57quickcontrols qt57graphicaleffects qt57tools qt57svg qt57webengine
+sudo apt install qt6-webengine-dev qt6-base-dev qmake6
 ```
 
 ### Install OpenGL components
@@ -67,14 +65,12 @@ sudo apt-get install -y freeglut3-dev
 
 ### Build
 
-Assumes that Qt 5.7 packages are installed under `/opt/qt57`
-
 ```bash
-source /opt/qt57/bin/qt57-env.sh
 mkdir -p build-release
 cd build-release
-$QTHOME/bin/qmake -spec linux-g++-64 QMAKE_CC=gcc-5 QMAKE_CXX=g++-5 -Wall ../src/tableau-log-viewer.pro
-make
+qmake6 -spec linux-g++-64 QMAKE_CC=gcc QMAKE_CXX=g++ -Wall ../src/tableau-log-viewer.pro
+make -j 8
+tlv
 ```
 
 ## Building on Windows (using command line)
