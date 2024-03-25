@@ -24,6 +24,11 @@ You can get the latest release in the [Releases Section](https://github.com/tabl
 To view logs, drag'n'drop a Tableau log file into the application. Both Tableau Desktop and [most] Tableau Server log files are supported.
 Take a look at our [wiki](https://github.com/tableau/tableau-log-viewer/wiki) to get more details on the features and usage of TLV.
 
+**Using Pre-Built Tableau Log Viewer on M1 Mac**
+If you are trying to open a downloaded pre-built version of Tableau Log Viewer on an M1 Mac, this may fail as the application is not code-signed.
+You can code-sign the application yourself using `sudo codesign --force --deep -s - /path/to/tlv.app` and then launch it for the first time via `CTRL + <right-click Open>`.
+
+
 How do I build Tableau Log Viewer?
 ---------------
 See [INSTALL.md](INSTALL.md)
