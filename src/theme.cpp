@@ -195,24 +195,26 @@ std::unique_ptr<Theme> Theme::ThemeFactory(const QString& themeName, QWidget* wi
 
 void Theme::Activate()
 {
-    // For a strange reason (maybe a bug in Qt?), we have to do this twice
-    // to propagate the style and palette to all the controls. Doing it only once
-    // leaves some controls in the old style.
-    for (int i = 0; i < 2; i++)
+    QString defaultStyle = GetDefaultStyle();
+    QStyle* style = this->m_isFusionStyle ?
+        QStyleFactory::create("Fusion") :
+        QStyleFactory::create(defaultStyle);
+
+    qApp->setStyle(style);
+    qApp->setPalette(*m_palette);
+
+    // setPalette() propagates evenly to all widgets. There are several Qt bugs
+    // related to this issue.
+    // The workaround is to call setPalette explicitly for every widget. (issue #59)
+    for (QWidget *widget : qApp->allWidgets())
+        widget->setPalette(*m_palette);
+
+    if (m_isDark)
     {
-        QString defaultStyle = GetDefaultStyle();
-        QStyle* style = this->m_isFusionStyle ?
-            QStyleFactory::create("Fusion") :
-            QStyleFactory::create(defaultStyle);
-        qApp->setStyle(style);
-        qApp->setPalette(*m_palette);
-        if (m_isDark)
-        {
-            ThemeUtils::SetDarkIconSet();
-        }
-        else
-        {
-            ThemeUtils::SetLightIconSet();
-        }
+        ThemeUtils::SetDarkIconSet();
+    }
+    else
+    {
+        ThemeUtils::SetLightIconSet();
     }
 }
