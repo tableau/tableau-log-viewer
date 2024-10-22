@@ -162,7 +162,11 @@ void OptionsDlg::on_serviceEnable_clicked()
 
 void OptionsDlg::on_themeComboBox_currentTextChanged(const QString &themeName)
 {
-    ThemeUtils::SwitchTheme(themeName, this->parentWidget());
+    // Only switch the theme after the dialog window is fully loaded (issue #59)
+    if (this->isVisible())
+    {
+        ThemeUtils::SwitchTheme(themeName, this->parentWidget());
+    }
 }
 
 void OptionsDlg::on_OptionsDlg_accepted()
