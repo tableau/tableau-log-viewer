@@ -1,6 +1,7 @@
 #include "logtab.h"
 #include "ui_logtab.h"
 
+#include "microtimestamp.h"
 #include "options.h"
 #include "pathhelper.h"
 #include "processevent.h"
@@ -47,8 +48,22 @@ void LogTab::InitTreeView(const EventListPtr events)
     bool multipleDays = false;
     if (events->size() >= 2) {
        QModelIndex idx = ui->treeView->currentIndex();
-       auto firstDatetime = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
-       auto lastDatetime = m_treeModel->index(m_treeModel->rowCount()-1, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
+       auto firstData = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole);
+       auto lastData = m_treeModel->index(m_treeModel->rowCount()-1, COL::Time, idx.parent()).data(Qt::UserRole);
+       
+       QDateTime firstDatetime, lastDatetime;
+       if (firstData.canConvert<MicroTimestamp>()) {
+           firstDatetime = firstData.value<MicroTimestamp>().toDateTime();
+       } else {
+           firstDatetime = firstData.toDateTime();
+       }
+       
+       if (lastData.canConvert<MicroTimestamp>()) {
+           lastDatetime = lastData.value<MicroTimestamp>().toDateTime();
+       } else {
+           lastDatetime = lastData.toDateTime();
+       }
+       
        multipleDays = firstDatetime.date() != lastDatetime.date();
     }
     m_treeModel->SetTimeMode(multipleDays ? TimeMode::GlobalDateTime : TimeMode::GlobalTime);

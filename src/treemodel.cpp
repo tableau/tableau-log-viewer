@@ -1,5 +1,6 @@
 #include "treemodel.h"
 
+#include "microtimestamp.h"
 #include "options.h"
 #include "qjsonutils.h"
 #include "themeutils.h"
@@ -83,61 +84,37 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
-                QDateTime dateTime = item->Data(col).toDateTime();
-                if (!dateTime.isValid())
-                    return "";
+                // Try to get MicroTimestamp first, fall back to QDateTime
+                QVariant data = item->Data(col);
+                if (data.canConvert<MicroTimestamp>()) {
+                    MicroTimestamp microTs = data.value<MicroTimestamp>();
+                    if (!microTs.isValid())
+                        return "";
 
-                switch (m_timeMode)
-                {
-                   case TimeMode::GlobalDateTime:
-                   case TimeMode::GlobalTime:
-                   {
-                       // Get original timestamp string from the event data to check for microseconds
-                       QModelIndex rootIdx = index;
-                       while (rootIdx.parent().isValid()) {
-                           rootIdx = rootIdx.parent();
-                       }
+                    switch (m_timeMode)
+                    {
+                       case TimeMode::GlobalDateTime:
+                          return microTs.toDisplayString(true);
+                       case TimeMode::GlobalTime:
+                          return microTs.toDisplayString(false);
+                       case TimeMode::TimeDeltas:
+                          return GetDeltaMSecs(microTs.toDateTime());
+                    }
+                } else {
+                    // Fallback to original QDateTime logic
+                    QDateTime dateTime = data.toDateTime();
+                    if (!dateTime.isValid())
+                        return "";
 
-                       if (rootIdx.isValid() && rootIdx.row() >= 0 && rootIdx.row() < m_allEvents->size()) {
-                           QJsonObject event = m_allEvents->at(rootIdx.row());
-                           QString originalTs = event["ts"].toString();
-
-                           // Check if it's a microsecond timestamp (26 chars: "yyyy-MM-ddTHH:mm:ss.zzzzzz")
-                           if (originalTs.length() == 26) {
-                               // Custom format for microsecond display
-                               QString formatted = originalTs;
-                               formatted.replace('T', ' ');
-
-                               if (m_timeMode == TimeMode::GlobalDateTime) {
-                                   // Convert "2023-01-01 12:34:56.123456" to "01/01/2023 - 12:34:56.123456"
-                                   QStringList parts = formatted.split(' ');
-                                   if (parts.size() == 2) {
-                                       QStringList dateParts = parts[0].split('-');
-                                       if (dateParts.size() == 3) {
-                                           return QString("%1/%2/%3 - %4")
-                                               .arg(dateParts[1])  // month
-                                               .arg(dateParts[2])  // day
-                                               .arg(dateParts[0])  // year
-                                               .arg(parts[1]);     // time with microseconds
-                                       }
-                                   }
-                               } else {
-                                   // Just return time part for GlobalTime mode
-                                   QStringList parts = formatted.split(' ');
-                                   if (parts.size() == 2) {
-                                       return parts[1]; // time with microseconds
-                                   }
-                               }
-                           }
-                       }
-
-                       // Fallback to standard formatting for millisecond timestamps
-                       QString format = (m_timeMode == TimeMode::GlobalDateTime) ?
-                                        "MM/dd/yyyy - hh:mm:ss.zzz" : "hh:mm:ss.zzz";
-                       return dateTime.toString(format);
-                   }
-                   case TimeMode::TimeDeltas:
-                       return GetDeltaMSecs(dateTime);
+                    switch (m_timeMode)
+                    {
+                       case TimeMode::GlobalDateTime:
+                          return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
+                       case TimeMode::GlobalTime:
+                          return dateTime.toString("hh:mm:ss.zzz");
+                       case TimeMode::TimeDeltas:
+                          return GetDeltaMSecs(dateTime);
+                    }
                 }
             }
             else if (col == COL::ART)
@@ -415,14 +392,8 @@ void TreeModel::SetTabType(TABTYPE type)
     m_fileType = type;
 }
 
-static QDateTime parseTs(QString value) {
-    QString microsecondFormat = "yyyy-MM-ddTHH:mm:ss.zzzzzz";
-    QString millisecondFormat = "yyyy-MM-ddTHH:mm:ss.zzz";
-    if (value.size() == microsecondFormat.size()) {
-       // Hyper prints higher precision times that QT can't parse, so truncating here
-       value = value.left(millisecondFormat.size());
-    }
-    return QDateTime::fromString(value, millisecondFormat);
+static MicroTimestamp parseTs(QString value) {
+    return MicroTimestamp(value);
 }
 
 /// <summary>
@@ -442,10 +413,17 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
-        QDateTime mergeTime = parseTs(events[mergeIter]["ts"].toString());
+        MicroTimestamp mergeTime = parseTs(events[mergeIter]["ts"].toString());
         for (; origIter >= 0; origIter--)
         {
-            QDateTime origTime = m_rootItem->Child(origIter)->Data(COL::Time).toDateTime();
+            QVariant timeData = m_rootItem->Child(origIter)->Data(COL::Time);
+            MicroTimestamp origTime;
+            if (timeData.canConvert<MicroTimestamp>()) {
+                origTime = timeData.value<MicroTimestamp>();
+            } else {
+                origTime = MicroTimestamp(timeData.toDateTime());
+            }
+
             if (mergeTime >= origTime)
             {
                 InsertChild(origIter + 1, events[mergeIter]);
@@ -505,7 +483,7 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
 {
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
-    child->SetData(COL::Time, parseTs(event["ts"].toString()));
+    child->SetData(COL::Time, QVariant::fromValue(parseTs(event["ts"].toString())));
     child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
