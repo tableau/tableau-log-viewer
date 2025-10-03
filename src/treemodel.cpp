@@ -90,11 +90,54 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
                 switch (m_timeMode)
                 {
                    case TimeMode::GlobalDateTime:
-                      return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
                    case TimeMode::GlobalTime:
-                      return dateTime.toString("hh:mm:ss.zzz");
+                   {
+                       // Get original timestamp string from the event data to check for microseconds
+                       QModelIndex rootIdx = index;
+                       while (rootIdx.parent().isValid()) {
+                           rootIdx = rootIdx.parent();
+                       }
+
+                       if (rootIdx.isValid() && rootIdx.row() >= 0 && rootIdx.row() < m_allEvents->size()) {
+                           QJsonObject event = m_allEvents->at(rootIdx.row());
+                           QString originalTs = event["ts"].toString();
+
+                           // Check if it's a microsecond timestamp (26 chars: "yyyy-MM-ddTHH:mm:ss.zzzzzz")
+                           if (originalTs.length() == 26) {
+                               // Custom format for microsecond display
+                               QString formatted = originalTs;
+                               formatted.replace('T', ' ');
+
+                               if (m_timeMode == TimeMode::GlobalDateTime) {
+                                   // Convert "2023-01-01 12:34:56.123456" to "01/01/2023 - 12:34:56.123456"
+                                   QStringList parts = formatted.split(' ');
+                                   if (parts.size() == 2) {
+                                       QStringList dateParts = parts[0].split('-');
+                                       if (dateParts.size() == 3) {
+                                           return QString("%1/%2/%3 - %4")
+                                               .arg(dateParts[1])  // month
+                                               .arg(dateParts[2])  // day
+                                               .arg(dateParts[0])  // year
+                                               .arg(parts[1]);     // time with microseconds
+                                       }
+                                   }
+                               } else {
+                                   // Just return time part for GlobalTime mode
+                                   QStringList parts = formatted.split(' ');
+                                   if (parts.size() == 2) {
+                                       return parts[1]; // time with microseconds
+                                   }
+                               }
+                           }
+                       }
+
+                       // Fallback to standard formatting for millisecond timestamps
+                       QString format = (m_timeMode == TimeMode::GlobalDateTime) ?
+                                        "MM/dd/yyyy - hh:mm:ss.zzz" : "hh:mm:ss.zzz";
+                       return dateTime.toString(format);
+                   }
                    case TimeMode::TimeDeltas:
-                      return GetDeltaMSecs(dateTime);
+                       return GetDeltaMSecs(dateTime);
                 }
             }
             else if (col == COL::ART)
@@ -640,7 +683,7 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
 {
     bool showART = eventObject.contains("a") && Options::GetInstance().getShowArtDataInValue();
     bool showErrorCode = eventObject.contains("e") && Options::GetInstance().getShowErrorCodeInValue();
-    
+
     if (showART || showErrorCode) {
         QJsonObject obj;
 
