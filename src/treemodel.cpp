@@ -79,6 +79,27 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             TreeItem* item = GetItem(index);
             return item->Data(col);
         }
+        case Qt::UserRole + 1: // Copy role - provides data without display formatting
+        {
+            TreeItem* item = GetItem(index);
+            if (col == COL::Time) {
+                QVariant data = item->Data(col);
+                if (data.canConvert<MicroTimestamp>()) {
+                    MicroTimestamp microTs = data.value<MicroTimestamp>();
+                    if (!microTs.isValid())
+                        return "";
+                    return microTs.toCopyString(m_timeMode == TimeMode::GlobalDateTime);
+                } else {
+                    QDateTime dateTime = data.toDateTime();
+                    if (!dateTime.isValid())
+                        return "";
+                    QString format = (m_timeMode == TimeMode::GlobalDateTime) ?
+                                    "MM/dd/yyyy - hh:mm:ss.zzz" : "hh:mm:ss.zzz";
+                    return dateTime.toString(format);
+                }
+            }
+            return item->Data(col);
+        }
         case Qt::DisplayRole:
         {
             TreeItem* item = GetItem(index);

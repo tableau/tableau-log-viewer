@@ -764,9 +764,15 @@ void LogTab::CopyItemDetails(bool textOnly, bool normalized) const
             if (!(ui->treeView->isColumnHidden(i)) && (!normalized || (i == COL::Key) || (i == COL::Value)))
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
-                QString info = (i == COL::Value) ?
-                    m_treeModel->GetValueFullString(idx, true).replace("\t", " ") :
-                    idx_info.data().toString();
+                QString info;
+                if (i == COL::Time) {
+                    // Use copy-friendly format for timestamps (without space separator)
+                    info = idx_info.data(Qt::UserRole + 1).toString();
+                } else if (i == COL::Value) {
+                    info = m_treeModel->GetValueFullString(idx, true).replace("\t", " ");
+                } else {
+                    info = idx_info.data().toString();
+                }
 
                 if (info.length() > 0)
                 {

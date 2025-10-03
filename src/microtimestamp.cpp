@@ -176,6 +176,35 @@ QString MicroTimestamp::toDisplayString(bool includeDate) const
     }
 }
 
+QString MicroTimestamp::toCopyString(bool includeDate) const
+{
+    if (!m_valid) {
+        return QString();
+    }
+    
+    if (m_hasMicros) {
+        // Format for copying without space separator
+        QString dateStr = m_dateTime.date().toString("MM/dd/yyyy");
+        QString timeStr = m_dateTime.time().toString("hh:mm:ss");
+        QString microStr = QString("%1%2")
+            .arg(m_dateTime.time().msec(), 3, 10, QChar('0'))
+            .arg(m_microseconds, 3, 10, QChar('0'));
+        
+        if (includeDate) {
+            return QString("%1 - %2.%3").arg(dateStr, timeStr, microStr);
+        } else {
+            return QString("%1.%2").arg(timeStr, microStr);
+        }
+    } else {
+        // Standard formatting for millisecond display
+        if (includeDate) {
+            return m_dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
+        } else {
+            return m_dateTime.toString("hh:mm:ss.zzz");
+        }
+    }
+}
+
 QDateTime MicroTimestamp::toDateTime() const
 {
     return m_dateTime;

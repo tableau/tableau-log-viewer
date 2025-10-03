@@ -23,6 +23,7 @@ public:
     // Display formatting
     QString toString(const QString &format) const;
     QString toDisplayString(bool includeDate = true) const;
+    QString toCopyString(bool includeDate = true) const;  // For copying without space separator
     
     // Conversion functions
     QDateTime toDateTime() const;
