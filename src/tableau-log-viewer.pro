@@ -75,8 +75,9 @@ win32:RC_ICONS += ../resources/images/tlv.ico
 ICON = ../resources/images/tlv.icns
 
 CONFIG += c++17
+CONFIG += x86_64
 
-QMAKE_APPLE_DEVICE_ARCHS = arm64
+QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
 
 VERSION = 1.3.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
