@@ -1,6 +1,7 @@
 #include "logtab.h"
 #include "ui_logtab.h"
 
+#include "microtimestamp.h"
 #include "options.h"
 #include "pathhelper.h"
 #include "processevent.h"
@@ -47,8 +48,22 @@ void LogTab::InitTreeView(const EventListPtr events)
     bool multipleDays = false;
     if (events->size() >= 2) {
        QModelIndex idx = ui->treeView->currentIndex();
-       auto firstDatetime = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
-       auto lastDatetime = m_treeModel->index(m_treeModel->rowCount()-1, COL::Time, idx.parent()).data(Qt::UserRole).toDateTime();
+       auto firstData = m_treeModel->index(0, COL::Time, idx.parent()).data(Qt::UserRole);
+       auto lastData = m_treeModel->index(m_treeModel->rowCount()-1, COL::Time, idx.parent()).data(Qt::UserRole);
+       
+       QDateTime firstDatetime, lastDatetime;
+       if (firstData.canConvert<MicroTimestamp>()) {
+           firstDatetime = firstData.value<MicroTimestamp>().toDateTime();
+       } else {
+           firstDatetime = firstData.toDateTime();
+       }
+       
+       if (lastData.canConvert<MicroTimestamp>()) {
+           lastDatetime = lastData.value<MicroTimestamp>().toDateTime();
+       } else {
+           lastDatetime = lastData.toDateTime();
+       }
+       
        multipleDays = firstDatetime.date() != lastDatetime.date();
     }
     m_treeModel->SetTimeMode(multipleDays ? TimeMode::GlobalDateTime : TimeMode::GlobalTime);
@@ -749,9 +764,15 @@ void LogTab::CopyItemDetails(bool textOnly, bool normalized) const
             if (!(ui->treeView->isColumnHidden(i)) && (!normalized || (i == COL::Key) || (i == COL::Value)))
             {
                 auto idx_info = item_model->index(idx.row(), i, idx.parent());
-                QString info = (i == COL::Value) ?
-                    m_treeModel->GetValueFullString(idx, true).replace("\t", " ") :
-                    idx_info.data().toString();
+                QString info;
+                if (i == COL::Time) {
+                    // Use copy-friendly format for timestamps (without space separator)
+                    info = idx_info.data(Qt::UserRole + 1).toString();
+                } else if (i == COL::Value) {
+                    info = m_treeModel->GetValueFullString(idx, true).replace("\t", " ");
+                } else {
+                    info = idx_info.data().toString();
+                }
 
                 if (info.length() > 0)
                 {
