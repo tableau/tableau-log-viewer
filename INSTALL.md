@@ -14,9 +14,9 @@ The easiest way to install the Qt libraries is through [aqtinstall](https://gith
 ```
 pip install aqtinstall
 # On OSX
-aqt install-qt mac desktop 6.4.0 clang_64 -m qtwebview qtwebengine qtpositioning qtwebchannel
+aqt install-qt mac desktop 6.4.2 clang_64 -m qtwebview qtwebengine qtpositioning qtwebchannel
 # On Windows
-python -m aqt install-qt windows desktop 6.4.0 win64_msvc2019_64
+aqt.exe install-qt windows desktop 6.4.2 win64_msvc2019_64 -m qtwebview qtwebengine qtpositioning qtwebchannel
 ```
 
 **Note:** When installing Qt make sure you get the following components: `Qt WebView` and `Qt WebEngine`.
@@ -31,7 +31,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 cd tableau-log-viewer
 
 # Find out where the Qt libraries are stored in your disk drive, and add the directory to the PATH
-export PATH="~/Qt/6.4.0/macos/bin":$PATH
+export PATH="~/Qt/6.4.2/macos/bin":$PATH
 
 # Create a directory to compile
 mkdir build-release && cd build-release
@@ -95,7 +95,7 @@ git clone https://github.com/tableau/tableau-log-viewer.git
 # Make build directory and run QMake
 mkdir build-release
 cd build-release
-C:\Qt\6.4.0\msvc2019_64\bin\qmake -spec win32-msvc -Wall ../src/tableau-log-viewer.pro
+C:\Qt\6.4.2\msvc2019_64\bin\qmake -spec win32-msvc -Wall ../src/tableau-log-viewer.pro
 
 # Build it
 nmake
