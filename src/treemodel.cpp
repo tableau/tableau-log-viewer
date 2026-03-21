@@ -1,5 +1,6 @@
 #include "treemodel.h"
 
+#include "microtimestamp.h"
 #include "options.h"
 #include "qjsonutils.h"
 #include "themeutils.h"
@@ -78,23 +79,63 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             TreeItem* item = GetItem(index);
             return item->Data(col);
         }
+        case Qt::UserRole + 1: // Copy role - provides data without display formatting
+        {
+            TreeItem* item = GetItem(index);
+            if (col == COL::Time) {
+                QVariant data = item->Data(col);
+                if (data.canConvert<MicroTimestamp>()) {
+                    MicroTimestamp microTs = data.value<MicroTimestamp>();
+                    if (!microTs.isValid())
+                        return "";
+                    return microTs.toCopyString(m_timeMode == TimeMode::GlobalDateTime);
+                } else {
+                    QDateTime dateTime = data.toDateTime();
+                    if (!dateTime.isValid())
+                        return "";
+                    QString format = (m_timeMode == TimeMode::GlobalDateTime) ?
+                                    "MM/dd/yyyy - hh:mm:ss.zzz" : "hh:mm:ss.zzz";
+                    return dateTime.toString(format);
+                }
+            }
+            return item->Data(col);
+        }
         case Qt::DisplayRole:
         {
             TreeItem* item = GetItem(index);
             if (col == COL::Time)
             {
-                QDateTime dateTime = item->Data(col).toDateTime();
-                if (!dateTime.isValid())
-                    return "";
+                // Try to get MicroTimestamp first, fall back to QDateTime
+                QVariant data = item->Data(col);
+                if (data.canConvert<MicroTimestamp>()) {
+                    MicroTimestamp microTs = data.value<MicroTimestamp>();
+                    if (!microTs.isValid())
+                        return "";
 
-                switch (m_timeMode)
-                {
-                   case TimeMode::GlobalDateTime:
-                      return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
-                   case TimeMode::GlobalTime:
-                      return dateTime.toString("hh:mm:ss.zzz");
-                   case TimeMode::TimeDeltas:
-                      return GetDeltaMSecs(dateTime);
+                    switch (m_timeMode)
+                    {
+                       case TimeMode::GlobalDateTime:
+                          return microTs.toDisplayString(true);
+                       case TimeMode::GlobalTime:
+                          return microTs.toDisplayString(false);
+                       case TimeMode::TimeDeltas:
+                          return GetDeltaMSecs(microTs.toDateTime());
+                    }
+                } else {
+                    // Fallback to original QDateTime logic
+                    QDateTime dateTime = data.toDateTime();
+                    if (!dateTime.isValid())
+                        return "";
+
+                    switch (m_timeMode)
+                    {
+                       case TimeMode::GlobalDateTime:
+                          return dateTime.toString("MM/dd/yyyy - hh:mm:ss.zzz");
+                       case TimeMode::GlobalTime:
+                          return dateTime.toString("hh:mm:ss.zzz");
+                       case TimeMode::TimeDeltas:
+                          return GetDeltaMSecs(dateTime);
+                    }
                 }
             }
             else if (col == COL::ART)
@@ -372,14 +413,8 @@ void TreeModel::SetTabType(TABTYPE type)
     m_fileType = type;
 }
 
-static QDateTime parseTs(QString value) {
-    QString microsecondFormat = "yyyy-MM-ddTHH:mm:ss.zzzzzz";
-    QString millisecondFormat = "yyyy-MM-ddTHH:mm:ss.zzz";
-    if (value.size() == microsecondFormat.size()) {
-       // Hyper prints higher precision times that QT can't parse, so truncating here
-       value = value.left(millisecondFormat.size());
-    }
-    return QDateTime::fromString(value, millisecondFormat);
+static MicroTimestamp parseTs(QString value) {
+    return MicroTimestamp(value);
 }
 
 /// <summary>
@@ -399,10 +434,17 @@ int TreeModel::MergeIntoModelData(const EventList& events)
 
     for (int mergeIter = events.size() - 1; mergeIter >= 0; mergeIter--)
     {
-        QDateTime mergeTime = parseTs(events[mergeIter]["ts"].toString());
+        MicroTimestamp mergeTime = parseTs(events[mergeIter]["ts"].toString());
         for (; origIter >= 0; origIter--)
         {
-            QDateTime origTime = m_rootItem->Child(origIter)->Data(COL::Time).toDateTime();
+            QVariant timeData = m_rootItem->Child(origIter)->Data(COL::Time);
+            MicroTimestamp origTime;
+            if (timeData.canConvert<MicroTimestamp>()) {
+                origTime = timeData.value<MicroTimestamp>();
+            } else {
+                origTime = MicroTimestamp(timeData.toDateTime());
+            }
+
             if (mergeTime >= origTime)
             {
                 InsertChild(origIter + 1, events[mergeIter]);
@@ -462,7 +504,7 @@ void TreeModel::SetupChild(TreeItem *child, const QJsonObject & event)
 {
     child->SetData(COL::ID, event["idx"].toInt());
     child->SetData(COL::File, event["file"].toString());
-    child->SetData(COL::Time, parseTs(event["ts"].toString()));
+    child->SetData(COL::Time, QVariant::fromValue(parseTs(event["ts"].toString())));
     child->SetData(COL::PID, event["pid"].toInt());
     child->SetData(COL::TID, event["tid"].toString());
     child->SetData(COL::Severity, event["sev"].toString());
@@ -640,7 +682,7 @@ QJsonValue TreeModel::ConsolidateValueAndActivity(const QJsonObject& eventObject
 {
     bool showART = eventObject.contains("a") && Options::GetInstance().getShowArtDataInValue();
     bool showErrorCode = eventObject.contains("e") && Options::GetInstance().getShowErrorCodeInValue();
-    
+
     if (showART || showErrorCode) {
         QJsonObject obj;
 
